@@ -14,6 +14,8 @@ wijzigingen worden aangebracht in de productie resources.
 
 ## DESCRIPTION
 
+Deze productieregel gebruikt de naamselector `IsProduction`. Ontwikkelbronnen worden overgeslagen. Naamherkenning is een conventie; stem namen of uitzonderingen af op uw productie-inventaris.
+
 Door een service connection te beperken tot productie, wordt voorkomen dat
 deze wordt gebruikt voor het wijzigen van resources in andere omgevingen.
 Het beschermen van een service connection met één of meer checks zal helpen

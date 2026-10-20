@@ -27,7 +27,7 @@ Function Get-AzDevOpsVariableGroups {
     $header = $script:connection.GetHeader()
     # try to get the variable groups, throw a descriptive error if it fails for authentication or other reasons
     try {
-        $response = Invoke-RestMethod -Uri $url -Method Get -Headers $header
+        $response = Invoke-AzDevOpsPagedRequest -Uri $url -Headers $header
         # If the response is not an object but a string, the authentication failed
         if ($response -is [string]) {
             throw "Authentication failed or project not found"

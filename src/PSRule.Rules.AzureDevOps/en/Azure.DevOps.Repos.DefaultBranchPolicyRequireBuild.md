@@ -14,6 +14,10 @@ branch.
 
 ## DESCRIPTION
 
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
 The branch policy should be configured to require a build or CI pipeline to pass
 before changes can be merged into the default branch. This ensures that changes
 are validated before being merged into the default branch. This rule does not

@@ -13,6 +13,8 @@ checks to prevent accidental changes to production resources.
 
 ## DESCRIPTION
 
+This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+
 An environment scoped to production should be protected with one or more
 checks to prevent accidental changes to production resources. Checks can
 be used to require a user to approve a deployment or require a successful

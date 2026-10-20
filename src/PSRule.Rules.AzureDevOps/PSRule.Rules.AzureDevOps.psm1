@@ -85,6 +85,7 @@ function Export-AzDevOpsRuleData {
     Assert-AzDevOpsCompletenessReportPath -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath
     $report = [ordered]@{ SchemaVersion = 1; Organization = $script:connection.Organization; Status = 'Complete'; Projects = @() }
     Invoke-AzDevOpsProjectExport -Organization $Organization -OrganizationId $OrganizationId -Project $Project -OutputPath $OutputPath -PassThru:$PassThru -Report $report
+    Invoke-AzDevOpsOrganizationExport -OrganizationId $OrganizationId -OutputPath $OutputPath -PassThru:$PassThru -Report $report
     Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
 }
 
@@ -108,7 +109,6 @@ function Invoke-AzDevOpsProjectExport {
     }
 
     $Organization = $script:connection.Organization
-    $AccessToken = $script:connection.Token
     if (-not $OrganizationId) {
         $OrganizationId = $script:connection.OrganizationId
     }
@@ -126,12 +126,32 @@ function Invoke-AzDevOpsProjectExport {
         @{ Name = 'Export-AzDevOpsVariableGroups'; Params = @{ Project = $Project }; Message = "[$Project] Exporting variable groups" },
         @{ Name = 'Export-AzDevOpsReleaseDefinitions'; Params = @{ Project = $Project }; Message = "[$Project] Exporting release definitions" },
         @{ Name = 'Export-AzDevOpsGroups'; Params = @{ Project = $Project }; Message = "[$Project] Exporting groups" },
-        @{ Name = 'Export-AzDevOpsRetentionSettings'; Params = @{ Project = $Project }; Message = "[$Project] Exporting retention settings" },
-        @{ Name = 'Export-AdoOrganizationPipelinesSettings'; Params = @{ Organization = $Organization; AccessToken = $AccessToken }; Message = "[$Project] Exporting organization pipelines settings" },
-        @{ Name = 'Export-AdoOrganizationGeneralOverview'; Params = @{ Organization = $Organization; AccessToken = $AccessToken }; Message = "[$Project] Exporting organization general overview" },
-        @{ Name = 'Export-AdoOrganizationGeneralBillingSettings'; Params = @{ Organization = $Organization; OrganizationId = $OrganizationId; AccessToken = $AccessToken }; Message = "[$Project] Exporting organization billing settings" },
-        @{ Name = 'Export-AdoOrganizationSecurityPolicies'; Params = @{ Organization = $Organization; AccessToken = $AccessToken }; Message = "[$Project] Exporting organization security policies" }
+        @{ Name = 'Export-AzDevOpsRetentionSettings'; Params = @{ Project = $Project }; Message = "[$Project] Exporting retention settings" }
     )
+
+    $projectReport = [ordered]@{ Project = $Project; Status = 'Complete'; Collectors = @() }
+    $Report.Projects += $projectReport
+    Invoke-AzDevOpsCollectors -ExportCommands $exportCommands -OutputPath $OutputPath -PassThru:$PassThru -CollectionReport $projectReport
+}
+
+function Invoke-AzDevOpsOrganizationExport {
+    [CmdletBinding()]
+    param ([string]$OrganizationId, [string]$OutputPath, [switch]$PassThru, [System.Collections.IDictionary]$Report)
+
+    if (-not $OrganizationId) { $OrganizationId = $script:connection.OrganizationId }
+    $exportCommands = @(
+        @{ Name = 'Export-AdoOrganizationPipelinesSettings'; Params = @{} },
+        @{ Name = 'Export-AdoOrganizationGeneralOverview'; Params = @{} },
+        @{ Name = 'Export-AdoOrganizationGeneralBillingSettings'; Params = @{ OrganizationId = $OrganizationId } },
+        @{ Name = 'Export-AdoOrganizationSecurityPolicies'; Params = @{} }
+    )
+    $Report.OrganizationCollection = [ordered]@{ Status = 'Complete'; Collectors = @() }
+    Invoke-AzDevOpsCollectors -ExportCommands $exportCommands -OutputPath $OutputPath -PassThru:$PassThru -CollectionReport $Report.OrganizationCollection -OrganizationScope
+}
+
+function Invoke-AzDevOpsCollectors {
+    [CmdletBinding()]
+    param ([object[]]$ExportCommands, [string]$OutputPath, [switch]$PassThru, [System.Collections.IDictionary]$CollectionReport, [switch]$OrganizationScope)
 
     $commonParams = if ($PassThru) {
         @{ PassThru = $true }
@@ -141,11 +161,8 @@ function Invoke-AzDevOpsProjectExport {
     }
 
     $failedExports = @()
-    $projectReport = [ordered]@{ Project = $Project; Status = 'Complete'; Collectors = @() }
-    $Report.Projects += $projectReport
-
     foreach ($export in $exportCommands) {
-        Write-Host $export.Message -ForegroundColor Blue
+        Write-Host "Exporting $($export.Name)" -ForegroundColor Blue
 
         # assemble splat from Params + commonParams
         $splat = @{}
@@ -155,8 +172,12 @@ function Invoke-AzDevOpsProjectExport {
         # attempt the export; on error, log and continue
         $previousStatus = $script:collectionStatus
         $script:collectionStatus = [ordered]@{ Command = $export.Name; Status = 'Completed'; ReasonCodes = @() }
-        $projectReport.Collectors += $script:collectionStatus
+        $CollectionReport.Collectors += $script:collectionStatus
         try {
+            if ($OrganizationScope) {
+                $splat.Organization = $script:connection.Organization
+                $splat.AccessToken = $script:connection.GetHeader().Authorization
+            }
             & $export.Name @splat -ErrorAction Stop
         }
         catch {
@@ -274,6 +295,17 @@ Function Export-AzDevOpsOrganizationRuleData {
             }
             Write-Error '[Export-AzDevOpsRuleData]: Project export failed.' -ErrorAction Continue
         }
+    }
+    try {
+        if (-not (Test-Path -LiteralPath $OutputPath)) { New-Item -Path $OutputPath -ItemType Directory -ErrorAction Stop | Out-Null }
+        Invoke-AzDevOpsOrganizationExport -OrganizationId $OrganizationId -OutputPath $OutputPath -Report $report
+    }
+    catch {
+        $report.OrganizationCollection = [ordered]@{
+            Status = 'Unavailable'
+            Collectors = @([ordered]@{ Command = 'Export-AzDevOpsOrganizationRuleData'; Status = 'Failed'; ReasonCodes = @('OrganizationExportFailed') })
+        }
+        Write-Error 'Organization collection failed.' -ErrorAction Continue
     }
     Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
 }

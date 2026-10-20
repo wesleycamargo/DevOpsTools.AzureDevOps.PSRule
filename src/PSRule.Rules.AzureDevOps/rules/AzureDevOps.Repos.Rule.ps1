@@ -39,8 +39,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers' `
         Reason 'The default branch policy does not require any reviewers.'
         Recommend 'Require a minimum number of reviewers to approve pull requests.'
         # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#repositories-and-branches
-        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'}), "settings.minimumApproverCount", $true)
-        $Assert.GreaterOrEqual(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'}), "settings.minimumApproverCount", $Configuration.GetValueOrDefault('branchMinimumApproverCount', 1))
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true -and $null -ne $_.settings.minimumApproverCount -and $_.settings.minimumApproverCount -ge $Configuration.GetValueOrDefault('branchMinimumApproverCount', 1) })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synopsis: The default branch policy should not allow creators to approve their own changes
@@ -53,8 +53,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval' `
         Reason 'The default branch policy allows creators to approve their own changes.'
         Recommend 'Do not allow users to approve their own changes.'
         # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#policies
-        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'}), "settings.creatorVoteCounts", $true)
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'}), "settings.creatorVoteCounts", $false)
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true -and $_.settings.creatorVoteCounts -eq $false })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synopsis: The default branch policy should reset code reviewer votes when new changes are pushed
@@ -67,8 +67,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyResetVotes' `
         Reason 'The default branch policy does not reset code reviewer votes when new changes are pushed.'
         Recommend 'Reset code reviewer votes when new changes are pushed.'
         # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#policies
-        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'}), "settings.resetOnSourcePush", $true)
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd'}), "settings.resetOnSourcePush", $true)
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true -and $_.settings.resetOnSourcePush -eq $true })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synopsis: The repository should contain a README file
@@ -107,8 +107,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyEnforceLinkedWorkItems' `
         Reason 'The default branch policy does not enforce linked work items.'
         Recommend 'Enforce linked work items.'
         # Links 'https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#enforce-linked-work-items'
-        $Assert.NotNull($TargetObject, "MainBranchPolicy")
-        $Assert.HasField($TargetObject, "MainBranchPolicy[?@type.id == '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e'].type", $false)
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq '40e92b44-2fe1-4dd6-b3d8-74a9c21d0c6e' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synopsis: The default branch policy should enforce comment resolution
@@ -121,7 +121,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyCommentResolution' `
         Reason 'The default branch policy does not enforce comment resolution'
         Recommend 'Enforce comment resolution'
         # Links 'https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#enforce-comment-resolution'
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'c6a1889d-b943-4856-b76f-9e46bb6b0df2'}), "type.displayName", "Comment requirements")
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'c6a1889d-b943-4856-b76f-9e46bb6b0df2' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synopsis: The default branch policy should require a merge strategy
@@ -134,7 +135,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyMergeStrategy' `
         Reason 'The default branch policy does not require a merge strategy'
         Recommend 'Consider requiring a merge strategy'
         # Links 'https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops#require-a-merge-strategy'
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'}), "type.displayName", "Require a merge strategy")
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true -and ($_.settings.allowSquash -eq $true -or $_.settings.allowRebase -eq $true -or $_.settings.allowNoFastForward -eq $true -or $_.settings.allowRebaseMerge -eq $true) })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synopsis: GitHub Advanced Security should be enabled
@@ -194,7 +196,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild' `
         Reason 'The default branch policy does not require a build/pipeline to pass'
         Recommend 'Consider requiring a build/pipeline to pass'
         # Links 'https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops'
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq '0609b952-1397-4640-95ec-e00a01b2c241'}), "type.displayName", "Build")
+        $policies = @($TargetObject.MainBranchPolicy | Where-Object { $_.type.id -eq '0609b952-1397-4640-95ec-e00a01b2c241' -and $_.isEnabled -eq $true -and $_.isBlocking -eq $true -and $_.settings.buildDefinitionId -gt 0 })
+        $Assert.Greater($policies, 'Count', 0)
 }
 
 # Synposis: Repos should not have direct permissions for Project Valid Users

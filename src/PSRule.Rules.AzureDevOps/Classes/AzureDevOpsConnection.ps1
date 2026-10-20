@@ -99,7 +99,7 @@ class AzureDevOpsConnection {
         $this.Organization = $Organization
         $this.OrganizationId = $OrganizationId
         $this.Token = "Bearer $AccessToken"
-        $this.TokenExpires = [System.DateTime]::Now.AddHours(1) # Default 1-hour expiry
+        $this.TokenExpires = [System.DateTime]::UtcNow.AddHours(1)
         $this.TokenType = $TokenType
         $this.AuthType = 'Bearer'
 
@@ -123,7 +123,7 @@ class AzureDevOpsConnection {
         }
         $response = Invoke-RestMethod -Uri $this.TokenEndpoint -Method Post -Body $body -ContentType 'application/x-www-form-urlencoded' -Headers $header
         $this.Token = "Bearer $($response.access_token)"
-        $this.TokenExpires = [System.DateTime]::Now.AddSeconds($response.expires_in)
+        $this.TokenExpires = [System.DateTime]::UtcNow.AddSeconds($response.expires_in)
         $this.AuthType = 'ServicePrincipal'
     }
 
@@ -139,7 +139,7 @@ class AzureDevOpsConnection {
         }
         $response = Invoke-RestMethod -Uri $this.TokenEndpoint -Method Get -Headers $header
         $this.Token = "Bearer $($response.access_token)"
-        $this.TokenExpires = (Get-Date 01.01.1970).AddSeconds($response.expires_on)
+        $this.TokenExpires = [DateTimeOffset]::FromUnixTimeSeconds([long]$response.expires_on).UtcDateTime
         $this.AuthType = 'ManagedIdentity'
     }
 
@@ -155,7 +155,7 @@ class AzureDevOpsConnection {
     [System.Collections.Hashtable]GetHeader()
     {
         # If the token is expired, attempt to refresh (except for Bearer and PAT)
-        if ($this.TokenExpires -lt [System.DateTime]::Now) {
+        if ($this.TokenExpires -lt [System.DateTime]::UtcNow) {
             switch ($this.AuthType) {
                 'ServicePrincipal' {
                     $this.GetServicePrincipalToken()

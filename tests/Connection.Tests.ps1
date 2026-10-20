@@ -40,6 +40,8 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
             Mock Invoke-RestMethod { [pscustomobject]@{ access_token = 'managed-identity-token'; expires_on = ([DateTimeOffset]::UtcNow.AddHours(1).ToUnixTimeSeconds()) } } -ParameterFilter { $Method -eq 'Get' }
             Connect-AzDevOps -Organization test-org -OrganizationId test-org-id -ManagedIdentity
             $script:connection.AuthType | Should -Be 'ManagedIdentity'
+            $script:connection.TokenExpires.Kind | Should -Be Utc
+            $script:connection.TokenExpires | Should -BeGreaterThan ([DateTime]::UtcNow.AddMinutes(59))
             $script:connection.OrganizationId | Should -Be 'test-org-id'
             $script:connection.GetHeader().Authorization | Should -Be 'Bearer managed-identity-token'
             Assert-MockCalled Invoke-RestMethod -ParameterFilter { $Method -eq 'Get' } -Times 2 -Exactly

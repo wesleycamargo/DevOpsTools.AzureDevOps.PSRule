@@ -65,6 +65,10 @@ function Complete-AzDevOpsAssessmentExport {
     param ($Report, [string]$CompletenessReportPath, [switch]$Strict)
 
     $records = @()
+    if ($Report.Contains('OrganizationCollection')) {
+        $Report.OrganizationCollection.Status = Get-AzDevOpsCollectionSummary -Records $Report.OrganizationCollection.Collectors
+        $records += $Report.OrganizationCollection.Collectors
+    }
     foreach ($project in $Report.Projects) {
         $project.Status = Get-AzDevOpsCollectionSummary -Records $project.Collectors
         $records += $project.Collectors

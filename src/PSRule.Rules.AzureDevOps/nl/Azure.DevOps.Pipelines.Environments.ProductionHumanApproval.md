@@ -14,6 +14,8 @@ er per ongeluk wijzigingen worden aangebracht in productiebronnen.
 
 ## DESCRIPTION
 
+Deze productieregel gebruikt de naamselector `IsProduction`. Ontwikkelbronnen worden overgeslagen. Naamherkenning is een conventie; stem namen of uitzonderingen af op uw productie-inventaris.
+
 De implementatie van een Azure DevOps Pipelines environment die is beperkt
 tot productie zou moeten worden beschermd met een menselijke goedkeuring om
 te voorkomen dat er per ongeluk wijzigingen worden aangebracht in

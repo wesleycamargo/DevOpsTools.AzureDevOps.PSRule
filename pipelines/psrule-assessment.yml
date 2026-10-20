@@ -16,7 +16,7 @@ variables:
   - name: ADO_ORGANIZATION
     value: "ai-experiments"
   - name: ADO_ORGANIZATION_ID
-    value: "3b022c28-683d-4d7e-87a5-bd8198332011"
+    value: "5e433049-1396-4a9d-80b2-33dc2f1e98af"
   - name: ADO_TENANT_ID
     value: $[ variables['Directory (tenant) ID'] ]
   - name: ADO_CLIENT_ID

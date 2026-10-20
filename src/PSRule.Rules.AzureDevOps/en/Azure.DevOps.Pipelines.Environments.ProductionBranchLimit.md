@@ -12,6 +12,8 @@ A production environment should be limited to the branches it can be used in.
 
 ## DESCRIPTION
 
+This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+
 A production environment should be limited to the branches it can be used in. This ensures
 the environment is not used in a non-production branch. This rule checks if the
 environment is limited to a production branch.
