@@ -54,8 +54,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integratio
 
     Context " Get-AzDevOpsEnvironments with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsEnvironments -Project $env:ADO_PROJECT } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsEnvironments -Project $env:ADO_PROJECT } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -131,8 +130,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integratio
 
     Context " Get-AzDevOpsEnvironmentChecks with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsEnvironmentChecks -Project $env:ADO_PROJECT -Environment "test" } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsEnvironmentChecks -Project $env:ADO_PROJECT -Environment "test" } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -199,8 +197,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integratio
 
     Context " Get-AzDevOpsEnvironmentAcls with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsEnvironmentAcls -ProjectId $env:ADO_PROJECT -EnvironmentId "test" } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsEnvironmentAcls -ProjectId $env:ADO_PROJECT -EnvironmentId "test" } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
