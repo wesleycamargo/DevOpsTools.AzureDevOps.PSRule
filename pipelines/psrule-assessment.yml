@@ -95,13 +95,19 @@ steps:
             -CompletenessReportPath $completenessPath `
             -Strict
 
+        $inputFiles = @(Get-ChildItem -LiteralPath $exportPath -File -Recurse -Filter '*.json' | Select-Object -ExpandProperty FullName)
+        if ($inputFiles.Count -eq 0) { throw 'The organization export produced no JSON input files.' }
+        $assessmentResults = $null
         $null = Assert-PSRule `
-            -InputPath $exportPath `
+            -InputPath $inputFiles `
             -Module PSRule.Rules.AzureDevOps `
             -Baseline Baseline.Default `
+            -As Detail `
             -OutputPath $reportPath `
             -OutputFormat Sarif `
-            -ResultVariable results
+            -ResultVariable assessmentResults
+        $results = @($assessmentResults | Where-Object { $null -ne $_ })
+        if ($results.Count -eq 0) { throw 'The assessment evaluated zero rule results.' }
         $failedCount = @($results | Where-Object { $_.Outcome -eq 'Fail' }).Count
 
         Write-Host "PSRule assessment completed with $failedCount failed rule result(s)."
