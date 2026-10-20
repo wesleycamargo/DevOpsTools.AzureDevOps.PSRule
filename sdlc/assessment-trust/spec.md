@@ -11,7 +11,7 @@ Implements the user-approved review scope. Routine technical decisions are deleg
 5. Managed identity expiry uses UTC consistently. Failed connection verification preserves the previous working connection.
 6. Production-only rules skip development resources using the established selector. Secret detection must reject documented credential formats without classifying arbitrary fixed-length checksums as secrets, and must not expose matched values.
 7. Dashboard assessment uses a fresh directory, strict collection and a report outside target inputs. Incomplete collection prevents evaluation, dashboard generation and ingestion; completeness diagnostics remain artifacts.
-8. CI covers all relevant source, manifest, test, pipeline and workflow changes; shares pinned local configuration; explicitly fails on test failures; retains diagnostics on failure.
+8. CI covers all relevant source, manifest, test, pipeline and workflow changes; shares pinned local configuration; explicitly fails on test failures; retains diagnostics on failure. Remove unused upstream SonarCloud configuration; the user confirms there is no SonarCloud integration.
 9. Gallery publishing uses explicit validated manual version/tag inputs, verifies tag/manifest agreement, tests and builds before publishing. No publication is performed merely to validate this change.
 10. Preserve advisory security findings and live integration tests. Candidate validation must not merge or silently change production pipelines to unapproved main code.
 
