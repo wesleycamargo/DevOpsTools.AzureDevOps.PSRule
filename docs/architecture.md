@@ -103,43 +103,18 @@ Changes to object metadata can affect rule selection, target identity, tests, an
 
 ## Azure DevOps pipeline structure
 
-The rule repository contains two independent entry points. Neither includes the other as a template.
+The two pipeline entry points are the module publisher and the companion assessment.
 
-| Definition | Trigger and agent | Ordered work | Outputs and failure behavior |
-| --- | --- | --- | --- |
-| `pipelines/azure-pipelines.yml` | Push to `main`. Hosted `windows-latest`. | Install prerequisite modules. Register an Azure Artifacts feed. Publish the module source package. | Module package in Azure Artifacts. Uses `devops-assessment-vg001`. This definition contains no test stage. |
-| `pipelines/psrule-assessment.yml` | Manual, or Sunday at 02:00 UTC. Schedule includes `main`. Self-hosted `AI-Pool`. | Install PSRule 2.9.0. Import checked-out module. Obtain a service-principal token. Export with strict completeness. Evaluate `Baseline.Default`. | `psrule-results` build artifact contains completeness JSON and SARIF when evaluation runs. Assessment uses `continueOnError`. Publication uses `always()`. Raw exports remain temporary. |
+| Definition | Trigger and agent | Behavior |
+| --- | --- | --- |
+| `pipelines/azure-pipelines.yml` | Push to `main` or manual; hosted Windows | Validate manifest and pinned offline unit tests, publish test results, then publish the declared version to Azure Artifacts on main only. Uses `devops-assessment-vg001`. |
+| Companion `azure-pipelines/run-assessment.yml` | Daily 06:00 UTC or manual; `AI-Pool` | Check out rules from main, export with strict completeness, evaluate and display the pipeline dashboard. Retain reports and raw JSON in separate artifacts even after failure. No Azure dashboard deployment or Log Analytics publishing. |
 
-The dashboard repository contains three independent entry points.
-
-| Definition | Trigger and agent | Ordered work | Outputs and failure behavior |
-| --- | --- | --- | --- |
-| `azure-pipelines/azure-pipelines.yml` | Daily at 06:00 UTC on `main`. No push trigger. Hosted `ubuntu-latest`. | One `Run` stage and job. Install modules. Load the rule module from Azure Artifacts. Export data through an Azure service connection. Run analysis and legacy Monitor publication. | `AzureDevOpsRawData` and `PSRuleAnalysisReports` pipeline artifacts. Both reference the export directory. Analysis artifact publication also requires a successful job status. |
-| `azure-pipelines/deploy-workbooks.yml` | Manual. Push and PR triggers disabled. Self-hosted `AI-Pool`. | Use `psrule-azure`. Run `Deploy-PSRuleWorkbooks.ps1` to validate, preview, deploy, and inspect resources. | Resource-group deployment `psrule-workbooks`, five workbooks, result table, and ingestion configuration. It does not run an assessment. |
-| `azure-pipelines/publish-workbooks.yml` | Manual. Push and PR triggers disabled. Self-hosted `AI-Pool`. | Check out dashboards and rules separately. Assess the organization. Generate local reports. Ingest results. Query the workspace to check counts. | `psrule-results` artifact, Markdown run summary, and conditional `PSRule Dashboard` HTML attachment. Workbook ingestion failure can fail the run after report generation. |
-
-The manual dashboard pipeline checks out the rule repository from `main` through `github.com_wesleycamargo`.
-It uses the rule source on `main`.
-Its assessment script exports without `-Strict` or a completeness report.
-Available JSON can therefore reach evaluation even when collection coverage is incomplete.
-
-```mermaid
-flowchart TD
-    Release["Module package publication"] --> Feed["Azure Artifacts"]
-    Feed --> Legacy["Daily legacy dashboard pipeline"]
-    Source["Rule source checkout"] --> Weekly["Weekly strict assessment"]
-    SourceBranch["Rule automation branch checkout"] --> Manual["Manual workbook assessment"]
-    Weekly --> Evidence["Completeness JSON and SARIF artifact"]
-    Deploy["Manual workbook deployment"] --> Infra["Workbooks, PSRule_CL, and ingestion rule"]
-    Infra --> Manual
-    Manual --> Reports["SARIF, HTML artifact, and Markdown summary"]
-    Manual --> History["Ingest and check Log Analytics results"]
-    Reports --> Viewer["Reports page through HTML Reports extension"]
-```
-
-The arrows show data and resource dependencies. They are not automatic pipeline completion triggers.
-Open HTML reports on the run's **Reports** page. The **Code Coverage** page expects coverage data and a coverage HTML report.
-None of these Azure DevOps definitions publishes code coverage.
+The weekly module assessment and legacy dashboard/deployment definitions are retired.
+GitHub workflows remain separate. The source pipeline keeps SARIF, HTML, Markdown
+and completeness status in `psrule-results`; `AzureDevOpsRawData` contains raw project
+exports. Rule violations are findings; collection or execution errors fail the run.
+See the [pipeline README](../pipelines/README.md) for credentials and cutover notes.
 
 ### Project Health reporting integration
 
@@ -226,5 +201,5 @@ Stakeholder review can resolve the operational gaps above and approve any future
 ### Source entry points
 
 - [Module loader](../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1), [connection](../src/PSRule.Rules.AzureDevOps/Classes/AzureDevOpsConnection.ps1), and [bindings](../src/PSRule.Rules.AzureDevOps/rules/Config.Rule.yaml).
-- [Module publication pipeline](../pipelines/azure-pipelines.yml) and [weekly assessment pipeline](../pipelines/psrule-assessment.yml).
+- [Module publication pipeline](../pipelines/azure-pipelines.yml).
 - [Module CI](../.github/workflows/module-ci.yml), [Gallery publication](../.github/workflows/publish-on-release.yml), [wiki publication](../.github/workflows/wiki.yml), and [legacy Monitor workflow](../.github/workflows/psrule-monitor.yml).

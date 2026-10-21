@@ -8,12 +8,37 @@ variables:
 trigger:
   - main
 
+pr: none
+
 pool:
   vmImage: "windows-latest"
 
 steps:
   - task: PowerShell@2
+    displayName: Validate module and run offline unit tests
+    inputs:
+      targetType: inline
+      pwsh: true
+      script: |
+        $ErrorActionPreference = 'Stop'
+        Set-Location '$(Build.SourcesDirectory)'
+        (Import-PowerShellDataFile tests/requirements.psd1).GetEnumerator() | ForEach-Object {
+            Install-Module $_.Key -RequiredVersion $_.Value -Scope CurrentUser -Force -SkipPublisherCheck
+        }
+        Test-ModuleManifest ./src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1 -ErrorAction Stop | Out-Null
+        & ./tests/Run-Tests.ps1 -TestType Unit -ResultPath '$(Common.TestResultsDirectory)/module-tests.xml'
+
+  - task: PublishTestResults@2
+    displayName: Publish unit test results
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: NUnit
+      testResultsFiles: '$(Common.TestResultsDirectory)/module-tests.xml'
+      failTaskOnFailedTests: true
+
+  - task: PowerShell@2
     displayName: "Install prerequisite modules"
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
     inputs:
       targetType: inline
       pwsh: true
@@ -38,6 +63,7 @@ steps:
 
   - task: PowerShell@2
     displayName: "Register Azure Artifacts Feed"
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
     inputs:
       targetType: inline
       pwsh: true
@@ -63,6 +89,7 @@ steps:
 
   - task: PowerShell@2
     displayName: "Publish PSModule to Azure Artifacts"
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
     inputs:
       targetType: inline
       pwsh: true

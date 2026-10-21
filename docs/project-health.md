@@ -67,9 +67,9 @@ thresholds and provenance are maintained in the [dashboard guide](https://github
 
 This repository owns module exports, rules, baselines and rule help. The dashboard
 repository owns report generation, HTML/JS/CSS, effort configuration, snapshot
-projection and history acquisition. Neither the module-publication pipeline nor
-this repository's weekly `psrule-assessment.yml` generates the three-tab HTML.
-The [pipeline README](../pipelines/README.md) documents that separate workflow.
+projection and history acquisition. The companion `run-assessment` pipeline owns reporting; the module publisher
+only validates and publishes the package. The former weekly assessment is retired.
+The [pipeline README](../pipelines/README.md) documents the consolidated workflow.
 
 Classic definition 17 embeds a compressed source bundle. A rules branch change
 does not update dashboard code. Generate its bootstrap from the reviewed dashboard
