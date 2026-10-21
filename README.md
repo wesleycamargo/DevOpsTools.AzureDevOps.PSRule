@@ -45,6 +45,12 @@ Use [assessment collection completeness](docs/assessment-completeness.md) to che
 collection coverage before evaluating rules, including strict exports and separate
 JSON completeness reports.
 
+For the companion three-tab pipeline dashboard, see
+[Project Health & Compliance](docs/project-health.md). That guide identifies the
+report-producing pipeline, explains measured remediation priority when effort is
+unset, and links the validated report and dashboard implementation. The module's
+weekly assessment pipeline remains a separate completeness/SARIF workflow.
+
 To use this module, you need to have _PSRule_ installed.
 You can install it from the PowerShell Gallery:
 

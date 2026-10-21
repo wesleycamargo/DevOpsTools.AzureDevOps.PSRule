@@ -2,6 +2,9 @@
 
 This document describes the checked-out source on 10 October 2026. It includes local changes that might not exist on remote `main`.
 Pipeline definitions describe intended execution. They do not prove that a pipeline, service connection, or Azure resource currently exists.
+The [Project Health integration guide](project-health.md) records the separately
+validated classic report pipeline and dashboard review branch on 21 October 2026;
+those operational details do not imply that the feature is merged into `main`.
 
 ## Scope and requirements
 
@@ -137,6 +140,29 @@ flowchart TD
 The arrows show data and resource dependencies. They are not automatic pipeline completion triggers.
 Open HTML reports on the run's **Reports** page. The **Code Coverage** page expects coverage data and a coverage HTML report.
 None of these Azure DevOps definitions publishes code coverage.
+
+### Project Health reporting integration
+
+The dashboard repository owns the reporter, templates, effort configuration and
+historical artifact acquisition. This repository supplies collectors, rule
+evaluation and localized remediation help. The current three-tab report is
+reviewed on dashboard branch `feature/project-health-dashboard`, against its
+`feat/assessment-analytics` base. It supersedes the earlier report presentation
+described in the source inventory above.
+
+Existing classic definition **17**, revision **15**, generated and published
+**Project Health & Compliance** in report-only run **121**. The job executed this
+module's `fix/assessment-trust` source at
+`164726afbb48861b9abad768834fd9ba17f524d8` on the container's registered agent.
+It retained collection status, SARIF, Markdown, HTML, normalized snapshot and
+history artifacts. Report-only success does not establish Monitor ingestion.
+
+The display uses schema 2.0; stored snapshots/history remain 1.0. Missing coverage,
+legacy failures-only evidence and incompatible identities/configurations cannot
+establish improvement. Effort is external reviewed configuration, separate from
+rule severity. Without usable estimates in scope, the UI hides effort-dependent
+content and ranks using measured findings. See the [integration guide](project-health.md)
+for the current report link, definitions, validation and ownership boundaries.
 
 ## GitHub workflow structure
 
