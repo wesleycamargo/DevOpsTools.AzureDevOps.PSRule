@@ -143,7 +143,7 @@ git commit -m "docs: plan rule-quality remediation and track classifications"
 - [x] Add versioned assessment catalog and risk correlation contract (117 unique entries; same-target correlation; raw SARIF preserved; unknown ratings explicit).
 - [x] Implement policy applicability and review baselines with legacy compatibility (17 policy-aware controls, four discoverable review baselines, PublicProject/NoExtraLicense regression tests).
 - [ ] Calibrate assessment severity and document migration (42 supplied changes and replacement secret rating implemented; separate 57-change proposal still missing).
-- [x] Run offline suites, authorized pipeline validation, and open PR (161 local and hosted tests passed; Azure build 122 partial; overall acceptance remains blocked below).
+- [x] Run offline suites, authorized pipeline validation, and open PR (166 hosted tests passed; Azure build 124 completed collection and published verified reports; overall acceptance remains blocked below).
 
 ## Handover
 
