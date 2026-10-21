@@ -1,24 +1,24 @@
 ---
-category: Microsoft Azure DevOps Organization  
-severity: Severe  
-online version: https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/tree/main/src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeRelease.md  
+category: Microsoft Azure DevOps Organization
+severity: Severe
+online version: https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/tree/main/src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeNonRelease.md
 ---
 
-# Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeRelease
+# Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeNonRelease
 
 ## SYNOPSIS
 
-Job authorization scope for release pipelines should be limited in organization settings.
+Job authorization scope for non-release pipelines should be limited in organization settings.
 
 ## DESCRIPTION
 
-Limiting job authorization scope for release pipelines in organization settings reduces the risk of unauthorized access to resources. This rule checks that the `enforceJobAuthScopeForReleases` setting is enabled in Azure DevOps organization settings.
+Limiting job authorization scope for non-release pipelines in organization settings reduces the risk of unauthorized access to resources. This rule checks that the `enforceJobAuthScope` setting is enabled in Azure DevOps organization settings.
 
 Minimum TokenType: `FullAccess`
 
 ## RECOMMENDATION
 
-Enable "Limit job authorization scope for release pipelines" in Azure DevOps organization settings.
+Enable "Limit job authorization scope for non-release pipelines" in Azure DevOps organization settings.
 
 ## LINKS
 
