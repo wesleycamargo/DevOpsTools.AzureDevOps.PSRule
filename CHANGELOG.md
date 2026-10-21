@@ -11,6 +11,9 @@
 
 ### Fixed
 
+- Masked Azure DevOps variable-group secrets no longer require Key Vault. The historical `NoKeyVaultNoSecrets` ID remains a deprecated alias; unavailable data is not evaluated.
+- Six `InheritedPermissions` controls now assess complete effective permission evidence against a referenced policy, including nested groups, denies, and administrative bypass. Missing evidence or policy is Unknown, rather than a pass or an inheritance failure.
+
 - `Export-AzDevOpsRuleData` no longer requires `-Organization` and `-OrganizationId`; both default to the connection, and an explicit `-OrganizationId` is now used instead of being discarded.
 - `Connect-AzDevOps -AccessToken` no longer requires `-OrganizationId`.
 - The organization readers (`Read-AdoOrganizationPipelinesSettings`, `-GeneralOverview`, `-SecurityPolicies`, `-GeneralBillingSettings`) accept a bare access token as well as a full `Bearer` header value.

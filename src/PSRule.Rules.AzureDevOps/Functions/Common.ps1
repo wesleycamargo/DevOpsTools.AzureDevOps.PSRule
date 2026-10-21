@@ -230,12 +230,12 @@ function Get-AzDevOpsProjectAcls {
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
     $aclInfo = @{
-        'Environments' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/83d4c2e6-e57d-4d6e-892b-b87222b7ad20?api-version=7.2-preview.1&token=Environments/$ProjectId"
-        'Pipelines' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/33344d9c-fc72-4d6f-aba5-fa317101a7e9?api-version=7.2-preview.1&token=$ProjectId"
-        'ReleaseDefinitions' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?api-version=7.2-preview.1&token=$ProjectId"
-        'Repositories' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87?api-version=7.2-preview.1&token=repoV2/$ProjectId"
-        'ServiceConnections' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/49b48001-ca20-4adc-8111-5b60c903a50c?api-version=7.2-preview.1&token=endpoints/$ProjectId"
-        'VariableGroups' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/b7e84409-6553-448a-bbb2-af228e07cbeb?api-version=7.2-preview.1&token=Library/$ProjectId"
+        'Environments' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/83d4c2e6-e57d-4d6e-892b-b87222b7ad20?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/$ProjectId"
+        'Pipelines' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/33344d9c-fc72-4d6f-aba5-fa317101a7e9?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
+        'ReleaseDefinitions' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
+        'Repositories' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/$ProjectId"
+        'ServiceConnections' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/49b48001-ca20-4adc-8111-5b60c903a50c?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/$ProjectId"
+        'VariableGroups' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/b7e84409-6553-448a-bbb2-af228e07cbeb?includeExtendedInfo=true&api-version=7.2-preview.1&token=Library/$ProjectId"
     }
     $acls = @{}
     try {

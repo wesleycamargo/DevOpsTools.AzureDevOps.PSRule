@@ -142,7 +142,7 @@ GitHub create-branch request was rejected: `403 Resource not accessible by integ
 
 - [x] Verify current remote main and create isolated requested branch.
 - [ ] Inventory runtime rules, documented controls, collectors, and baseline selections.
-- [ ] Replace secret and six inherited permission checks with evidence-based outcomes.
+- [x] Replace secret and six inherited permission checks with evidence-based outcomes (targeted and full offline tests passed).
 - [x] Correct job authorization help and verify independent settings (4 synthetic cases passed).
 - [ ] Add versioned assessment catalog and risk correlation contract.
 - [ ] Implement policy applicability and review baselines with legacy compatibility.
@@ -151,7 +151,7 @@ GitHub create-branch request was rejected: `403 Resource not accessible by integ
 
 ## Handover
 
-Current: Preparation and backlog items 12–13 complete. Four independent scope-setting cases passed with Pester 5.7.1 / PSRule 2.9.0.
-Next: Inventory runtime and documented rules and effective ACL collection evidence; implement secret and permission replacements.
-Blockers: None. The attachment supplies execution authorization; no separate approved SDLC spec/plan exists, so its requirements remain authoritative.
+Current: Backlog items 1–7 and 12–13 implemented. Secret handling retains the legacy alias; six permission IDs use effective ACL/identity evidence. Collector, English/Dutch help, and synthetic tests added. Source inventory contains 117 documented and 119 runtime definitions. Full offline suite passed 117 tests; the final 12-case secret suite also passed after adding omitted-value and malformed-collection coverage.
+Next: Implement the versioned catalog, risk correlation, and policy applicability/baselines. Complete full validation and PR/pipeline handover.
+Blockers: The separate 117-rule proposal/57 broader severity changes are not included in the attachment; location requested from the user. This does not block the explicit 42-rule backlog. The attachment remains the authoritative implementation plan.
 Remaining validation: Full requirement-by-requirement implementation and validation.

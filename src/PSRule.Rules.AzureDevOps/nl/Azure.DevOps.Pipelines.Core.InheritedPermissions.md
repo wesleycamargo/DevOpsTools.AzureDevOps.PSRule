@@ -8,20 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Pipeline permissies mogen niet worden geërfd van het project.
+Effectieve gevoelige rechten moeten zijn toegestaan door organisatiebeleid.
 
 ## DESCRIPTION
 
-Pipeline permissies mogen niet worden geërfd van het project. Geërfde
-permissies kunnen leiden tot onverwachte toegang tot resources.
-
-Mininum TokenType: `FineGrained`
+De historische regel-ID blijft behouden. Overerving op zichzelf veroorzaakt geen fout meer. De regel beoordeelt de ACL-hiërarchie, geneste groepen, expliciete toestemmingen en weigeringen en beheerderstoegang in `PermissionEvidence`. Configureer `effectivePermissionPolicies` voor het doeltype `Azure.DevOps.Pipeline`. Ontbrekend beleid, ontbrekende ACLs, onvolledige groepsgegevens of ontbrekende beheerdergegevens leiden tot Unknown en worden niet door PSRule beoordeeld. Dit is nooit een geslaagde controle. Beperkte overgeërfde leestoegang is toegestaan; ongeautoriseerde gevoelige rechten falen.
 
 ## RECOMMENDATION
 
-Overweeg om geërfde permissies uit de pipeline te verwijderen en expliciet
-permissies in te stellen.
+Verzamel volledige gegevens en beperk ongeautoriseerde rechten. Behoud legitieme overerving met minimale rechten. Zie [permission evidence](../../../docs/assessment/permission-evidence.md).
 
 ## LINKS
 
-- [Azure DevOps Security best practices](https://learn.microsoft.com/nl-nl/azure/devops/organizations/security/security-best-practices?view=azure-devops#scoped-permissions)
+- [Permissions and inheritance](https://learn.microsoft.com/en-us/azure/devops/organizations/security/about-permissions)

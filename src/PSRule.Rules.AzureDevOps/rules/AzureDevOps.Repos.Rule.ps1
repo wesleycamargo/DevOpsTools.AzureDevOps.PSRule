@@ -167,21 +167,17 @@ Rule 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' `
         $Assert.HasFieldValue($TargetObject, "Ghas.blockPushes", $Configuration.GetBoolOrDefault('ghasBlockPushesEnabled', $True))
 }
 
-# Synopsis: Repository should not have inherited permissions
+# Synopsis: Effective repository privileges must be authorized
 Rule 'Azure.DevOps.Repos.InheritedPermissions' `
     -Ref 'ADO-RP-012' `
     -Type 'Azure.DevOps.Repo' `
-    -Tag @{ release = 'GA'} `
-    -If { "Acls" -in $TargetObject.psobject.Properties.Name } `
+    -If { (Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Repo').Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA'; assessment = 'EffectivePermissions'; legacyName = 'InheritedPermissions' } `
     -Level Warning {
-        # Description 'Repository should not have inherited permissions'
-        Reason 'Repository has inherited permissions'
-        Recommend 'Consider removing inherited permissions'
-        # Links 'https://docs.microsoft.com/en-us/azure/devops/repos/git/set-git-repository-permissions?view=azure-devops'
-        AllOf {
-            $Assert.HasField($TargetObject, "Acls.inheritPermissions", $true)
-            $Assert.HasFieldValue($TargetObject, "Acls.inheritPermissions", $false)
-        }
+        $assessment = Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Repo'
+        Reason $assessment.ReasonCode
+        Recommend 'Restrict unauthorized effective privileges or update the approved permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: The default branch policy should require a build/pipeline to pass

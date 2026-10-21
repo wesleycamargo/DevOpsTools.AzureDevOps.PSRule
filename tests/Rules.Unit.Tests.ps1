@@ -55,7 +55,7 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
             $result.Outcome | Should -Not -Contain 'Fail'
         }
 
-        It 'fails the no-key-vault-secret check when a Vsts group declares a secret' {
+        It 'accepts a masked Vsts secret without requiring Key Vault' {
             $fixture = [pscustomobject]@{
                 ObjectType = 'Azure.DevOps.Tasks.VariableGroup'
                 ObjectName = 'fixture.secret-variable-group'
@@ -68,7 +68,7 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
 
             $result = @($fixture | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets -Culture en)
             $result.Count | Should -Be 1
-            $result[0].Outcome | Should -Be 'Fail'
+            $result[0].Outcome | Should -Be 'Pass'
         }
     }
 }

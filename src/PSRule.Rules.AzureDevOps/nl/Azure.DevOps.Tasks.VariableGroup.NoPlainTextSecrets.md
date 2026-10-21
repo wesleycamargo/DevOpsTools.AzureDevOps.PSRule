@@ -8,22 +8,18 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Variable groups zouden geen geheimen in platte tekst moeten bevatten.
+Variabelegroepen mogen geen referenties blootstellen.
 
 ## DESCRIPTION
 
-Variable groups zouden geen geheimen in platte tekst moeten bevatten. Geheimen moeten
-worden opgeslagen in Azure Key Vault en worden gerefereerd in de variabele groep. Dit
-voorkomt dat het geheim wordt blootgesteld in de build logs. Als het geheim in platte
-tekst wordt opgeslagen, wordt het blootgesteld in de build logs.
+Afgeschermde Azure DevOps-geheimen (`isSecret: true`, `value: null`) zijn toegestaan zonder verplichte Key Vault. Niet-afgeschermde geheimen en waarden die overeenkomen met referentiepatronen falen. Patroonherkenning bewijst niet dat willekeurige tekst geen geheim bevat. Ontbrekende gegevens krijgen de beoordeling Unknown en worden niet door PSRule beoordeeld; dit is geen geslaagde controle.
 
-Mininum TokenType: `ReadOnly`
+Minimum TokenType: `ReadOnly`
 
 ## RECOMMENDATION
 
-Overweeg om geheimen op te slaan in Azure Key Vault en ze te refereren in de variabele
-groep.
+Gebruik afgeschermde geheime variabelen of Key Vault-verwijzingen. Roteer blootgestelde referenties en herstel ontbrekende verzamelrechten.
 
 ## LINKS
 
-- [Azure DevOps Security best practices - Tasks](https://learn.microsoft.com/nl-nl/azure/devops/organizations/security/security-best-practices?view=azure-devops#tasks)
+- [Secret variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables)

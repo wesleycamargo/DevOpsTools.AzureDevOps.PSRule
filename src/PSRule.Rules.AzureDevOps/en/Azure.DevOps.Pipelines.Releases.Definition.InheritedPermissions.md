@@ -8,20 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Release Pipeline permissions should not be inherited from the project.
+Effective sensitive permissions must be authorized by organizational policy.
 
 ## DESCRIPTION
 
-Release Pipeline permissions should not be inherited from the project. Inherited
-permissions can lead to unexpected access to resources.
-
-Mininum TokenType: `FineGrained`
+The historical rule ID is retained, but inheritance alone is no longer a failure. The rule evaluates the ordered ACL path, nested group membership, explicit allow and deny, and administrative bypass in `PermissionEvidence`. Configure `effectivePermissionPolicies` for target type `Azure.DevOps.Pipelines.Releases.Definition` with a policy reference, security namespace, sensitive permission mask, and allowed descriptor-to-mask map. Missing policy, ACL ancestry, identity resolution, or administrator evidence is Unknown in assessment output and not evaluated by PSRule. It never becomes a pass. Read-only inherited access is allowed; unauthorized sensitive rights fail.
 
 ## RECOMMENDATION
 
-Consider removing inherited permissions from the release pipeline and setting
-permissions explicitly.
+Collect complete permission evidence and restrict unauthorized privileges. Keep legitimate least-privilege inheritance. See [permission evidence](../../../docs/assessment/permission-evidence.md) for collection and policy configuration.
 
 ## LINKS
 
-- [Azure DevOps Security best practices](https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#scoped-permissions)
+- [Permissions and inheritance](https://learn.microsoft.com/en-us/azure/devops/organizations/security/about-permissions)

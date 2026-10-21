@@ -117,16 +117,13 @@ Rule 'Azure.DevOps.ServiceConnections.GitHubPAT' `
 Rule 'Azure.DevOps.ServiceConnections.InheritedPermissions' `
     -Ref 'ADO-SC-009' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.ServiceConnection').Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA'; assessment = 'EffectivePermissions'; legacyName = 'InheritedPermissions' } `
     -Level Warning {
-        # Description 'Service Connections should not inherit permissions.'
-        Reason 'The service connection inherits permissions.'
-        Recommend 'Do not inherit permissions for the service connection.'
-        AllOf {
-            $Assert.HasField($TargetObject, "Acls", $true)
-            $Assert.HasField($TargetObject.Acls[0], "inheritPermissions", $true)
-            $Assert.HasFieldValue($TargetObject.Acls[0], "inheritPermissions", $false)
-        }
+        $assessment = Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.ServiceConnection'
+        Reason $assessment.ReasonCode
+        Recommend 'Restrict unauthorized effective privileges or update the approved permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synposis: Service connections should not have direct permissions for Project Valid Users

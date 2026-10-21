@@ -8,21 +8,18 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Variable groups should not contain secrets in plain text.
+Variable groups should not expose credentials.
 
 ## DESCRIPTION
 
-Variable groups should not contain secrets in plain text. Secrets should be stored in
-Azure Key Vault and referenced in the variable group. This will prevent the secret from
-being exposed in the build logs. If the secret is stored in plain text, it will be
-exposed in the build logs.
+Masked Azure DevOps secret variables (`isSecret: true`, `value: null`) are accepted without a Key Vault requirement. Unmasked declared secrets and values matching credential patterns fail. Pattern detection cannot prove that arbitrary plaintext is not a secret. Missing variable collection is Unknown in assessment output and not evaluated by PSRule; it is never a pass.
 
-Mininum TokenType: `ReadOnly`
+Minimum TokenType: `ReadOnly`
 
 ## RECOMMENDATION
 
-Consider storing secrets in Azure Key Vault and referencing them in the variable group.
+Use masked Azure DevOps secret variables or Key Vault references. Rotate exposed credentials. Restore collection permissions when evidence is unavailable.
 
 ## LINKS
 
-- [Azure DevOps Security best practices - Tasks](https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#tasks)
+- [Secret variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables)

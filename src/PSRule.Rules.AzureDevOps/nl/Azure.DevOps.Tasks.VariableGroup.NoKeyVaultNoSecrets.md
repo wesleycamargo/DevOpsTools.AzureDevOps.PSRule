@@ -8,23 +8,18 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Een variabele groep zou geen geheimen moeten bevatten wanneer deze niet is
-gekoppeld aan een key vault.
+Variabelegroepen mogen geen referenties blootstellen.
 
 ## DESCRIPTION
 
-Een variabele groep zou geen geheimen moeten bevatten wanneer deze niet is
-gekoppeld aan een key vault. Dit komt omdat de geheimen in platte tekst
-worden opgeslagen in de variabele groep en kunnen worden bekeken door
-iedereen met toegang tot de variabele groep.
+Deze regel-ID is verouderd en blijft beschikbaar als alias voor `Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets`. Beide diagnostieken behoren tot dezelfde risicogroep. Afgeschermde Azure DevOps-geheimen (`isSecret: true`, `value: null`) zijn toegestaan zonder verplichte Key Vault. Niet-afgeschermde geheimen en waarden die overeenkomen met referentiepatronen falen. Patroonherkenning bewijst niet dat willekeurige tekst geen geheim bevat. Ontbrekende gegevens krijgen de beoordeling Unknown en worden niet door PSRule beoordeeld; dit is geen geslaagde controle.
 
-Mininum TokenType: `ReadOnly`
+Minimum TokenType: `ReadOnly`
 
 ## RECOMMENDATION
 
-Overweeg om alle geheimen uit de variabele groep te verwijderen of te
-vervangen door variabelen die zijn gekoppeld aan een key vault.
+Gebruik afgeschermde geheime variabelen of Key Vault-verwijzingen. Roteer blootgestelde referenties en herstel ontbrekende verzamelrechten.
 
 ## LINKS
 
-- [Create a variable group with key vault](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/library/variable-groups?view=azure-devops&tabs=yaml#link-secrets-from-an-azure-key-vault)
+- [Secret variables](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/set-secret-variables)
