@@ -134,10 +134,6 @@ git commit -m "docs: plan rule-quality remediation and track classifications"
 - No fabricated remediation effort estimates; Unknown remains Unknown until measured.
 - No risk/severity claim based on documentation alone without a verified control outcome.
 
-## Current blocker
-
-GitHub create-branch request was rejected: `403 Resource not accessible by integration`. Reauthorize the GitHub integration with repository write rights or create the intended branch through another authorized workflow; then apply and test the proposed changes. This package is not itself a Git commit.
-
 ## Execution progress
 
 - [x] Verify current remote main and create isolated requested branch.
@@ -151,7 +147,7 @@ GitHub create-branch request was rejected: `403 Resource not accessible by integ
 
 ## Handover
 
-Current: Implementation now covers the supplied 42-rule backlog, with versioned assessment metadata, policy applicability, review baselines, source/identity preservation, and a per-project pipeline reporting bridge. Full offline suite passed 159 tests (0 failed, 635 live/integration tests not selected) using Pester 5.7.1 and PSRule 2.9.0. Result XML: /tmp/assessment-quality-phase3-final.xml. Raw SARIF artifact test retains four branch findings across two project scopes while projecting one root objective per project; original payloads are excluded. Pipeline template regression tests cover the additional report, incomplete collection, assertion failure, and fresh exports. CI now uses pinned test requirements, includes Assessment files in triggers, and exits unsuccessfully on failed tests.
-Next: Publish the branch and open a draft PR; run branch pipeline validation and inspect its artifacts. Perform independent requirement-by-requirement implementation validation, including collector semantics and the remaining broader severity proposal.
-Blockers: GitHub connector create-branch again returned 403 Resource not accessible by integration; gh has no authenticated host. Git transport publication still to be attempted after the verified milestone is committed. The separate proposed 117-entry inventory/57 broader severity changes were not supplied; user was asked for their location. Those missing proposed ratings remain explicitly null/PendingBroaderProposal rather than being fabricated. Azure CLI read access to pipeline 14 was verified; it references this GitHub repository and pipelines/psrule-assessment.yml.
-Remaining validation: Remote branch/PR and pipeline results; independent final audit; broader severity proposal. Do not mark the overall goal complete.
+Current: Supplied 42-rule backlog implemented and published in draft PR #3: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/pull/3. Offline validation passed 159 tests (0 failed; 635 live/integration tests not selected), Pester 5.7.1 / PSRule 2.9.0; XML /tmp/assessment-quality-phase3-final.xml. Raw SARIF/report contract and pipeline failure handling have regression coverage. Azure pipeline 14 build 122 ran commit 67a042ddc531adb4536d93cefbad5694e9c296a1 and completed partiallySucceeded. Its collection-status.json reports billing CollectorFailed and security policies MissingRequiredData across seven projects; strict collection correctly stopped rule evaluation. Both collector implementations are unchanged from the base. The temporary existing Azure agent listener exited cleanly after this run.
+Next: Finish hosted GitHub test validation and independent requirement audit. CI test runner changed to ubuntu-latest because the self-hosted job remained queued without an available runner. Preserve strict collection behavior and resolve collector evidence gaps before claiming end-to-end assessment success.
+Blockers: The separate 117-entry inventory/57 broader severity proposal remains unavailable; missing ratings remain null/PendingBroaderProposal. Azure live collection is incomplete. GitHub SonarCloud failed because SONAR_TOKEN was empty (authentication/organization error). GitHub connector writes return 403, but Git transport and authenticated REST successfully published the branch and PR.
+Remaining validation: Hosted CI result, final independent audit, broader severity proposal, and a live assessment with complete collection. Overall validation is not passed; PR remains draft.
