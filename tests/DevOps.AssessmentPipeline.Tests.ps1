@@ -45,6 +45,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
             }
             '{}' | Set-Content (Join-Path $OutputPath 'fixture.prj.ado.json')
         }
+        Mock Invoke-PSRule { [pscustomobject]@{ RuleName = 'fixture'; Outcome = 'None'; OutcomeReason = 'PreconditionFail' } }
         Mock Export-AzDevOpsAssessmentRun {
             param ($OutputPath)
             @{ RuleSetVersion = '2026.10.21.1'; SeverityPolicyVersion = '1.0.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
@@ -72,6 +73,13 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $script:exportPaths[0].StartsWith($env:AGENT_TEMPDIRECTORY) | Should -BeTrue
         $publish['inputs']['PathtoPublish'] | Should -Be '$(Build.ArtifactStagingDirectory)'
         @((Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY).Name) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif')
+    }
+
+    It 'projects detailed precondition outcomes rather than the assertion result subset' {
+        & $assessmentScript
+
+        Should -Invoke Invoke-PSRule -Times 1 -Exactly -ParameterFilter { $Outcome -eq 'All' -and $InputPath.EndsWith([string][IO.Path]::DirectorySeparatorChar) }
+        Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter { $Result.Count -eq 1 -and $Result[0].Outcome -eq 'None' }
     }
 
     It 'uses the authenticated organization identity instead of a stale configured ID' {

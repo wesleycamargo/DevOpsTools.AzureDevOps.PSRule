@@ -113,7 +113,15 @@ steps:
             -ErrorAction SilentlyContinue `
             -ErrorVariable assessmentErrors
 
-        $assessment = Export-AzDevOpsAssessmentRun -Result @($results) -ExportPath $exportPath `
+        # Assert-PSRule omits precondition outcomes from ResultVariable in PSRule 2.9.
+        # Re-evaluate the same immutable export for Unknown/NotApplicable projection.
+        $assessmentResults = @(Invoke-PSRule `
+            -InputPath ($exportPath + [IO.Path]::DirectorySeparatorChar) `
+            -Module PSRule.Rules.AzureDevOps `
+            -Baseline Baseline.Default `
+            -Outcome All `
+            -ErrorAction Stop)
+        $assessment = Export-AzDevOpsAssessmentRun -Result $assessmentResults -ExportPath $exportPath `
             -OutputPath $assessmentPath -Organization $env:ADO_ORGANIZATION `
             -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default
         $failedCount = @($results | Where-Object { $_.Outcome -eq 'Fail' }).Count

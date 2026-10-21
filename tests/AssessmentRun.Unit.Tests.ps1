@@ -15,17 +15,23 @@ Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
                 ObjectType = 'Azure.DevOps.Repo.Branch'; ObjectName = 'fixture.same-identity'; BranchPolicy = @()
                 syntheticPayloadMustNotBePublished = 'private-fixture-payload'
             } | ConvertTo-Json -Depth 5 | Set-Content "$directory/branch.json"
+            @{ ObjectType = 'Azure.DevOps.Pipeline'; ObjectName = 'fixture.missing-permissions' } | ConvertTo-Json | Set-Content "$directory/pipeline.json"
+            @{ ObjectType = 'Azure.DevOps.Organization.GeneralOverview'; ObjectName = 'fixture.no-policy'; geography = 'fixture-region' } | ConvertTo-Json | Set-Content "$directory/overview.json"
         }
         $sarifPath = "$TestDrive/raw.sarif"
-        $rules = 'Azure.DevOps.Repos.Branch.HasBranchPolicy', 'Azure.DevOps.Repos.Branch.BranchPolicyIsEnabled'
+        $rules = 'Azure.DevOps.Repos.Branch.HasBranchPolicy', 'Azure.DevOps.Repos.Branch.BranchPolicyIsEnabled', 'Azure.DevOps.Pipelines.Core.InheritedPermissions', 'Azure.DevOps.Organization.GeneralOverview.GeographySet'
         $null = Assert-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module PSRule.Rules.AzureDevOps -Name $rules -Outcome All -Culture en -OutputPath $sarifPath -OutputFormat Sarif -ResultVariable raw -ErrorAction SilentlyContinue
         $before = Get-Content $sarifPath -Raw
-        $report = Export-AzDevOpsAssessmentRun -Result @($raw) -ExportPath $export.FullName -OutputPath "$TestDrive/assessment.json" -Organization fixture -SourceRevision synthetic-commit
+        $details = @(Invoke-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module PSRule.Rules.AzureDevOps -Name $rules -Outcome All -Culture en)
+        $report = Export-AzDevOpsAssessmentRun -Result $details -ExportPath $export.FullName -OutputPath "$TestDrive/assessment.json" -Organization fixture -SourceRevision synthetic-commit
         $report.Projects.Count | Should -Be 2
         $report.Projects[0].ScopeId | Should -Not -Be $report.Projects[1].ScopeId
         foreach ($project in $report.Projects) {
-            $project.Findings.Count | Should -Be 2
-            $project.RiskObjectives.Count | Should -Be 1
+            $project.Findings.Count | Should -Be 4
+            $project.RiskObjectives.Count | Should -Be 3
+            @($project.Findings | Where-Object Outcome -EQ 'Unknown').Count | Should -Be 1
+            @($project.Findings | Where-Object Outcome -EQ 'NotApplicable').Count | Should -Be 1
+            $project.Summary.SecurityScore | Should -BeNullOrEmpty
         }
         (Get-Content $sarifPath -Raw) | Should -Be $before
         $sarif = $before | ConvertFrom-Json

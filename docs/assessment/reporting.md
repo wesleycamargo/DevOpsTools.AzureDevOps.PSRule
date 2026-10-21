@@ -58,3 +58,5 @@ The assessment pipeline now includes a trailing directory separator when passing
 | PullRequestRunsMinimumRetentionDays | assessmentPolicies[Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays].Minimum |
 
 Add Reference to each migrated policy. The historical GHAS defaults remain present in legacy baseline files for configuration compatibility, but they do not implicitly activate the new licensed-feature policy. Unconfigured optional controls are NotApplicable. Administrator count keys retain their existing names. Record the administrative/recovery policy reference in the configuration so the history configuration hash changes when the operating model changes.
+
+PSRule 2.9 assertion output omits precondition results from `ResultVariable`, even with `-Outcome All`. The pipeline retains its SARIF assertion pass and evaluates the same immutable export with `Invoke-PSRule -Outcome All` for the assessment projection. This preserves Unknown permission evidence and NotApplicable optional policies in the JSON report.
