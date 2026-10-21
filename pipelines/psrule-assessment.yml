@@ -15,8 +15,6 @@ variables:
   - group: ai-credentials
   - name: ADO_ORGANIZATION
     value: "ai-experiments"
-  - name: ADO_ORGANIZATION_ID
-    value: "3b022c28-683d-4d7e-87a5-bd8198332011"
   - name: ADO_TENANT_ID
     value: $[ variables['Directory (tenant) ID'] ]
   - name: ADO_CLIENT_ID
@@ -83,15 +81,23 @@ steps:
             -Body $tokenBody `
             -ContentType 'application/x-www-form-urlencoded').access_token
 
+        $connectionData = Invoke-RestMethod `
+            -Uri "https://dev.azure.com/$($env:ADO_ORGANIZATION)/_apis/connectionData" `
+            -Headers @{ Authorization = "Bearer $accessToken" }
+        if (-not $connectionData.instanceId) {
+            throw 'Azure DevOps did not return an organization identity.'
+        }
+        $organizationId = [guid]$connectionData.instanceId
+
         $connectParams = @{
             Organization = $env:ADO_ORGANIZATION
-            OrganizationId = $env:ADO_ORGANIZATION_ID
+            OrganizationId = $organizationId
             AccessToken = $accessToken
         }
         Connect-AzDevOps @connectParams
         Export-AzDevOpsOrganizationRuleData `
             -Organization $env:ADO_ORGANIZATION `
-            -OrganizationId $env:ADO_ORGANIZATION_ID `
+            -OrganizationId $organizationId `
             -OutputPath $exportPath `
             -CompletenessReportPath $completenessPath `
             -Strict
@@ -119,7 +125,6 @@ steps:
         }
     env:
       ADO_ORGANIZATION: $(ADO_ORGANIZATION)
-      ADO_ORGANIZATION_ID: $(ADO_ORGANIZATION_ID)
       ADO_TENANT_ID: $(ADO_TENANT_ID)
       ADO_CLIENT_ID: $(ADO_CLIENT_ID)
       ADO_CLIENT_SECRET: $(ADO_CLIENT_SECRET)

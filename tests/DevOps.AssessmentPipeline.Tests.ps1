@@ -34,6 +34,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $results = @([pscustomobject]@{ RuleName = 'fixture'; Outcome = 'Pass' })
         Mock Import-Module {}
         Mock Invoke-RestMethod { [pscustomobject]@{ access_token = 'fixture-token' } }
+        Mock Invoke-RestMethod { [pscustomobject]@{ instanceId = '22222222-2222-2222-2222-222222222222' } } -ParameterFilter { $Uri -eq 'https://dev.azure.com/fixture-org/_apis/connectionData' }
         Mock Connect-AzDevOps {}
         Mock Export-AzDevOpsOrganizationRuleData {
             param ($OutputPath, $CompletenessReportPath, [switch]$Strict)
@@ -71,6 +72,21 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $script:exportPaths[0].StartsWith($env:AGENT_TEMPDIRECTORY) | Should -BeTrue
         $publish['inputs']['PathtoPublish'] | Should -Be '$(Build.ArtifactStagingDirectory)'
         @((Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY).Name) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif')
+    }
+
+    It 'uses the authenticated organization identity instead of a stale configured ID' {
+        & $assessmentScript
+
+        Should -Invoke Connect-AzDevOps -Times 1 -Exactly -ParameterFilter { $OrganizationId -eq '22222222-2222-2222-2222-222222222222' }
+        Should -Invoke Export-AzDevOpsOrganizationRuleData -Times 1 -Exactly -ParameterFilter { $OrganizationId -eq '22222222-2222-2222-2222-222222222222' }
+    }
+
+    It 'stops before collection when organization identity is unavailable' {
+        Mock Invoke-RestMethod { [pscustomobject]@{} } -ParameterFilter { $Uri -eq 'https://dev.azure.com/fixture-org/_apis/connectionData' }
+
+        { & $assessmentScript } | Should -Throw '*did not return an organization identity*'
+
+        Should -Invoke Export-AzDevOpsOrganizationRuleData -Times 0 -Exactly
     }
 
     It 'stops incomplete assessment while allowing partial pipeline success and retaining its report' {

@@ -109,13 +109,13 @@ function Read-AdoOrganizationSecurityPolicies {
                 $settings[$settingsKey] = $effective  # Removed extra "policy." prefix
 
                 # Track policy names without Policy. prefix for validation
-                $cleanName = $name -replace '^Policy\.', ''
+                $cleanName = $name -replace '^Policy\.', '' -replace '\s+', ''
                 $foundPolicies += $cleanName
             }
         }
 
         # Validate expected policies
-        $missingPolicies = $expectedPolicies | Where-Object { $_ -notin $foundPolicies }
+        $missingPolicies = $expectedPolicies | Where-Object { ($_ -replace '\s+', '') -notin $foundPolicies }
         if ($missingPolicies) {
             Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode MissingRequiredData
             Write-Warning "Missing expected policies in API response: $($missingPolicies -join ', ')"
