@@ -26,3 +26,7 @@ Consider adding a description to the variable group.
 ## LINKS
 
 - [Variable groups](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/variable-groups?view=azure-devops&tabs=yaml)
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Information remain compatibility metadata; they are not the four-grade assessment scale.

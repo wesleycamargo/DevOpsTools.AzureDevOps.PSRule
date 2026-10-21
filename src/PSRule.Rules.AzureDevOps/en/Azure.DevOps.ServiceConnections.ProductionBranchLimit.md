@@ -27,3 +27,7 @@ Consider limiting the service connection to a production branch.
 ## LINKS
 
 - [Azure DevOps Service connections](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints?view=azure-devops)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

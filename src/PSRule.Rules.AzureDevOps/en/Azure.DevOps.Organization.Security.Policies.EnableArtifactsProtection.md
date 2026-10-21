@@ -23,3 +23,7 @@ Enable external package protection in Azure DevOps organization settings.
 ## LINKS
 
 - [Artifacts Security](https://docs.microsoft.com/en-us/azure/devops/organizations/security/artifacts-security)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

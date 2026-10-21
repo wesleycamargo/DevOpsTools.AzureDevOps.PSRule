@@ -39,8 +39,8 @@ Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
         @($sarif.runs[0].results.rule.id | Sort-Object -Unique).Count | Should -Be 2
         $serialized = Get-Content "$TestDrive/assessment.json" -Raw
         $serialized | Should -Not -Match 'private-fixture-payload|syntheticPayloadMustNotBePublished'
-        $report.RuleSetVersion | Should -Be '2026.10.21.1'
-        $report.SeverityPolicyVersion | Should -Be '1.0.0'
+        $report.RuleSetVersion | Should -Be '2026.10.21.2'
+        $report.SeverityPolicyVersion | Should -Be '1.1.0'
         $report.SourceRevision | Should -Be 'synthetic-commit'
     }
 }

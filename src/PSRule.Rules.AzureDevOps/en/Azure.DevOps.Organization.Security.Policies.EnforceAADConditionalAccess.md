@@ -23,3 +23,7 @@ Enable Azure AD conditional access in Azure DevOps organization settings.
 ## LINKS
 
 - [Conditional Access](https://learn.microsoft.com/en-us/azure/active-directory/conditional-access/overview)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

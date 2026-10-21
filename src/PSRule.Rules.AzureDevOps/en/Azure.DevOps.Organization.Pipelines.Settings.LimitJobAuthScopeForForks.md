@@ -23,3 +23,7 @@ Enable "Limit job authorization scope for forks" in Azure DevOps organization se
 ## LINKS
 
 - [Protecting Branches in Forks](https://learn.microsoft.com/en-us/azure/devops/pipelines/repos/branches/fork-protection)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

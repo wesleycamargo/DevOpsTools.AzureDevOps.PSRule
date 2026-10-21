@@ -26,4 +26,4 @@ Ensure the Azure DevOps organization subscription is active in the billing setti
 
 ## ASSESSMENT
 
-Independent assessment risk: **Medium** (severity policy `1.0.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

@@ -25,3 +25,7 @@ Overweeg om de environment te beperken tot een productiebranch.
 ## LINKS
 
 - [Azure DevOps Pipelines Environments](https://docs.microsoft.com/nl-nl/azure/devops/pipelines/process/environments)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

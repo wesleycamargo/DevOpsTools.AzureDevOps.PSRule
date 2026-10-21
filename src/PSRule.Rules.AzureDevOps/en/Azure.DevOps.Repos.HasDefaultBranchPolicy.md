@@ -33,4 +33,4 @@ and that the team's Git workflow is followed.
 
 ## ASSESSMENT
 
-Independent assessment risk: **High** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

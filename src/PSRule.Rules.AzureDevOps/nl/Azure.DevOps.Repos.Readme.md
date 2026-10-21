@@ -30,3 +30,7 @@ Overweeg om een README.md bestand in de repository root te maken.
 ## ASSESSMENT
 
 Onafhankelijk beoordelingsrisico: **Low** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

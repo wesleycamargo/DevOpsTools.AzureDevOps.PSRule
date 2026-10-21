@@ -27,3 +27,7 @@ Gebruik afgeschermde geheime variabelen of Key Vault-verwijzingen. Roteer blootg
 ## ASSESSMENT
 
 Onafhankelijk beoordelingsrisico: **Medium** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

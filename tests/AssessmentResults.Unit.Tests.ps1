@@ -14,7 +14,7 @@ Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
         @(Compare-Object @($inventory.rules | Where-Object documented | Select-Object -ExpandProperty ruleId) $catalog.Rules.RuleId).Count | Should -Be 0
         @($catalog.SupplementalRules).Count | Should -Be 2
         @($catalog.Rules | Where-Object { $_.AssessmentSeverity -in 'High', 'Critical' -and -not $_.ExposureRationale }).Count | Should -Be 0
-        @($catalog.Rules | Where-Object ReviewStatus -EQ 'PendingBroaderProposal').Count | Should -BeGreaterThan 0
+        @($catalog.Rules | Where-Object { -not $_.AssessmentSeverity }).Count | Should -Be 0
     }
     It 'deduplicates same-target branch exposures while retaining both raw diagnostic identities' {
         $type = 'Azure.DevOps.Repo.Branch'
@@ -80,12 +80,13 @@ Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
         $report.Summary.KnownFailedSecurityWeight | Should -Be 0
         $report.Summary.SecurityScore | Should -BeNullOrEmpty
     }
-    It 'does not manufacture a severity for the absent broader proposal' {
+    It 'applies the supplied broader proposal to a verified failing diagnostic' {
         $raw = @(New-FixtureResult 'Azure.DevOps.Organization.Security.Policies.EnforceAADConditionalAccess' 'Azure.DevOps.Organization.Security.Policies')
         $report = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
-        $report.Findings[0].AssessmentSeverity | Should -BeNullOrEmpty
-        $report.Summary.UnclassifiedSecurityObjectives | Should -Be 1
-        $report.Summary.SecurityScore | Should -BeNullOrEmpty
+        $report.Findings[0].AssessmentSeverity | Should -Be 'High'
+        $report.Summary.UnclassifiedSecurityObjectives | Should -Be 0
+        $report.Summary.KnownFailedSecurityWeight | Should -Be 4
+        $report.Summary.SecurityScore | Should -Be 0
     }
     It 'does not hide an unmapped new diagnostic behind a complete score' {
         $raw = @(

@@ -27,3 +27,7 @@ Overweeg om de machtigingsomvang van de taak voor release-pipelines te beperken 
 ## LINKS
 
 - [Azure DevOps Security best practices - Tasks](https://learn.microsoft.com/nl-nl/azure/devops/organizations/security/security-best-practices?view=azure-devops#tasks)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

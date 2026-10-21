@@ -23,3 +23,7 @@ Enable audit event logging in Azure DevOps organization settings.
 ## LINKS
 
 - [Auditing](https://docs.microsoft.com/en-us/azure/devops/organizations/security/auditing)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

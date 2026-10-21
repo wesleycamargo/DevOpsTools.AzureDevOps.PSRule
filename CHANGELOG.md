@@ -3,7 +3,7 @@
 ### Added
 
 - Four opt-in assessment review baselines, a 117-control catalog, and versioned assessment JSON with same-target risk correlation and explicit Unknown/NotApplicable coverage.
-- Referenced policies for optional region, billing, licensing, authentication, human approval, retention, and agent lifecycle controls. Broader unprovided severity proposals remain explicitly unclassified.
+- Referenced policies for optional region, billing, licensing, authentication, human approval, retention, and agent lifecycle controls. Assessment policy 1.1.0 applies the supplied 117-rule classification inventory with preserved provenance and applicability guidance.
 
 - Export of **Organization Settings** in `Export-AzDevOpsOrganizationRuleData` to extend coverage of organizational rule data.
 

@@ -15,19 +15,12 @@ spec:
       - Azure.DevOps.Organization.Pipelines.Settings.LimitPRsFromForks
       - Azure.DevOps.Organization.Pipelines.Settings.DisableBuildsFromForks
       - Azure.DevOps.Organization.Pipelines.Settings.SanitizeShellTaskArguments
-      - Azure.DevOps.Organization.Pipelines.Settings.DisableStageChooser
-      - Azure.DevOps.Organization.Pipelines.Settings.DisableInBoxTasksVar
       - Azure.DevOps.Organization.Pipelines.Settings.DisableMarketplaceTasksVar
       - Azure.DevOps.Organization.Pipelines.Settings.DisableNode6TasksVar
       - Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeForForks
       - Azure.DevOps.Organization.Pipelines.Settings.DisableSecretsFromForks
-      - Azure.DevOps.Organization.Pipelines.Settings.EnableAuditSettableVar
       - Azure.DevOps.Organization.Pipelines.Settings.EnableTaskLockdown
       - Azure.DevOps.Organization.Pipelines.Settings.RestrictPipelinePoliciesPermission
-      - Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForPullRequest
-      - Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForNonTeamMembers
-      - Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForNonTeamAndNonContributors
-      - Azure.DevOps.Organization.Pipelines.Settings.EnableShellTasksArgsSanitizingAudit
       - Azure.DevOps.Organization.Security.Policies.DisallowRequestAccessToken
       - Azure.DevOps.Organization.Security.Policies.DisallowTeamAdminsInvitations
       - Azure.DevOps.Organization.Security.Policies.EnforceAADConditionalAccess
@@ -66,14 +59,14 @@ spec:
       - Azure.DevOps.Repos.Branch.BranchPolicyMinimumReviewers
       - Azure.DevOps.Repos.Branch.BranchPolicyAllowSelfApproval
       - Azure.DevOps.Repos.Branch.BranchPolicyResetVotes
-      - Azure.DevOps.Repos.Branch.BranchPolicyRequireBuild
+      - Azure.DevOps.Repos.Branch.BranchPolicyCommentResolution
       - Azure.DevOps.Repos.HasDefaultBranchPolicy
       - Azure.DevOps.Repos.DefaultBranchPolicyIsEnabled
       - Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers
       - Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval
       - Azure.DevOps.Repos.DefaultBranchPolicyResetVotes
+      - Azure.DevOps.Repos.DefaultBranchPolicyCommentResolution
       - Azure.DevOps.Repos.InheritedPermissions
-      - Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild
       - Azure.DevOps.Repos.ProjectValidUsers
       - Azure.DevOps.ServiceConnections.ProductionCheckProtection
       - Azure.DevOps.ServiceConnections.Scope

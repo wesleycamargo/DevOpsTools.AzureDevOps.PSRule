@@ -23,3 +23,7 @@ Enable "Disable marketplace task variables" in Azure DevOps organization setting
 ## LINKS
 
 - [Secure Pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/security/secure-pipelines)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

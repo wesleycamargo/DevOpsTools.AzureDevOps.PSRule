@@ -48,7 +48,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         Mock Invoke-PSRule { [pscustomobject]@{ RuleName = 'fixture'; Outcome = 'None'; OutcomeReason = 'PreconditionFail' } }
         Mock Export-AzDevOpsAssessmentRun {
             param ($OutputPath)
-            @{ RuleSetVersion = '2026.10.21.1'; SeverityPolicyVersion = '1.0.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
+            @{ RuleSetVersion = '2026.10.21.2'; SeverityPolicyVersion = '1.1.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
         }
         Mock Assert-PSRule {
             param ($InputPath, $OutputPath)

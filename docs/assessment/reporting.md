@@ -1,6 +1,10 @@
 # Assessment reporting and migration
 
-`Assessment/catalog.json` contains 117 uniquely identified historical documented controls, plus explicit dispositions for two supplemental runtime rules. Rule-set version is `2026.10.21.1`; severity-policy version is `1.0.0`. The 42 supplied backlog ratings and the replacement secret control are recorded. The separate proposed inventory and 57 broader severity changes were not supplied: their affected controls cannot be inferred. Unspecified ratings remain null/PendingBroaderProposal, preserving the legacy help rating separately.
+`Assessment/catalog.json` contains 117 uniquely identified historical documented controls, plus explicit dispositions for two supplemental runtime rules. Rule-set version is `2026.10.21.2`; severity-policy version is `1.1.0`. All 117 classifications now match the user-supplied `proposed-rule-risk-policy.json`; its original draft and the 42-rule backlog are preserved in this directory as provenance. The draft itself is not loaded at runtime. Legacy help severity and PSRule levels are preserved separately.
+
+Version 1.1.0 fills 74 previously unclassified ratings, adopts 17 supplied domain assignments, and changes the plaintext-secret replacement from Medium to Critical. Its deprecated alias retains the proposed Medium rating; same-target correlation uses the maximum applicable weight once. These are policy migrations, not evidence that security posture improved. `ApplicabilityGuidance` preserves the proposal's evidence caveats; a classification does not prove actual exploitability.
+
+The supplied inventory covers all 117 controls but does not identify a standalone set of 57 changes. Validation therefore compares every ID, original severity, proposed rating, domain, and rationale rather than inferring an unspecified subset. The implemented review selections include the six corrected permission controls (the draft excluded their legacy implementations), omit the deprecated secret alias, keep restrictive public-exposure defaults in Security, and select opt-in controls through Conditional. Domain assignments follow the proposal where it names Security, Engineering, or Governance. Conditional and Legacy are selection/migration categories, so their implemented risk domains remain explicit in the catalog.
 
 ## Project raw results without rewriting them
 

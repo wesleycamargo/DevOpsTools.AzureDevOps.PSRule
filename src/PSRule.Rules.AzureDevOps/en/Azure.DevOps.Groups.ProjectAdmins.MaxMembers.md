@@ -28,6 +28,6 @@ Consider removing members from the project administrators group.
 
 ## ASSESSMENT
 
-Independent assessment risk: **Medium** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
 
 Set `ProjectAdminsMaxMembers` to the approved administrative operating-model threshold, for example 5 for five justified administrators. Retain the access-review policy reference in assessment configuration; count alone does not establish privilege quality.
