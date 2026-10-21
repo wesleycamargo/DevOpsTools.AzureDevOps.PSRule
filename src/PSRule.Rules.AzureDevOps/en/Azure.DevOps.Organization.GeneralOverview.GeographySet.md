@@ -8,18 +8,16 @@ online version: https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/tr
 
 ## SYNOPSIS
 
-Organization geography should be set to Europe.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Setting the organization geography to Europe ensures compliance with regional data residency requirements for European organizations. This rule checks that the `geography` setting is set to `"Europe"` in Azure DevOps organization settings.
-
-Minimum TokenType: `FullAccess`
+This control follows `assessmentPolicies['Azure.DevOps.Organization.GeneralOverview.GeographySet']`. Each explicit policy needs a Reference. Set Expected to one or more approved residency regions. Europe is not required by default. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Set the geography to Europe in Azure DevOps organization settings.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Organization Overview](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/organization-overview)
+Independent assessment risk: **Low** (severity policy `1.0.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

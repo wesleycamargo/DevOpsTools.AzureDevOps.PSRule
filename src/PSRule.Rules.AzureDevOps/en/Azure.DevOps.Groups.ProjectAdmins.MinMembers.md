@@ -26,3 +26,9 @@ Consider adding more than one member to the project administrators group.
 ## LINKS
 
 - [Azure DevOps Security best practices - Tasks](https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#tasks)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+An approved one-admin operating model with centralized recovery or break-glass can set `ProjectAdminsMinMembers: 1`. Record the access/recovery policy reference in assessment configuration and retain evidence that the recovery arrangement works. The member count alone does not establish privilege safety.

@@ -4,26 +4,26 @@
 Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
     -Ref 'ADO-SC-001' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA' } `
     -Level Warning {
-        # Description 'Production service connection should be protected by one or more checks.'
-        Reason 'No checks are configured for the service connection.'
-        Recommend 'Add one or more check gates to the production service connection.'
-        $Assert.HasField($TargetObject, "Checks", $true)
-        $Assert.NotNull($TargetObject, "Checks")
+        $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject
+        Reason $assessment.ReasonCode
+        Recommend 'Configure an enabled production protection check; human approval is a separate policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Production service connection should be protected by a human approval
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' `
     -Ref 'ADO-SC-002' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description 'Production service connection should be protected by a human approval.'
-        Reason 'No approval check is configured for the service connection.'
-        Recommend 'Add one or more check gates to the production service connection.'
-        $approvalCount = @($TargetObject.Checks | Where-Object { $_.type.name -eq 'Approval' })
-        $Assert.Greater($approvalCount, "Count", 0)
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: service connections should have a description

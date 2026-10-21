@@ -64,6 +64,7 @@ steps:
         $exportPath = Join-Path $env:AGENT_TEMPDIRECTORY ('psrule-export-' + [guid]::NewGuid().ToString())
         $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif'
         $completenessPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json'
+        $assessmentPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'assessment-results.json'
 
         New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
         New-Item -Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY -ItemType Directory -Force | Out-Null
@@ -96,16 +97,26 @@ steps:
             -Strict
 
         $null = Assert-PSRule `
-            -InputPath $exportPath `
+            -InputPath ($exportPath + [IO.Path]::DirectorySeparatorChar) `
             -Module PSRule.Rules.AzureDevOps `
             -Baseline Baseline.Default `
             -OutputPath $reportPath `
             -OutputFormat Sarif `
-            -ResultVariable results
+            -Outcome All `
+            -ResultVariable results `
+            -ErrorAction SilentlyContinue `
+            -ErrorVariable assessmentErrors
+
+        $assessment = Export-AzDevOpsAssessmentRun -Result @($results) -ExportPath $exportPath `
+            -OutputPath $assessmentPath -Organization $env:ADO_ORGANIZATION `
+            -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default
         $failedCount = @($results | Where-Object { $_.Outcome -eq 'Fail' }).Count
 
         Write-Host "PSRule assessment completed with $failedCount failed rule result(s)."
         Write-Host "##vso[task.setvariable variable=PSRuleFailedCount]$failedCount"
+        if (@($assessmentErrors).Count -gt 0) {
+            throw 'PSRule reported failures or errors. Raw SARIF and versioned assessment reports have been retained.'
+        }
     env:
       ADO_ORGANIZATION: $(ADO_ORGANIZATION)
       ADO_ORGANIZATION_ID: $(ADO_ORGANIZATION_ID)

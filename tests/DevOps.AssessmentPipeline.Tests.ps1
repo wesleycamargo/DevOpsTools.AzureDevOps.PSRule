@@ -17,6 +17,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $environment = @{
             AGENT_TEMPDIRECTORY = Join-Path $runPath 'agent-temp'
             BUILD_ARTIFACTSTAGINGDIRECTORY = Join-Path $runPath 'artifacts'
+            BUILD_SOURCEVERSION = 'synthetic-commit'
             BUILD_SOURCESDIRECTORY = (Resolve-Path "$PSScriptRoot/..").Path
             ADO_ORGANIZATION = 'fixture-org'
             ADO_ORGANIZATION_ID = '11111111-1111-1111-1111-111111111111'
@@ -30,6 +31,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         }
         $script:collectionStatus = 'Complete'
         $script:exportPaths = @()
+        $results = @([pscustomobject]@{ RuleName = 'fixture'; Outcome = 'Pass' })
         Mock Import-Module {}
         Mock Invoke-RestMethod { [pscustomobject]@{ access_token = 'fixture-token' } }
         Mock Connect-AzDevOps {}
@@ -41,6 +43,10 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
                 throw 'Assessment collection is incomplete.'
             }
             '{}' | Set-Content (Join-Path $OutputPath 'fixture.prj.ado.json')
+        }
+        Mock Export-AzDevOpsAssessmentRun {
+            param ($OutputPath)
+            @{ RuleSetVersion = '2026.10.21.1'; SeverityPolicyVersion = '1.0.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
         }
         Mock Assert-PSRule {
             param ($InputPath, $OutputPath)
@@ -58,12 +64,13 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
     It 'assesses complete exports and publishes only separate reports' {
         & $assessmentScript
 
-        Should -Invoke Assert-PSRule -Times 1 -Exactly
+        Should -Invoke Assert-PSRule -Times 1 -Exactly -ParameterFilter { $InputPath.EndsWith([string][IO.Path]::DirectorySeparatorChar) -and $Outcome -eq 'All' }
+        Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter { $SourceRevision -eq 'synthetic-commit' -and $Organization -eq 'fixture-org' }
         (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
         Test-Path (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif') | Should -BeTrue
         $script:exportPaths[0].StartsWith($env:AGENT_TEMPDIRECTORY) | Should -BeTrue
         $publish['inputs']['PathtoPublish'] | Should -Be '$(Build.ArtifactStagingDirectory)'
-        @((Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY).Name) | Should -Be @('collection-status.json', 'psrule-results.sarif')
+        @((Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY).Name) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif')
     }
 
     It 'stops incomplete assessment while allowing partial pipeline success and retaining its report' {

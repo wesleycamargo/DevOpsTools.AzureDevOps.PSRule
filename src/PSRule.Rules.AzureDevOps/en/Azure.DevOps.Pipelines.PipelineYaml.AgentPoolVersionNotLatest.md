@@ -8,20 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Microsoft Hosted agent pools should be pinned to a version.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Microsoft Hosted agent pools should be pinned to a version. This ensures that
-the pipeline will not be impacted by changes to the agent pool and its
-operating system.
-
-Mininum TokenType: `ReadOnly`
+This control follows `assessmentPolicies['Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest']`. Each explicit policy needs a Reference. Set AllowedImages to the supported approved image names, including intentionally floating images when approved. RetiredImages always fails even if also allowed. Root, stage, and job pools are checked; unavailable pool evidence is Unknown. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Consider pinning the agent pool to a specific version.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Azure Pipelines YAML schema reference](https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema)
+Independent assessment risk: **Low** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

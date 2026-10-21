@@ -8,27 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Een Azure DevOps Pipelines environment die is beperkt tot productie zou
-moeten worden beschermd met een of meer controles om te voorkomen dat er
-per ongeluk wijzigingen worden aangebracht in productiebronnen.
+Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
-Een Azure DevOps Pipelines environment die is beperkt tot productie zou
-moeten worden beschermd met een of meer controles om te voorkomen dat er
-per ongeluk wijzigingen worden aangebracht in productiebronnen. Controles
-kunnen worden gebruikt om te eisen dat een gebruiker een implementatie
-goedkeurt of dat er een succesvolle build moet zijn voordat een
-implementatie kan worden uitgevoerd.
-
-Mininum TokenType: `FineGrained`
+Een ingeschakelde geconfigureerde controle voldoet, ook als deze geautomatiseerd is. Menselijke goedkeuring is afzonderlijk beleid. Lege of uitgeschakelde controles falen; ontbrekende gegevens zijn Unknown. Dit beoordeelt de configuratie en bewijst geen succesvolle uitvoering van een deployment.
 
 ## RECOMMENDATION
 
-Overweeg om een of meer controles toe te voegen aan de Azure DevOps
-Pipelines environment die is beperkt tot productie.
+Configure an enabled protection check and retain deployment execution evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-- [Create an environment](https://docs.microsoft.com/nl-nl/azure/devops/pipelines/process/environments?view=azure-devops&tabs=yaml#create-an-environment)
+Onafhankelijk beoordelingsrisico: **High** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.

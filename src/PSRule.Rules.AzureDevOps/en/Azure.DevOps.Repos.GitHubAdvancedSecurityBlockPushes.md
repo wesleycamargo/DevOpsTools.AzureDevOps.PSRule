@@ -8,21 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Configure GitHub Advanced Security to block pushes not meeting security requirements.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-GitHub Advanced Security provides a suite of security features for Azure DevOps
-repositories. This rule checks if GitHub Advanced Security is configured to block
-pushes not meeting security requirements.
-
-Mininum TokenType: `FullAccess`
+This control follows `assessmentPolicies['Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes']`. Each explicit policy needs a Reference. Expected defaults to true for required licensed push prevention. Licensed=false makes this vendor-specific check inapplicable. ApprovedEquivalentControls can reference reviewed effective push-time prevention. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Consider configuring GitHub Advanced Security to block pushes not meeting security
-requirements.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Configure GitHub Advanced Security](https://learn.microsoft.com/en-us/azure/devops/repos/security/configure-github-advanced-security-features?view=azure-devops&tabs=yaml)
+Independent assessment risk: **Medium** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

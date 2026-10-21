@@ -8,19 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Projects should not be publicly accessible.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Projects can be configured to be publicly accessible. This means anyone with the URL can
-view the project. Consider restricting access to projects to prevent unauthorized access.
-
-Mininum TokenType: `ReadOnly`
+This control follows `assessmentPolicies['Azure.DevOps.Project.Visibility']`. Each explicit policy needs a Reference. Expected defaults to private. A referenced policy may explicitly allow public visibility for named Targets. Other targets remain private by default. Baseline.PublicProject explicitly excludes this control. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Consider restricting access to projects to prevent unauthorized access.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Azure DevOps Security best practices](https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#tasks)
+Independent assessment risk: **High** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

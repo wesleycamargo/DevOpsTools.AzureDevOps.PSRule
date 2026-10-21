@@ -1,0 +1,20 @@
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Baseline
+metadata:
+  name: Baseline.GovernanceReview
+spec:
+  rule:
+    include:
+      - Azure.DevOps.Groups.ProjectAdmins.MinMembers
+      - Azure.DevOps.Organization.GeneralBillingSettings.SubscriptionActive
+      - Azure.DevOps.Organization.GeneralOverview.DescriptionSet
+      - Azure.DevOps.Organization.GeneralOverview.OwnerSet
+      - Azure.DevOps.Organization.Security.Policies.DisallowFeedbackCollection
+      - Azure.DevOps.Pipelines.Environments.Description
+      - Azure.DevOps.Repos.Branch.BranchPolicyEnforceLinkedWorkItems
+      - Azure.DevOps.Repos.DefaultBranchPolicyEnforceLinkedWorkItems
+      - Azure.DevOps.ServiceConnections.Description
+      - Azure.DevOps.Tasks.VariableGroup.Description
+  configuration:
+    branchMinimumApproverCount: 1
+    releaseMinimumProductionApproverCount: 1

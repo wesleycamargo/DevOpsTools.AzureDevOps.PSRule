@@ -8,27 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Retention settings for artifacts should be configured to meet compliance
-requirements. For example, a retention policy of 30 days may be required for
-production environments.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Retention settings for artifacts should be configured to meet compliance
-requirements. For example, a retention policy of 30 days may be required for
-production environments.
-
-This rule requires a minimum retention period of 7 days. The rule is configurable
-to allow a different minimum retention period with the `ArtifactMinimumRetentionDays`
-conifguration setting.
-
-Mininum TokenType: `ReadOnly`
+This control follows `assessmentPolicies['Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays']`. Each explicit policy needs a Reference. Set Minimum to the approved artifact-retention threshold for the evidence class. No fixed seven-day default applies without policy. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Consider setting a minimum retention period of more than 7 days for artifacts.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-
+Independent assessment risk: **Medium** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

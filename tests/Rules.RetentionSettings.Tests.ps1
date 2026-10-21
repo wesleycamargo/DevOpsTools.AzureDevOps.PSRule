@@ -34,42 +34,24 @@ BeforeAll {
 
 Describe "Azure.DevOps.RetentionSettings rules" -Tag 'Integration' {
     Context ' Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' {
-        It ' should pass once' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays').Count | Should -Be 0
         }
 
-        It ' should pass once for ReadOnly token type' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should pass once for FineGrained token type' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays.md') | Should -Be $true
         }
     }
 
     Context ' Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' {
-        It ' should pass once' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays').Count | Should -Be 0
         }
 
-        It ' should pass once for ReadOnly token type' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should pass once for FineGrained token type' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays.md') | Should -Be $true
         }
     }
 }

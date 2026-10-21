@@ -18,7 +18,7 @@
       }
     },
     {
-      "Outcome": "Fail",
+      "Outcome": "None",
       "Target": {
         "ObjectType": "Azure.DevOps.Project",
         "ObjectName": "fixture.project.missing"

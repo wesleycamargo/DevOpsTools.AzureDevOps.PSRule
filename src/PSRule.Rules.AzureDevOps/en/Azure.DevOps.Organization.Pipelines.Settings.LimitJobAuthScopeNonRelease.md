@@ -23,3 +23,7 @@ Enable "Limit job authorization scope for non-release pipelines" in Azure DevOps
 ## LINKS
 
 - [Security Overview](https://docs.microsoft.com/en-us/azure/devops/organizations/security/security-overview)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.0.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

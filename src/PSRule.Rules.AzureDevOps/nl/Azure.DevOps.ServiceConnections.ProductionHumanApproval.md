@@ -8,26 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Een service connection die is beperkt tot productie moet worden beschermd 
-door een menselijke review en goedkeuring. Dit zal helpen om ervoor te
-zorgen dat er geen onbedoelde wijzigingen worden aangebracht in de
-productie resources.
+Het doel moet voldoen aan toepasselijk organisatiebeleid.
 
 ## DESCRIPTION
 
-Door een service connection te beperken tot productie, wordt voorkomen dat
-deze wordt gebruikt voor het wijzigen van resources in andere omgevingen.
-Bijvoorbeeld, een service connection die is beperkt tot productie zou moeten
-worden beschermd met een check die een minimum aantal reviewers vereist.
-
-Mininum TokenType: `ReadOnly`
+Deze controle volgt `assessmentPolicies['Azure.DevOps.ServiceConnections.ProductionHumanApproval']`. Elk expliciet beleid vereist een Reference. Zonder optioneel beleid is de controle niet van toepassing. Ontbrekend bewijs voor toepasselijk beleid resulteert in Unknown. PSRule geeft hiervoor None terug met -Outcome All; de beoordelingsprojectie onderscheidt deze uitkomsten. Zie de Engelstalige beleidsdocumentatie voor de exacte velden.
 
 ## RECOMMENDATION
 
-Overweeg om een service connection die is beperkt tot productie te
-beschermen met een menselijke review en goedkeuring.
+Configureer en pas het beleid met bronverwijzing toe. Zie [beleidsconfiguratie](../../../docs/assessment/policies.md).
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-
+Onafhankelijk beoordelingsrisico: **High** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.

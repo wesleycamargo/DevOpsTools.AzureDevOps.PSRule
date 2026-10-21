@@ -2,6 +2,9 @@
 
 ### Added
 
+- Four opt-in assessment review baselines, a 117-control catalog, and versioned assessment JSON with same-target risk correlation and explicit Unknown/NotApplicable coverage.
+- Referenced policies for optional region, billing, licensing, authentication, human approval, retention, and agent lifecycle controls. Broader unprovided severity proposals remain explicitly unclassified.
+
 - Export of **Organization Settings** in `Export-AzDevOpsOrganizationRuleData` to extend coverage of organizational rule data.
 
 ### Improved
@@ -10,6 +13,8 @@
 - Logging messages now provide clearer and more structured feedback during execution.
 
 ### Fixed
+
+- Assessment pipeline export discovery now includes nested project files and retains both raw SARIF and versioned per-project reports. Policy or denominator changes invalidate numerical history comparisons.
 
 - Masked Azure DevOps variable-group secrets no longer require Key Vault. The historical `NoKeyVaultNoSecrets` ID remains a deprecated alias; unavailable data is not evaluated.
 - Six `InheritedPermissions` controls now assess complete effective permission evidence against a referenced policy, including nested groups, denies, and administrative bypass. Missing evidence or policy is Unknown, rather than a pass or an inheritance failure.

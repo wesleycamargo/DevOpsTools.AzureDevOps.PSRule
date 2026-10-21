@@ -1,0 +1,20 @@
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Baseline
+metadata:
+  name: Baseline.EngineeringReview
+spec:
+  rule:
+    include:
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableClassicBuildPipelines
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableClassicReleasePipelines
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableImpliedYAMLCiTrigger
+      - Azure.DevOps.Pipelines.Core.UseYamlDefinition
+      - Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName
+      - Azure.DevOps.Repos.Branch.BranchPolicyCommentResolution
+      - Azure.DevOps.Repos.Branch.BranchPolicyMergeStrategy
+      - Azure.DevOps.Repos.Readme
+      - Azure.DevOps.Repos.DefaultBranchPolicyCommentResolution
+      - Azure.DevOps.Repos.DefaultBranchPolicyMergeStrategy
+  configuration:
+    branchMinimumApproverCount: 1
+    releaseMinimumProductionApproverCount: 1

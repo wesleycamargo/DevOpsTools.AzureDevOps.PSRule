@@ -8,26 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Een Azure DevOps Pipelines environment die is beperkt tot productie zou
-moeten worden beschermd met een menselijke goedkeuring om te voorkomen dat
-er per ongeluk wijzigingen worden aangebracht in productiebronnen.
+Het doel moet voldoen aan toepasselijk organisatiebeleid.
 
 ## DESCRIPTION
 
-De implementatie van een Azure DevOps Pipelines environment die is beperkt
-tot productie zou moeten worden beschermd met een menselijke goedkeuring om
-te voorkomen dat er per ongeluk wijzigingen worden aangebracht in
-productiebronnen. Een goedkeuring kan worden gebruikt om te eisen dat een
-gebruiker een implementatie goedkeurt voordat deze kan worden uitgevoerd.
-
-Mininum TokenType: `FineGrained`
+Deze controle volgt `assessmentPolicies['Azure.DevOps.Pipelines.Environments.ProductionHumanApproval']`. Elk expliciet beleid vereist een Reference. Zonder optioneel beleid is de controle niet van toepassing. Ontbrekend bewijs voor toepasselijk beleid resulteert in Unknown. PSRule geeft hiervoor None terug met -Outcome All; de beoordelingsprojectie onderscheidt deze uitkomsten. Zie de Engelstalige beleidsdocumentatie voor de exacte velden.
 
 ## RECOMMENDATION
 
-Overweeg om een menselijke goedkeuring toe te voegen aan de Azure DevOps
-Pipelines environment die is beperkt tot productie.
+Configureer en pas het beleid met bronverwijzing toe. Zie [beleidsconfiguratie](../../../docs/assessment/policies.md).
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-- [Create an environment](https://docs.microsoft.com/nl-nl/azure/devops/pipelines/process/environments?view=azure-devops&tabs=yaml#create-an-environment)
+Onafhankelijk beoordelingsrisico: **High** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.

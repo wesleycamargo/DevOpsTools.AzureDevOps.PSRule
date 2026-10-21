@@ -8,22 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Configureer GitHub Advanced Security om pushes te blokkeren die niet voldoen aan de
-Sbeveiligingseisen.
+Het doel moet voldoen aan toepasselijk organisatiebeleid.
 
 ## DESCRIPTION
 
-GitHub Advanced Security biedt een reeks beveiligingsfuncties voor Azure DevOps
-repositories. Deze regel controleert of GitHub Advanced Security is geconfigureerd om
-pushes te blokkeren die niet voldoen aan de beveiligingseisen.
-
-Mininum TokenType: `FullAccess`
+Deze controle volgt `assessmentPolicies['Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes']`. Elk expliciet beleid vereist een Reference. Zonder optioneel beleid is de controle niet van toepassing. Ontbrekend bewijs voor toepasselijk beleid resulteert in Unknown. PSRule geeft hiervoor None terug met -Outcome All; de beoordelingsprojectie onderscheidt deze uitkomsten. Zie de Engelstalige beleidsdocumentatie voor de exacte velden.
 
 ## RECOMMENDATION
 
-Overweeg om GitHub Advanced Security te configureren om pushes te blokkeren die niet
-voldoen aan de beveiligingseisen.
+Configureer en pas het beleid met bronverwijzing toe. Zie [beleidsconfiguratie](../../../docs/assessment/policies.md).
 
-## LINKS
+## ASSESSMENT
 
-- [Configureer GitHub Advanced Security](https://learn.microsoft.com/nl-nl/azure/devops/repos/security/configure-github-advanced-security-features?view=azure-devops&tabs=yaml)
+Onafhankelijk beoordelingsrisico: **Medium** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.

@@ -46,7 +46,9 @@ The pipeline installs PSRule 2.9.0, imports the checked-out module, and exports
 the organization data to a fresh agent temporary directory for each run.
 It uses strict collection completeness checks before evaluating
 `Baseline.Default`. The `psrule-results` artifact contains
-`collection-status.json` and, when evaluation runs, `psrule-results.sarif`;
+`collection-status.json` and, when evaluation runs, `psrule-results.sarif` plus
+`assessment-results.json` with per-project correlation, explicit unavailable
+evidence, rule/severity versions, source revision, and history comparison keys;
 exported Azure DevOps data is not published. Report publication runs even
 when collection fails.
 
@@ -62,3 +64,5 @@ capacity. At least one Linux agent in that pool must be online for scheduled or
 manual runs to start.
 
 ![Sarif Viewer](../assets/media/sarif-0.0.11.png)
+
+See [assessment reporting](../docs/assessment/reporting.md) before comparing revised scores. Unknown evidence and pending severity classification keep SecurityScore unavailable; a changed policy or denominator is not compliance improvement.

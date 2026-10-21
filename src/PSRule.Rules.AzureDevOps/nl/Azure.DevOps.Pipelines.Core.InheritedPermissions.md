@@ -21,3 +21,7 @@ Verzamel volledige gegevens en beperk ongeautoriseerde rechten. Behoud legitieme
 ## LINKS
 
 - [Permissions and inheritance](https://learn.microsoft.com/en-us/azure/devops/organizations/security/about-permissions)
+
+## ASSESSMENT
+
+Onafhankelijk beoordelingsrisico: **Medium** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.

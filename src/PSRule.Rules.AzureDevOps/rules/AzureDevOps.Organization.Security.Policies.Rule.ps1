@@ -31,28 +31,17 @@ Rule 'Azure.DevOps.Organization.Security.Policies.Debug' `
         }
 }
 
-# Synopsis: Secure Shell (SSH) authentication should be disabled
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.Security.Policies.DisallowSecureShell' `
     -Ref 'ADO-OSP-001' `
     -Type 'Azure.DevOps.Organization.Security.Policies' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowSecureShell' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowSecureShell').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Disabling SSH authentication enhances security by limiting access methods.
-        Reason 'SSH authentication is not disabled.'
-        Recommend 'Disable SSH authentication in Azure DevOps organization security settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices
-        try {
-            Write-Verbose "Checking policy.disallowSecureShell: $($TargetObject.'policy.disallowSecureShell')"
-            if ($TargetObject.'policy.disallowSecureShell' -eq $true) {
-                $Assert.Pass()
-            } else {
-                $Assert.Fail('SSH authentication is not disabled.')
-            }
-        }
-        catch {
-            Write-Error "Rule ADO-OSP-001 exception: $_"
-            $Assert.Fail("Rule failed due to an exception.")
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowSecureShell' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowSecureShell'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: Request access token should be disabled
@@ -151,28 +140,17 @@ Rule 'Azure.DevOps.Organization.Security.Policies.EnforceAADConditionalAccess' `
         }
 }
 
-# Synopsis: OAuth authentication should be disabled
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication' `
     -Ref 'ADO-OSP-006' `
     -Type 'Azure.DevOps.Organization.Security.Policies' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Disabling OAuth authentication reduces the risk of unauthorized access via third-party applications.
-        Reason 'OAuth authentication is not disabled.'
-        Recommend 'Disable OAuth authentication in Azure DevOps organization security settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices
-        try {
-            Write-Verbose "Checking policy.disallowOAuthAuthentication: $($TargetObject.'policy.disallowOAuthAuthentication')"
-            if ($TargetObject.'policy.disallowOAuthAuthentication' -eq $true) {
-                $Assert.Pass()
-            } else {
-                $Assert.Fail('OAuth authentication is not disabled.')
-            }
-        }
-        catch {
-            Write-Error "Rule ADO-OSP-006 exception: $_"
-            $Assert.Fail("Rule failed due to an exception.")
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: Audit event logging should be enabled
@@ -223,50 +201,28 @@ Rule 'Azure.DevOps.Organization.Security.Policies.EnableArtifactsProtection' `
         }
 }
 
-# Synopsis: Anonymous access should be disabled
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess' `
     -Ref 'ADO-OSP-009' `
     -Type 'Azure.DevOps.Organization.Security.Policies' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Disabling anonymous access prevents unauthorized users from viewing public projects.
-        Reason 'Anonymous access is not disabled.'
-        Recommend 'Disable anonymous access in Azure DevOps organization settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/permissions
-        try {
-            Write-Verbose "Checking policy.allowAnonymousAccess: $($TargetObject.'policy.allowAnonymousAccess')"
-            if ($TargetObject.'policy.allowAnonymousAccess' -eq $false) {
-                $Assert.Pass()
-            } else {
-                $Assert.Fail('Anonymous access is not disabled.')
-            }
-        }
-        catch {
-            Write-Error "Rule ADO-OSP-009 exception: $_"
-            $Assert.Fail("Rule failed due to an exception.")
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Azure AD guest user access should be disabled
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess' `
     -Ref 'ADO-OSP-010' `
     -Type 'Azure.DevOps.Organization.Security.Policies' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Disabling Azure AD guest user access restricts external users from accessing the organization.
-        Reason 'Azure AD guest user access is not disabled.'
-        Recommend 'Disable Azure AD guest user access in Azure DevOps organization settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/guest-access
-        try {
-            Write-Verbose "Checking policy.disallowAadGuestUserAccess: $($TargetObject.'policy.disallowAadGuestUserAccess')"
-            if ($TargetObject.'policy.disallowAadGuestUserAccess' -eq $true) {
-                $Assert.Pass()
-            } else {
-                $Assert.Fail('Azure AD guest user access is not disabled.')
-            }
-        }
-        catch {
-            Write-Error "Rule ADO-OSP-010 exception: $_"
-            $Assert.Fail("Rule failed due to an exception.")
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }

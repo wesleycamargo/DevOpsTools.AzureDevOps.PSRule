@@ -21,3 +21,7 @@ Collect complete permission evidence and restrict unauthorized privileges. Keep 
 ## LINKS
 
 - [Permissions and inheritance](https://learn.microsoft.com/en-us/azure/devops/organizations/security/about-permissions)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.0.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

@@ -8,24 +8,16 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-A service connection scoped to production should be protected. This will help
-ensure no accidental changes are made to the production resources.
+Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
-Protecting a service connection with one or more checks will help prevent
-accidental changes to production resources. For example, a service connection
-scoped to production should be protected with a check that requires a minimum
-number of reviewers or a specific CI pipeline must pass.
-
-Mininum TokenType: `ReadOnly`
+An enabled configured protection check satisfies this diagnostic, including an automated check. Human approval is a separate policy. Empty checks fail; disabled checks fail; unavailable or incomplete check collection is Unknown and not evaluated by PSRule. This verifies gate configuration, not successful execution of a deployment. Raw findings remain distinct; only the same target's common missing or disabled gate is correlated in assessment scoring.
 
 ## RECOMMENDATION
 
-Consider protecting a service connection scoped to production with one or
-more checks.
+Configure an enabled protection check and retain deployment execution evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-
+Independent assessment risk: **High** (severity policy `1.0.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

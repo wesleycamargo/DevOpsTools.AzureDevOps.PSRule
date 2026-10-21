@@ -26,3 +26,7 @@ Overweeg om een README.md bestand in de repository root te maken.
 ## LINKS
 
 - [Writing a README](https://opensource.guide/starting-a-project/#writing-a-readme)
+
+## ASSESSMENT
+
+Onafhankelijk beoordelingsrisico: **Low** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.

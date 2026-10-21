@@ -1,28 +1,15 @@
 
-# Synopsis: Microsoft hosted agent pool should target a specific version
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest' `
     -Ref 'ADO-YAML-001' `
     -Type 'Azure.DevOps.Pipelines.PipelineYaml' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description 'Microsoft hosted agent pool should target a specific version'
-        Reason 'Pipeline is using the latest version of the Microsoft hosted agent pool'
-        Recommend 'Specify a specific version of the Microsoft hosted agent pool'
-        # Links ''
-        AllOf {
-            AnyOf {
-                $Assert.NotMatch($TargetObject, "stages.jobs[*].pool.vmImage", "latest")
-                $Assert.Null($TargetObject, "stages.jobs[*].pool.vmImage")    
-            }
-            AnyOf {
-                $Assert.NotMatch($TargetObject, "stages[*].pool.vmImage", "latest")
-                $Assert.Null($TargetObject, "stages[*].pool.vmImage")    
-            }
-            AnyOf {
-                $Assert.NotMatch($TargetObject, "pool.vmImage", "latest")
-                $Assert.Null($TargetObject, "pool.vmImage")    
-            }
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: All steps should have a display name

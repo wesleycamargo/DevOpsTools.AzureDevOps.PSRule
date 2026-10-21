@@ -6,6 +6,7 @@ spec:
   rule:
     exclude:
       - 'Azure.DevOps.Project.Visibility'
+      - 'Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess'
       - 'Azure.DevOps.Pipelines.Settings.StatusBadgesPrivate'
       - 'Azure.DevOps.Organization.Pipelines.Settings.DisableAnonymousBadgeAccess'
     tag:

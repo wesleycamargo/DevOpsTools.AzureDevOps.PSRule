@@ -1,0 +1,25 @@
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Baseline
+metadata:
+  name: Baseline.ConditionalReview
+spec:
+  rule:
+    include:
+      - Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured
+      - Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled
+      - Azure.DevOps.Organization.GeneralOverview.TimeZoneSet
+      - Azure.DevOps.Organization.GeneralOverview.GeographySet
+      - Azure.DevOps.Organization.Security.Policies.DisallowSecureShell
+      - Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication
+      - Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess
+      - Azure.DevOps.Pipelines.Environments.ProductionHumanApproval
+      - Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest
+      - Azure.DevOps.Repos.License
+      - Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled
+      - Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes
+      - Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays
+      - Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays
+      - Azure.DevOps.ServiceConnections.ProductionHumanApproval
+  configuration:
+    branchMinimumApproverCount: 1
+    releaseMinimumProductionApproverCount: 1

@@ -112,36 +112,13 @@ Describe "Azure.DevOps.Pipelines.Releases rules" -Tag 'Integration' {
     }
 
     Context ' Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' {
-        It ' should fail for targets named fail' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' -and $_.TargetName -match 'Fail$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions').Count | Should -Be 0
         }
 
-        It ' should pass for targets named success' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' -and $_.TargetName -match 'Success$' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should not be present with a ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should be the same as default with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' -and $_.TargetName -match 'Fail$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
-
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' -and $_.TargetName -match 'Success$' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should have an English markdown help file' {
-            $fileExists = Test-Path -Path (Join-Path -Path $ourModule -ChildPath 'en/Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions.md');
-            $fileExists | Should -Be $true;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions.md') | Should -Be $true
         }
     }
 

@@ -245,42 +245,14 @@ Describe "Azure.DevOps.ServiceConnections rules" -Tag 'Integration' {
         }
     }
 
-    Context 'Azure.DevOps.ServiceConnections.InheritedPermissions' {
-        It ' should fail for targets named fail' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.InheritedPermissions' -and $_.TargetName -match 'fail$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 3;
+    Context ' Azure.DevOps.ServiceConnections.InheritedPermissions' {
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.ServiceConnections.InheritedPermissions').Count | Should -Be 0
         }
 
-        It ' should pass for targets named success' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.InheritedPermissions' -and $_.TargetName -like '*success*' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should be the same with a ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.InheritedPermissions' -and $_.TargetName -match 'fail$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 3;
-
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.InheritedPermissions' -and $_.TargetName -like '*success*' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should be the same with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.InheritedPermissions' -and $_.TargetName -match 'fail$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 3;
-
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.InheritedPermissions' -and $_.TargetName -like '*success*' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should have an english markdown help file' {
-            $fileExists = Test-Path -Path (Join-Path -Path $ourModule -ChildPath 'en/Azure.DevOps.ServiceConnections.InheritedPermissions.md');
-            $fileExists | Should -Be $true;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.ServiceConnections.InheritedPermissions.md') | Should -Be $true
         }
     }
 

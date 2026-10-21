@@ -141,17 +141,17 @@ GitHub create-branch request was rejected: `403 Resource not accessible by integ
 ## Execution progress
 
 - [x] Verify current remote main and create isolated requested branch.
-- [ ] Inventory runtime rules, documented controls, collectors, and baseline selections.
+- [x] Inventory runtime rules, documented controls, collectors, and baseline selections (117 documented, 119 retained runtime IDs; migration deltas documented).
 - [x] Replace secret and six inherited permission checks with evidence-based outcomes (targeted and full offline tests passed).
 - [x] Correct job authorization help and verify independent settings (4 synthetic cases passed).
-- [ ] Add versioned assessment catalog and risk correlation contract.
-- [ ] Implement policy applicability and review baselines with legacy compatibility.
-- [ ] Calibrate assessment severity and document migration.
+- [x] Add versioned assessment catalog and risk correlation contract (117 unique entries; same-target correlation; raw SARIF preserved; unknown ratings explicit).
+- [x] Implement policy applicability and review baselines with legacy compatibility (17 policy-aware controls, four discoverable review baselines, PublicProject/NoExtraLicense regression tests).
+- [ ] Calibrate assessment severity and document migration (42 supplied changes and replacement secret rating implemented; separate 57-change proposal still missing).
 - [ ] Run offline suites, authorized pipeline validation, and open PR.
 
 ## Handover
 
-Current: Backlog items 1–7 and 12–13 implemented. Secret handling retains the legacy alias; six permission IDs use effective ACL/identity evidence. Collector, English/Dutch help, and synthetic tests added. Source inventory contains 117 documented and 119 runtime definitions. Full offline suite passed 117 tests; the final 12-case secret suite also passed after adding omitted-value and malformed-collection coverage.
-Next: Implement the versioned catalog, risk correlation, and policy applicability/baselines. Complete full validation and PR/pipeline handover.
-Blockers: The separate 117-rule proposal/57 broader severity changes are not included in the attachment; location requested from the user. This does not block the explicit 42-rule backlog. The attachment remains the authoritative implementation plan.
-Remaining validation: Full requirement-by-requirement implementation and validation.
+Current: Implementation now covers the supplied 42-rule backlog, with versioned assessment metadata, policy applicability, review baselines, source/identity preservation, and a per-project pipeline reporting bridge. Full offline suite passed 159 tests (0 failed, 635 live/integration tests not selected) using Pester 5.7.1 and PSRule 2.9.0. Result XML: /tmp/assessment-quality-phase3-final.xml. Raw SARIF artifact test retains four branch findings across two project scopes while projecting one root objective per project; original payloads are excluded. Pipeline template regression tests cover the additional report, incomplete collection, assertion failure, and fresh exports. CI now uses pinned test requirements, includes Assessment files in triggers, and exits unsuccessfully on failed tests.
+Next: Publish the branch and open a draft PR; run branch pipeline validation and inspect its artifacts. Perform independent requirement-by-requirement implementation validation, including collector semantics and the remaining broader severity proposal.
+Blockers: GitHub connector create-branch again returned 403 Resource not accessible by integration; gh has no authenticated host. Git transport publication still to be attempted after the verified milestone is committed. The separate proposed 117-entry inventory/57 broader severity changes were not supplied; user was asked for their location. Those missing proposed ratings remain explicitly null/PendingBroaderProposal rather than being fabricated. Azure CLI read access to pipeline 14 was verified; it references this GitHub repository and pipelines/psrule-assessment.yml.
+Remaining validation: Remote branch/PR and pipeline results; independent final audit; broader severity proposal. Do not mark the overall goal complete.

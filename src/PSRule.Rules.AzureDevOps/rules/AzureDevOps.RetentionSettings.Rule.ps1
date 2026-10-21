@@ -1,33 +1,27 @@
 # PSRule rule definitions for Azure DevOps Retention Settings
 
-# Synopsis: Retention settings should allow for artifacts to be retained for a minimum of 7 days
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' `
     -Ref 'ADO-RET-001' `
     -Type 'Azure.DevOps.RetentionSettings' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description "Retention settings allow for artifacts to be retained for a minimum of 7 days"
-        Reason "Retention settings allow for artifacts to be retained for at least 7 days"
-        Recommend "Consider increasing the minimum retention days to 7 days"
-        # Links "https://docs.microsoft.com/en-us/azure/devops/pipelines/policies/retention?view=azure-devops#minimum-retention-days"
-        AllOf {
-            $Assert.HasField($TargetObject, "RetentionSettings.purgeArtifacts.value", $true)
-            $Assert.GreaterOrEqual($TargetObject, "RetentionSettings.purgeArtifacts.value", $Configuration.GetValueOrDefault('ArtifactMinimumRetentionDays', 7))
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Retention settings should allow pull request runs to be retained at least 7 days
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' `
     -Ref 'ADO-RET-002' `
     -Type 'Azure.DevOps.RetentionSettings' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description "Retention settings should allow pull request runs to be retained at least 7 days"
-        Reason "Retention settings should allow pull request runs to be retained at least 7 days"
-        Recommend "Consider increasing the minimum retention days to 7 days"
-        # Links "https://docs.microsoft.com/en-us/azure/devops/pipelines/policies/retention?view=azure-devops#minimum-retention-days"
-        AllOf {
-            $Assert.HasField($TargetObject, "RetentionSettings.purgePullRequestRuns.value", $true)
-            $Assert.GreaterOrEqual($TargetObject, "RetentionSettings.purgePullRequestRuns.value", $Configuration.GetValueOrDefault('PullRequestRunsMinimumRetentionDays', 7))
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
