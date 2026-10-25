@@ -54,8 +54,7 @@ Describe "Functions: DevOps.Pipelines.Releases.Tests" -Tag 'Integration' {
 
     Context " Get-AzDevOpsReleaseDefinitions with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsReleaseDefinitions -Project $env:ADO_PROJECT } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsReleaseDefinitions -Project $env:ADO_PROJECT } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -99,9 +98,8 @@ Describe "Functions: DevOps.Pipelines.Releases.Tests" -Tag 'Integration' {
 
     Context " Get-AzDevOpsReleaseDefinitionAcls with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
             $ProjectId = "1fa185aa-ce58-4732-8700-8964802ea538"
-            { Get-AzDevOpsReleaseDefinitionAcls -ProjectId $ProjectId -ReleaseDefinitionId 2 -Folder '' } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsReleaseDefinitionAcls -ProjectId $ProjectId -ReleaseDefinitionId 2 -Folder '' } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {

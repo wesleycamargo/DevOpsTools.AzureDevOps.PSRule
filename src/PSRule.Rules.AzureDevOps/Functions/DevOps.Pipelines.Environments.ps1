@@ -35,7 +35,7 @@ function Get-AzDevOpsEnvironments {
         $uri = "https://dev.azure.com/$Organization/$Project/_apis/pipelines/environments?api-version=6.0-preview.1"
         Write-Verbose "URI: $uri"
         try {
-            $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+            $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
             # If the response is a string and not an object, throw an exception for authentication failure or project not found
             if ($response -is [string]) {
                 throw "Authentication failed or project not found"

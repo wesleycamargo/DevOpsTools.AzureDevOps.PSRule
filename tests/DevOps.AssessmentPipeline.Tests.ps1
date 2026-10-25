@@ -43,7 +43,10 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
             if ($script:collectionStatus -ne 'Complete' -and $Strict) {
                 throw 'Assessment collection is incomplete.'
             }
-            '{}' | Set-Content (Join-Path $OutputPath 'fixture.prj.ado.json')
+            $projectDirectory = Join-Path $OutputPath 'fixture-project'
+            New-Item $projectDirectory -ItemType Directory -Force | Out-Null
+            '{}' | Set-Content (Join-Path $projectDirectory 'fixture.prj.ado.json')
+            '{}' | Set-Content (Join-Path $OutputPath 'organization.ado.json')
         }
         Mock Invoke-PSRule { [pscustomobject]@{ RuleName = 'fixture'; Outcome = 'None'; OutcomeReason = 'PreconditionFail' } }
         Mock Export-AzDevOpsAssessmentRun {
@@ -51,9 +54,16 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
             @{ RuleSetVersion = '2026.10.21.2'; SeverityPolicyVersion = '1.1.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
         }
         Mock Assert-PSRule {
-            param ($InputPath, $OutputPath)
-            @((Get-ChildItem $InputPath).Name) | Should -Be @('fixture.prj.ado.json')
+            param ($InputPath, $OutputPath, $ResultVariable)
+            @((Get-ChildItem $InputPath -File).Name | Sort-Object) | Should -Be @('fixture.prj.ado.json', 'organization.ado.json')
             '{}' | Set-Content $OutputPath
+            for ($scopeIndex = 1; $scopeIndex -le 8; $scopeIndex++) {
+                $scopedResultVariable = Get-Variable -Scope $scopeIndex | Where-Object Name -EQ $ResultVariable
+                if ($null -ne $scopedResultVariable) {
+                    $scopedResultVariable.Value = @([pscustomobject]@{ Outcome = 'Pass' })
+                    break
+                }
+            }
         }
     }
 
@@ -66,7 +76,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
     It 'assesses complete exports and publishes only separate reports' {
         & $assessmentScript
 
-        Should -Invoke Assert-PSRule -Times 1 -Exactly -ParameterFilter { $InputPath.EndsWith([string][IO.Path]::DirectorySeparatorChar) -and $Outcome -eq 'All' }
+        Should -Invoke Assert-PSRule -Times 1 -Exactly -ParameterFilter { @($InputPath).Count -eq 2 -and @($InputPath | Where-Object { $_ -like '*fixture-project*fixture.prj.ado.json' }).Count -eq 1 -and $Outcome -eq 'All' }
         Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter { $SourceRevision -eq 'synthetic-commit' -and $Organization -eq 'fixture-org' }
         (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
         Test-Path (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif') | Should -BeTrue
@@ -78,7 +88,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
     It 'projects detailed precondition outcomes rather than the assertion result subset' {
         & $assessmentScript
 
-        Should -Invoke Invoke-PSRule -Times 1 -Exactly -ParameterFilter { $Outcome -eq 'All' -and $InputPath.EndsWith([string][IO.Path]::DirectorySeparatorChar) }
+        Should -Invoke Invoke-PSRule -Times 1 -Exactly -ParameterFilter { $Outcome -eq 'All' -and @($InputPath).Count -eq 2 -and @($InputPath | Where-Object { $_ -like '*fixture-project*fixture.prj.ado.json' }).Count -eq 1 }
         Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter { $Result.Count -eq 1 -and $Result[0].Outcome -eq 'None' }
     }
 
@@ -118,6 +128,11 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
         $assessment['continueOnError'] | Should -BeTrue
         $publish['condition'] | Should -Be 'always()'
+    }
+
+    It 'rejects an assessment that evaluates no rule results' {
+        Mock Assert-PSRule { param($ResultVariable) Set-Variable -Name $ResultVariable -Scope 1 -Value @() }
+        { & $assessmentScript } | Should -Throw '*zero rule results*'
     }
 
     It 'uses fresh exports when the same agent runs again' {

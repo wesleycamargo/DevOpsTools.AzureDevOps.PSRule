@@ -14,6 +14,8 @@ Variable groups should not expose credentials.
 
 Masked Azure DevOps secret variables (`isSecret: true`, `value: null`) are accepted without a Key Vault requirement. Unmasked declared secrets and values matching credential patterns fail. Pattern detection cannot prove that arbitrary plaintext is not a secret. Missing variable collection is Unknown in assessment output and not evaluated by PSRule; it is never a pass.
 
+Detection is heuristic and limited to exported values. Structured credential patterns and the signed 84-character Azure DevOps PAT format are checked. Arbitrary 32/40-character values and legacy unsigned PATs cannot reliably be identified by length alone and are not flagged. A passing result does not establish the absence of secrets. Failure reasons do not include matched values.
+
 Minimum TokenType: `ReadOnly`
 
 ## RECOMMENDATION

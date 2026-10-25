@@ -12,7 +12,11 @@ Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
+This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+
 An enabled configured protection check satisfies this diagnostic, including an automated check. Human approval is a separate policy. Empty checks fail; disabled checks fail; unavailable or incomplete check collection is Unknown and not evaluated by PSRule. This verifies gate configuration, not successful execution of a deployment. Raw findings remain distinct; only the same target's common missing or disabled gate is correlated in assessment scoring.
+
+Mininum TokenType: `FineGrained`
 
 ## RECOMMENDATION
 

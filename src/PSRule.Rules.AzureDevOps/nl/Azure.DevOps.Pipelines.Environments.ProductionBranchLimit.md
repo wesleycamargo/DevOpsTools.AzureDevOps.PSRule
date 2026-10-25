@@ -12,6 +12,8 @@ Een productie environment moet beperkt zijn in de branches waarin deze kan worde
 
 ## DESCRIPTION
 
+Deze productieregel gebruikt de naamselector `IsProduction`. Ontwikkelbronnen worden overgeslagen. Naamherkenning is een conventie; stem namen of uitzonderingen af op uw productie-inventaris.
+
 Een productie environment moet beperkt zijn in de branches waarin deze kan worden gebruikt. Dit zorgt ervoor dat de omgeving niet wordt gebruikt in een
 niet-productiebranch. Deze regel controleert of de environment is beperkt tot een
 productiebranch.

@@ -13,6 +13,10 @@ pull requests to be resolved.
 
 ## DESCRIPTION
 
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
 Require comments for pull requests to be resolved to ensure that all comments are addressed. This helps to ensure that all comments are addressed and improves the quality of the pull request.
 
 Mininum TokenType: `ReadOnly`

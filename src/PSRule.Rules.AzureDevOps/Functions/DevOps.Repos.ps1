@@ -28,7 +28,7 @@ Function Get-AzDevOpsRepos {
     $uri = "https://dev.azure.com/$Organization/$Project/_apis/git/repositories?api-version=6.0"
     Write-Verbose "URI: $uri"
     try {
-        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+        $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
         # If the response is a string and not an object, throw an exception for authentication failure or project not found
         if ($response -is [string]) {
             throw "Authentication failed or project not found"
@@ -157,7 +157,7 @@ Function Get-AzDevOpsBranchPolicy {
     Write-Verbose "URI: $uri"
     # Try to get the branch policy, return an empty object if no branch policy is found for the branch
     try {
-        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+        $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
         # If the response is a string and not an object, throw an exception for authentication failure or project not found
         if ($response -is [string]) {
             throw "Authentication failed or project not found"
@@ -167,7 +167,14 @@ Function Get-AzDevOpsBranchPolicy {
         throw $_.Exception.Message
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
-    $branchPolicy = @($response.value | Where-Object {$_.settings.scope.refName -eq $Branch -and $_.settings.scope.repositoryId -eq $Repository})
+    $branchPolicy = @($response.value | Where-Object {
+        $matchingScopes = @($_.settings.scope | Where-Object {
+            ($null -eq $_.repositoryId -or $_.repositoryId -eq $Repository) -and
+            (($_.matchKind -eq 'Prefix' -and $Branch.StartsWith($_.refName, [StringComparison]::Ordinal)) -or
+             ($_.matchKind -ne 'Prefix' -and $_.refName -ceq $Branch))
+        })
+        $matchingScopes.Count -gt 0
+    })
 
     return $branchPolicy
 }
@@ -328,7 +335,13 @@ function Test-AzDevOpsFileExists {
         $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
     }
     catch {
-        return $false
+        if ($_.Exception.Response.StatusCode -eq 404 -and $_.ErrorDetails.Message -match 'GitItemNotFoundException|GitRepositoryEmptyException') {
+            return $false
+        }
+        throw
+    }
+    if ($response -is [string] -and $response -match '(?is)<(!doctype\s+html|html)\b') {
+        throw 'Authentication failed while checking repository file evidence.'
     }
     return $true
 }

@@ -4,6 +4,7 @@
 Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
     -Ref 'ADO-SC-001' `
     -Type 'Azure.DevOps.ServiceConnection' `
+    -With 'IsProduction' `
     -If { (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
@@ -17,6 +18,7 @@ Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
 Rule 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' `
     -Ref 'ADO-SC-002' `
     -Type 'Azure.DevOps.ServiceConnection' `
+    -With 'IsProduction' `
     -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
     -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
@@ -78,6 +80,7 @@ Rule 'Azure.DevOps.ServiceConnections.WorkloadIdentityFederation' `
 Rule 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' `
     -Ref 'ADO-SC-006' `
     -Type 'Azure.DevOps.ServiceConnection' `
+    -With 'IsProduction' `
     -Tag @{ release = 'GA'} `
     -Level Warning {
         # Description 'Production service connection should be limited to specific branches.'

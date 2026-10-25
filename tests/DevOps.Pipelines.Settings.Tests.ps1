@@ -29,8 +29,7 @@ Describe "Functions: DevOps.Pipelines.Settings.Tests" -Tag 'Integration' {
 
     Context " Get-AzDevOpsPipelinesSettings with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsPipelinesSettings -Project $env:ADO_PROJECT -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsPipelinesSettings -Project $env:ADO_PROJECT -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {

@@ -1,54 +1,70 @@
-# File: .github/workflows/qa.yml
+name: Validate and publish module to PSGallery
+
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing version tag matching the module manifest (v0.5.12)
+        required: true
+        type: string
+      publish:
+        description: Publish the validated package to PowerShell Gallery
+        type: boolean
+        default: false
 
-name: Publish Module to PSGallery
+permissions:
+  contents: read
 
 jobs:
   publish:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install PSRule module
+      - name: Validate tag input
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          if ($env:RELEASE_TAG -cnotmatch '^v\d+\.\d+\.\d+(-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$') {
+            throw 'Supply an existing version tag such as v0.5.12.'
+          }
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+      - name: Install pinned test dependencies
         shell: pwsh
         run: |
-          Install-Module -Name PSRule -Force -Scope CurrentUser -Repository PSGallery
-
-      # Update the module manifest for preview-release
-      - name: Update the module manifest for preview-release
-        if: github.event.release.prerelease == true
+          (Import-PowerShellDataFile ./tests/requirements.psd1).GetEnumerator() | ForEach-Object {
+            Install-Module $_.Key -RequiredVersion $_.Value -Scope CurrentUser -Force -SkipPublisherCheck
+          }
+      - name: Validate manifest version
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          # Update the module manifest with the version number in the release tag
-          $version = ($env:GITHUB_REF -replace 'refs/tags/v','') -split '-' | Select-Object -First 1
-          $prerelease = "-" + (($env:GITHUB_REF -replace 'refs/tags/v') -split '-' | Select-Object -Last 1)
-          $path = './src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1'
-          Update-ModuleManifest -Path $path -ModuleVersion $version -ReleaseNotes "${{ github.event.release.body }}" -Prerelease $prerelease
-
-      # Update the module manifest for full-release
-      - name: Update the module manifest for full-release
-        if: github.event.release.prerelease == false
+          $manifest = Test-ModuleManifest ./src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1
+          $version = $manifest.Version.ToString()
+          $prerelease = $manifest.PrivateData.PSData.Prerelease
+          if ($prerelease) { $version += "-$prerelease" }
+          if ($env:RELEASE_TAG -cne "v$version") { throw 'Tag and module manifest versions differ.' }
+      - name: Run offline tests
         shell: pwsh
-        run: |
-          # Update the module manifest with the version number in the release tag
-          $version = $env:GITHUB_REF -replace 'refs/tags/v'
-          $path = './src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1'
-          Update-ModuleManifest -Path $path -ModuleVersion $version -ReleaseNotes "${{ github.event.release.body }}"
-
-      # Publish to PowerShell Gallery on pre-release
-      - name: Publish preview module
-        if: github.event.release.prerelease == true
+        run: ./tests/Run-Tests.ps1 -TestType Unit
+      - name: Build module package
         shell: pwsh
-        id: publish-module-preview
-        run: |
-          Publish-Module -Path ./src/PSRule.Rules.AzureDevOps -NuGetApiKey ${{ secrets.PS_GALLERY_KEY }} -Repository PSGallery
-
-      # Publish to PowerShell Gallery on full-release
-      - name: Publish module
-        if: github.event.release.prerelease == false
+        run: ./scripts/Build-Module.ps1
+      - name: Publish validated module
+        if: ${{ inputs.publish }}
         shell: pwsh
-        id: publish-module
+        env:
+          PS_GALLERY_KEY: ${{ secrets.PS_GALLERY_KEY }}
         run: |
-          Publish-Module -Path ./src/PSRule.Rules.AzureDevOps -NuGetApiKey ${{ secrets.PS_GALLERY_KEY }}
+          if (-not $env:PS_GALLERY_KEY) { throw 'PowerShell Gallery publishing credential is unavailable.' }
+          Publish-Module -Path ./src/PSRule.Rules.AzureDevOps -NuGetApiKey $env:PS_GALLERY_KEY -Repository PSGallery
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: module-validation
+          include-hidden-files: true
+          path: |
+            testresults.xml
+            .local/releases/*

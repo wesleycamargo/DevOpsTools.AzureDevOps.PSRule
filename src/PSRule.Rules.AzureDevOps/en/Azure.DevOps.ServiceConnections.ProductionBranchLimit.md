@@ -13,6 +13,8 @@ in.
 
 ## DESCRIPTION
 
+This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+
 A production service connection should be limited in the branches it can be used
 in. This ensures that the service connection is not used in a non-production
 branch. This rule checks that the service connection is limited to a production

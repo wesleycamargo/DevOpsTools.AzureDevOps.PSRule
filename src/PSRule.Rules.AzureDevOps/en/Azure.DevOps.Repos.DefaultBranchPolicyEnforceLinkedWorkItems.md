@@ -13,6 +13,10 @@ items for pull requests.
 
 ## DESCRIPTION
 
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
 Require linked work items for pull requests to ensure that changes are associated with a work item. This helps to track changes and ensure that changes are associated with a work item and thus documented in some way.
 
 Mininum TokenType: `ReadOnly`

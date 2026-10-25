@@ -48,8 +48,7 @@ Describe "Functions: DevOps.Tasks.VariableGroups.Tests" -Tag 'Integration' {
 
     Context ' Get-AzDevOpsVariableGroups with wrong parameters' {
         It ' should throw an error with a wrong PAT' {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrong-pat'
-            { Get-AzDevOpsVariableGroups -Project $env:ADO_PROJECT -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrong-pat'; Get-AzDevOpsVariableGroups -Project $env:ADO_PROJECT -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It ' should throw a 404 error with a wrong project and organization' {
@@ -68,8 +67,7 @@ Describe "Functions: DevOps.Tasks.VariableGroups.Tests" -Tag 'Integration' {
 
     Context ' Get-AzDevOpsVariableGroupAcls with wrong parameters' {
         It ' should throw an error with a wrong PAT' {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrong-pat'
-            { Get-AzDevOpsVariableGroupAcls -ProjectId $env:ADO_PROJECT -VariableGroupId 1 -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrong-pat'; Get-AzDevOpsVariableGroupAcls -ProjectId $env:ADO_PROJECT -VariableGroupId 1 -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It ' should throw a 404 error with a wrong project and organization' {

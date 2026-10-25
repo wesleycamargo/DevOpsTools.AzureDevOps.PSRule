@@ -8,7 +8,9 @@ param(
     # Integration and Authentication defaults, used only when the matching ADO_* variable is not already set.
     [string]$Organization = 'ai-experiments',
 
-    [string]$Project = 'PSRule.Rules.AzureDevOps.Tests'
+    [string]$Project = 'PSRule.Rules.AzureDevOps.Tests',
+
+    [switch]$Coverage
 )
 
 $ErrorActionPreference = 'Stop'
@@ -54,6 +56,7 @@ if ($null -eq $pester) {
 }
 
 Import-Module $pester.Path -Force
+Import-Module PSRule -RequiredVersion (Import-PowerShellDataFile "$PSScriptRoot/requirements.psd1").PSRule -Force
 
 $configuration = New-PesterConfiguration
 $configuration.Run.Path = $PSScriptRoot
@@ -63,5 +66,15 @@ $configuration.Output.Verbosity = 'Detailed'
 $configuration.TestResult.Enabled = $true
 $configuration.TestResult.OutputFormat = 'NUnitXml'
 $configuration.TestResult.OutputPath = $ResultPath
+if ($Coverage) {
+    $configuration.CodeCoverage.Enabled = $true
+    $configuration.CodeCoverage.Path = @(
+        (Join-Path $PSScriptRoot '../src/PSRule.Rules.AzureDevOps/Functions'),
+        (Join-Path $PSScriptRoot '../src/PSRule.Rules.AzureDevOps/Classes'),
+        (Join-Path $PSScriptRoot '../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1')
+    )
+    $configuration.CodeCoverage.OutputFormat = 'JaCoCo'
+    $configuration.CodeCoverage.OutputPath = Join-Path (Split-Path $ResultPath -Parent) 'coverage.xml'
+}
 
 Invoke-Pester -Configuration $configuration

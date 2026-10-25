@@ -13,8 +13,8 @@ Describe 'Production protection diagnostics' -Tag 'Unit' {
     }
     It 'keeps automated protection separate from mandatory human review for both target types' {
         $targets = @(
-            [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'environment'; Checks = @(@{ type = @{ name = 'InvokeRESTAPI' }; settings = @{ inputs = @{ definition = 'synthetic-reviewed-gate' } } }) }
-            [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = 'connection'; Checks = @(@{ type = @{ name = 'InvokeRESTAPI' }; settings = @{ inputs = @{ definition = 'synthetic-reviewed-gate' } } }) }
+            [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'environment'; name = 'production'; Checks = @(@{ type = @{ name = 'InvokeRESTAPI' }; settings = @{ inputs = @{ definition = 'synthetic-reviewed-gate' } } }) }
+            [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = 'connection'; name = 'production'; Checks = @(@{ type = @{ name = 'InvokeRESTAPI' }; settings = @{ inputs = @{ definition = 'synthetic-reviewed-gate' } } }) }
         )
         $configuration = @{ assessmentPolicies = @{
             'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval' = @{ Reference = 'production-review-v1' }

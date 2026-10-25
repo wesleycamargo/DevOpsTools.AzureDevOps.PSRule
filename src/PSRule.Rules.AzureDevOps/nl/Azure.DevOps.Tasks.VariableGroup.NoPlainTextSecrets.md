@@ -14,6 +14,8 @@ Variabelegroepen mogen geen referenties blootstellen.
 
 Afgeschermde Azure DevOps-geheimen (`isSecret: true`, `value: null`) zijn toegestaan zonder verplichte Key Vault. Niet-afgeschermde geheimen en waarden die overeenkomen met referentiepatronen falen. Patroonherkenning bewijst niet dat willekeurige tekst geen geheim bevat. Ontbrekende gegevens krijgen de beoordeling Unknown en worden niet door PSRule beoordeeld; dit is geen geslaagde controle.
 
+Detectie is heuristisch en beperkt tot geëxporteerde waarden. Herkenbare verbindingspatronen en Azure DevOps PAT's van 84 tekens met een vaste signatuur worden gecontroleerd. Willekeurige waarden van 32/40 tekens en oude PAT's zonder signatuur zijn niet betrouwbaar aan hun lengte te herkennen. Een geslaagde controle bewijst niet dat geheimen ontbreken. Foutmeldingen bevatten geen gevonden waarden.
+
 Minimum TokenType: `ReadOnly`
 
 ## RECOMMENDATION

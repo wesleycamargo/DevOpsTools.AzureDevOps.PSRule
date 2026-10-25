@@ -102,10 +102,15 @@ steps:
             -CompletenessReportPath $completenessPath `
             -Strict
 
+        $inputFiles = @(Get-ChildItem -LiteralPath $exportPath -File -Recurse -Filter '*.json' | Select-Object -ExpandProperty FullName)
+        if ($inputFiles.Count -eq 0) { throw 'The organization export produced no JSON input files.' }
+        $results = $null
+        $assessmentErrors = @()
         $null = Assert-PSRule `
-            -InputPath ($exportPath + [IO.Path]::DirectorySeparatorChar) `
+            -InputPath $inputFiles `
             -Module PSRule.Rules.AzureDevOps `
             -Baseline Baseline.Default `
+            -As Detail `
             -OutputPath $reportPath `
             -OutputFormat Sarif `
             -Outcome All `
@@ -113,10 +118,13 @@ steps:
             -ErrorAction SilentlyContinue `
             -ErrorVariable assessmentErrors
 
+        $results = @($results | Where-Object { $null -ne $_ })
+        if ($results.Count -eq 0) { throw 'The assessment evaluated zero rule results.' }
+
         # Assert-PSRule omits precondition outcomes from ResultVariable in PSRule 2.9.
         # Re-evaluate the same immutable export for Unknown/NotApplicable projection.
         $assessmentResults = @(Invoke-PSRule `
-            -InputPath ($exportPath + [IO.Path]::DirectorySeparatorChar) `
+            -InputPath $inputFiles `
             -Module PSRule.Rules.AzureDevOps `
             -Baseline Baseline.Default `
             -Outcome All `

@@ -40,7 +40,8 @@ Export-AzDevOpsOrganizationRuleData `
     -CompletenessReportPath $completenessPath `
     -Strict
 
-Assert-PSRule -InputPath $targetDirectory -Module PSRule.Rules.AzureDevOps
+$inputFiles = @(Get-ChildItem $targetDirectory -File -Recurse -Filter '*.json' | Select-Object -ExpandProperty FullName)
+Assert-PSRule -InputPath $inputFiles -Module PSRule.Rules.AzureDevOps
 ```
 
 For one project, use the same options with
@@ -51,7 +52,8 @@ report path when only a terminating completion check is needed.
 
 `SchemaVersion` is `1`. The report contains `Organization`, overall `Status`, and
 `Projects`. Each project contains `Project`, `Status`, and `Collectors`; each
-collector contains `Command`, `Status`, and `ReasonCodes`. Organization exports
+collector contains `Command`, `Status`, and `ReasonCodes`. `OrganizationCollection`
+contains separate organization `Status` and `Collectors` records. Organization exports
 also contain a `ProjectDiscovery` record for `Get-AzDevOpsProject`.
 
 | Collector status | Meaning | Complete for strict mode? |
@@ -66,12 +68,15 @@ Overall and project statuses are `Complete`, `Partial`, or `Unavailable`.
 `Complete` includes legitimate empty collections. `Unavailable` means no collector
 provided usable coverage; `Partial` means some coverage was usable but some was
 missing. Successful project discovery alone does not make failed exports usable.
-An organization with a successfully retrieved empty project list is `Complete`.
+An organization with a successfully retrieved empty project list is `Complete`
+only when organization collection also completes. Organization data is collected
+once into the export root; each project has its own subdirectory. Single-project
+exports retain organization targets in the supplied output directory.
 
 Reason codes identify conditions without including credentials, raw responses, or
 exception messages: `EmptyCollection`, `PermissionDenied`, `MissingRequiredData`,
 `YamlUnavailable`, `CollectorFailed`, `ProjectDiscoveryFailed`, and
-`ProjectExportFailed`.
+`ProjectExportFailed`, and `OrganizationExportFailed`.
 
 Required settings must be present and non-null. Legitimately nullable fields,
 such as an unset organization description or an unconfigured billing subscription,
@@ -83,7 +88,8 @@ intentionally prevents access. For example, ReadOnly environment exports are
 `Unavailable`; omitted repository or pipeline ACLs are `Partial`. Strict mode
 checks all configured collectors; this version has no optional-collector list.
 
-Completeness describes detected collector outcomes and required-data checks. It
-does not prove pagination, retry resilience, or complete coverage of undocumented
-remote behavior; those remain ADO-005 and ADO-007 follow-ups. A collected false or
+Project, pipeline, environment, group, variable-group, release-definition, branch,
+and policy discovery follow continuation headers. A missing or failed later page
+fails collection. Completeness still does not prove retry resilience or complete
+coverage of undocumented remote behavior. A collected false or
 unset setting may still fail a rule; that is a finding, not a retrieval failure.

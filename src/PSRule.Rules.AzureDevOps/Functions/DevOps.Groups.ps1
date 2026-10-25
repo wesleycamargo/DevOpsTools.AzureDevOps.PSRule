@@ -37,7 +37,7 @@ Function Get-AzDevOpsGroups {
     $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/descriptors/$($projectResult.id)?api-version=7.2-preview.1"
     $scopeDescriptor = (Invoke-RestMethod -Uri $uri -Method Get -Headers $header).value
     $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/groups?scopeDescriptor=$scopeDescriptor&api-version=7.2-preview.1"
-    $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+    $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return $response.value
 }

@@ -187,7 +187,7 @@ Describe "Azure.DevOps.Group" -Tag 'Integration' {
                 Disconnect-AzDevOps
                 Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrongPAT"
                 Get-AzDevOpsGroupDetails -Group $group
-            } | Should -Throw "Failed to get group memberOf details from Azure DevOps"
+            } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
     }
 

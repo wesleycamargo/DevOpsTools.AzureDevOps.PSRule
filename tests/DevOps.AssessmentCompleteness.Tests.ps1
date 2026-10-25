@@ -39,7 +39,8 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         $report.Status | Should -Be 'Complete'
         $report.Projects.Count | Should -Be 1
         $report.Projects[0].Project | Should -Be 'fixture-project'
-        $report.Projects[0].Collectors.Count | Should -Be 14
+        $report.Projects[0].Collectors.Count | Should -Be 10
+        $report.OrganizationCollection.Collectors.Count | Should -Be 4
         @($report.Projects[0].Collectors | Where-Object Status -NE 'Completed').Count | Should -Be 0
         Get-ChildItem $outputPath | Should -BeNullOrEmpty
     }
@@ -153,7 +154,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         $report.Projects.Count | Should -Be 2
         $report.Projects[0].Status | Should -Be 'Partial'
         $report.Projects[1].Status | Should -Be 'Complete'
-        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Export-AdoOrganizationSecurityPolicies -Times 2 -Exactly
+        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Export-AdoOrganizationSecurityPolicies -Times 1 -Exactly
     }
 
     It 'treats an organization with no projects as complete and empty' {
@@ -165,6 +166,25 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         $report.Status | Should -Be 'Complete'
         $report.ProjectDiscovery.Status | Should -Be 'Empty'
         $report.Projects.Count | Should -Be 0
+        $report.OrganizationCollection.Collectors.Count | Should -Be 4
+        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Export-AdoOrganizationSecurityPolicies -Times 1 -Exactly
+    }
+
+    It 'fails strict organization collection when there are no projects and organization evidence is unavailable' {
+        Mock -ModuleName PSRule.Rules.AzureDevOps Get-AzDevOpsProject { @() }
+        Mock -ModuleName PSRule.Rules.AzureDevOps Export-AdoOrganizationSecurityPolicies { throw 'denied' }
+        { Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId org-id -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue 3>$null } | Should -Throw '*collection is incomplete*'
+        $report = Get-Content $reportPath -Raw | ConvertFrom-Json
+        $report.OrganizationCollection.Status | Should -Be Partial
+        $report.Status | Should -Be Partial
+    }
+
+    It 'refreshes organization authentication after project collection changes the token' {
+        Mock -ModuleName PSRule.Rules.AzureDevOps Export-AzDevOpsProject {
+            InModuleScope PSRule.Rules.AzureDevOps { $script:connection.Token = 'Bearer refreshed-token' }
+        }
+        Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -Strict
+        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Export-AdoOrganizationSecurityPolicies -Times 1 -Exactly -ParameterFilter { $AccessToken -eq 'Bearer refreshed-token' }
     }
 
     It 'recognizes the real empty project-list response' {
@@ -181,8 +201,8 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         { Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue } | Should -Throw '*collection is incomplete*'
 
         $report = Get-Content -Raw $reportPath | ConvertFrom-Json
-        $report.ProjectDiscovery.Status | Should -Be 'Unavailable'
-        $report.ProjectDiscovery.ReasonCodes | Should -Contain 'MissingRequiredData'
+        $report.ProjectDiscovery.Status | Should -Be 'Failed'
+        $report.ProjectDiscovery.ReasonCodes | Should -Contain 'ProjectDiscoveryFailed'
         $report.Projects.Count | Should -Be 0
     }
 
@@ -192,9 +212,21 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         { Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue } | Should -Throw '*collection is incomplete*'
 
         $report = Get-Content -Raw $reportPath | ConvertFrom-Json
-        $report.Status | Should -Be 'Unavailable'
+        $report.Status | Should -Be 'Partial'
         $report.ProjectDiscovery.Status | Should -Be 'Failed'
         (Get-Content -Raw $reportPath) | Should -Not -Match 'fixture-secret'
+    }
+
+    It 'writes an incomplete report and rejects a failed later discovery page in strict mode' {
+        Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-AzDevOpsRestPage {
+            [pscustomobject]@{ Body = [pscustomobject]@{ value = @([pscustomobject]@{ name = 'first-project' }) }; Headers = @{ 'x-ms-continuationtoken' = 'next' } }
+        } -ParameterFilter { $Uri -notmatch 'continuationToken=' }
+        Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-AzDevOpsRestPage { throw 'later page unavailable' } -ParameterFilter { $Uri -match 'continuationToken=' }
+        { Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId org-id -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue } | Should -Throw '*collection is incomplete*'
+        $report = Get-Content $reportPath -Raw | ConvertFrom-Json
+        $report.Status | Should -Not -Be Complete
+        $report.ProjectDiscovery.Status | Should -Be Failed
+        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Invoke-AzDevOpsRestPage -Times 1 -Exactly -ParameterFilter { $Uri -match 'continuationToken=' }
     }
 
     Context 'Real collection paths' {
@@ -315,10 +347,10 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             Mock -ModuleName PSRule.Rules.AzureDevOps Get-AzDevOpsRepositoryAcls { @{} }
             Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-RestMethod -ParameterFilter { $Uri -like '*policy/configurations*' } { [pscustomobject]@{} }
 
-            Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -CompletenessReportPath $reportPath 3>$null
+            Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue 3>$null
 
             $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AzDevOpsReposAndBranchPolicies'
-            $record.Status | Should -Be 'Partial'
+            $record.Status | Should -Be 'Failed'
             $record.ReasonCodes | Should -Contain 'MissingRequiredData'
         }
     }
@@ -333,7 +365,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
 
             { Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue 3>$null } | Should -Throw '*collection is incomplete*'
 
-            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AdoOrganizationPipelinesSettings'
+            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Collectors | Where-Object Command -EQ 'Export-AdoOrganizationPipelinesSettings'
             $record.Status | Should -Be 'Unavailable'
             $record.ReasonCodes | Should -Contain 'MissingRequiredData'
         }
@@ -346,7 +378,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -CompletenessReportPath $reportPath)
 
             ($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Organization.Pipelines.Settings').statusBadgesArePrivate | Should -BeFalse
-            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AdoOrganizationPipelinesSettings'
+            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Collectors | Where-Object Command -EQ 'Export-AdoOrganizationPipelinesSettings'
             $record.Status | Should -Be 'Partial'
             $record.ReasonCodes | Should -Contain 'MissingRequiredData'
         }
@@ -397,7 +429,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
 
             { Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue } | Should -Throw '*collection is incomplete*'
 
-            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AdoOrganizationGeneralBillingSettings'
+            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Collectors | Where-Object Command -EQ 'Export-AdoOrganizationGeneralBillingSettings'
             $record.Status | Should -Be 'Unavailable'
         }
     }
@@ -423,6 +455,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
 
             ($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Organization.Security.Policies').'policy.disallowSecureShell' | Should -BeFalse
             (Get-Content -Raw $reportPath | ConvertFrom-Json).Status | Should -Be 'Complete'
+            (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Status | Should -Be 'Complete'
         }
 
         It 'reports a missing security provider as unavailable' {
@@ -430,7 +463,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
 
             { Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue } | Should -Throw '*collection is incomplete*'
 
-            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AdoOrganizationSecurityPolicies'
+            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Collectors | Where-Object Command -EQ 'Export-AdoOrganizationSecurityPolicies'
             $record.Status | Should -Be 'Unavailable'
         }
 
@@ -443,7 +476,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -CompletenessReportPath $reportPath 3>$null)
 
             ($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Organization.Security.Policies').'policy.disallowSecureShell' | Should -BeFalse
-            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AdoOrganizationSecurityPolicies'
+            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Collectors | Where-Object Command -EQ 'Export-AdoOrganizationSecurityPolicies'
             $record.Status | Should -Be 'Partial'
         }
     }
@@ -470,7 +503,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
 
             { Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -CompletenessReportPath $reportPath -Strict } | Should -Throw '*collection is incomplete*'
 
-            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).Projects[0].Collectors | Where-Object Command -EQ 'Export-AdoOrganizationGeneralOverview'
+            $record = (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Collectors | Where-Object Command -EQ 'Export-AdoOrganizationGeneralOverview'
             $record.Status | Should -Be 'Unavailable'
         }
     }

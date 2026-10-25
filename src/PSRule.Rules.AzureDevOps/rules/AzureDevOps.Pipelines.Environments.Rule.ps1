@@ -4,6 +4,7 @@
 Rule 'Azure.DevOps.Pipelines.Environments.ProductionCheckProtection' `
     -Ref 'ADO-E-001' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
+    -With 'IsProduction' `
     -If { (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
@@ -17,6 +18,7 @@ Rule 'Azure.DevOps.Pipelines.Environments.ProductionCheckProtection' `
 Rule 'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval' `
     -Ref 'ADO-E-002' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
+    -With 'IsProduction' `
     -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
     -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
@@ -44,6 +46,7 @@ Rule 'Azure.DevOps.Pipelines.Environments.Description' `
 Rule 'Azure.DevOps.Pipelines.Environments.ProductionBranchLimit' `
     -Ref 'ADO-E-004' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
+    -With 'IsProduction' `
     -Tag @{ release = 'GA'} `
     -Level Warning {
         # Description 'Production environment should be limited to specific branches'

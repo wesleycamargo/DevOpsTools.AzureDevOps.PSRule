@@ -12,6 +12,10 @@ Change authors should not be allowed to approve their own changes.
 
 ## DESCRIPTION
 
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
 The branch policy on the default branch should not allow creators to approve
 their own changes. This will help ensure that the code in the default branch
 is of a high quality and that the team's Git workflow is followed.

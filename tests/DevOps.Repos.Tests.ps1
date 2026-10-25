@@ -40,8 +40,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
 
     Context " Get-AzDevOpsRepos with wrong parameters" {
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsRepos -Project $env:ADO_PROJECT -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsRepos -Project $env:ADO_PROJECT -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -103,8 +102,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $repos = Get-AzDevOpsRepos -Project $env:ADO_PROJECT
             Disconnect-AzDevOps
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsBranches -Project $env:ADO_PROJECT -Repository $repos[0].id -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsBranches -Project $env:ADO_PROJECT -Repository $repos[0].id -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -173,8 +171,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
             Disconnect-AzDevOps
         }
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsBranchPolicy -Project $env:ADO_PROJECT -Repository $repository -Branch $Branch -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsBranchPolicy -Project $env:ADO_PROJECT -Repository $repository -Branch $Branch -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project" {
@@ -219,8 +216,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
             Disconnect-AzDevOps
         }
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsRepositoryAcls -RepositoryId $RepositoryId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsRepositoryAcls -RepositoryId $RepositoryId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -295,8 +291,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
         }
 
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsRepositoryGhas -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsRepositoryGhas -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -354,8 +349,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
         }
 
         It " should throw an error with a wrong PAT" {
-            Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"
-            { Get-AzDevOpsRepositoryPipelinePermissions -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw
+            { Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT "wrong-pat"; Get-AzDevOpsRepositoryPipelinePermissions -RepositoryId $repoId -ProjectId $ProjectId -ErrorAction Stop } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It " should throw a 404 error with a wrong project and organization" {
@@ -445,4 +439,4 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
 AfterAll {
     Disconnect-AzDevOps
     Remove-Module -Name PSRule.Rules.AzureDevOps -Force
-}   
+}

@@ -50,7 +50,7 @@ Describe 'Azure.DevOps.RetentionSettings' -Tag 'Integration' {
                 Disconnect-AzDevOps
                 Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrongPAT'
                 Get-AzDevOpsRetentionSettings -Project $env:ADO_PROJECT
-            } | Should -Throw "Failed to get retention settings for project '$($env:ADO_PROJECT)' from Azure DevOps"
+            } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It 'should throw an error with a wrong organization' {
@@ -115,7 +115,7 @@ Describe 'Azure.DevOps.RetentionSettings' -Tag 'Integration' {
                 Disconnect-AzDevOps
                 Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrongPAT'
                 Export-AzDevOpsRetentionSettings -Project $env:ADO_PROJECT -OutputPath $Env:ADO_EXPORT_DIR
-            } | Should -Throw "Failed to get retention settings for project '$($env:ADO_PROJECT)' from Azure DevOps"
+            } | Should -Throw '*Failed to connect to Azure DevOps*'
         }
 
         It 'should throw an error with a wrong organization' {
