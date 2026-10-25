@@ -65,9 +65,10 @@ published. See
 [assessment completeness](../docs/assessment-completeness.md) for report details.
 Open the artifact with the Azure DevOps SARIF Viewer extension if installed.
 
-The pipeline uses the project self-hosted `AI-Pool` rather than Microsoft-hosted
-capacity. At least one Linux agent in that pool must be online for scheduled or
-manual runs to start.
+The pipeline uses the Microsoft-hosted `Azure Pipelines` pool with the
+`ubuntu-latest` image. Each job receives a fresh VM; a local agent listener is
+not required. Hosted capacity and pipeline authorization are configured in Azure
+DevOps. See [hosted agents](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted?view=azure-devops).
 
 ![Sarif Viewer](../assets/media/sarif-0.0.11.png)
 

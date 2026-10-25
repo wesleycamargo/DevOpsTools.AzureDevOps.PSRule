@@ -1,10 +1,10 @@
 # Repository architecture
 
-This document describes the checked-out source on 10 October 2026. It includes local changes that might not exist on remote `main`.
+This document describes the module source and assessment contracts on 25 October 2026.
 Pipeline definitions describe intended execution. They do not prove that a pipeline, service connection, or Azure resource currently exists.
-The [Project Health integration guide](project-health.md) records the separately
-validated classic report pipeline and dashboard review branch on 21 October 2026;
-those operational details do not imply that the feature is merged into `main`.
+The [Project Health integration guide](project-health.md) retains historical live
+validation. The dashboard reporter is now integrated in its repository; source
+integration alone does not establish that a live pipeline definition was updated.
 
 ## Scope and requirements
 
@@ -31,7 +31,7 @@ The container workspace is not a Git repository. It contains two independent rep
 | --- | --- |
 | `PSRule.Rules.AzureDevOps/` | PowerShell module, collectors, rules, tests, and module delivery pipelines. |
 | `PSRule.Dashboards.AzureDevOps_/` | Assessment scripts, pipeline reports, Bicep resources, and Azure Monitor Workbooks. |
-| `PSRule.AzureDevOps-p0/` and `PSRule.AzureDevOps-pipeline/` | Additional Git worktrees of the rule repository. They are not additional production components. |
+| Each repository's `.worktrees/` | Isolated development checkouts; these are not production components. |
 | `.agents/` | Shared development workflows. It is not part of the assessment runtime. |
 
 Dashboard paths below refer to the dashboard repository root. Rule paths refer to this repository root.
@@ -41,24 +41,56 @@ That cross-repository link works in this workspace. It requires the same directo
 ## Component and data flow
 
 ```mermaid
-flowchart LR
-    Identity["PAT, bearer token, service principal, or managed identity"] --> Connection["Connect-AzDevOps and AzureDevOpsConnection"]
-    Connection --> Collectors["Azure DevOps REST collectors"]
-    ADO["Azure DevOps organization"] --> Collectors
-    Collectors --> Export["Project and organization exporters"]
-    Export --> JSON["JSON assessment input"]
-    Export --> Completeness["Separate collection-status JSON"]
-    JSON --> Engine["PSRule with baselines and bindings"]
-    Rules["Rule scripts and localized help"] --> Engine
-    Engine --> SARIF["SARIF evidence"]
-    Engine --> Results["Detailed rule results"]
-    Results --> HTML["HTML report and Markdown summary"]
-    Results --> Ingestion["Azure Monitor ingestion"]
-    Ingestion --> Table["PSRule_CL in Log Analytics"]
-    Table --> Workbooks["Five Azure Monitor Workbooks"]
+flowchart TB
+    subgraph collect["1 · Collect — Azure DevOps access required"]
+        identity["PAT / bearer token / service principal / managed identity"]
+        connection["Connect-AzDevOps<br/>Connection state and refreshed headers"]
+        ado[("Azure DevOps<br/>Organization and projects")]
+        collectors["Collectors and exporters<br/>Configuration, permissions and policies"]
+        identity --> connection
+        connection --> collectors
+        ado --> collectors
+    end
+
+    subgraph evidence["2 · Save evidence — separate data contracts"]
+        targets[("JSON / YAML targets<br/>ObjectType · ObjectName")]
+        coverage[("collection-status.json<br/>Coverage and reason codes")]
+    end
+    collectors --> targets
+    collectors --> coverage
+
+    subgraph evaluate["3 · Evaluate — works offline"]
+        definitions["Rules, bindings, baselines<br/>Configuration and localized help"]
+        engine["PSRule 2.9.0"]
+        results["Detailed rule results"]
+        projection["Assessment policy<br/>Applicability and risk correlation"]
+        definitions --> engine
+        engine --> results
+        results --> projection
+    end
+    targets --> engine
+
+    sarif[("Raw SARIF")]
+    assessment[("assessment-results.json")]
+    report["Dashboard repository<br/>Project Health · Readiness · Evolution"]
+    results --> sarif
+    projection --> assessment
+    results --> report
+    coverage -. "Coverage limits and confidence" .-> report
+
+    classDef service fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
+    classDef step fill:#eff6ff,stroke:#2563eb,color:#172554
+    classDef data fill:#fffbeb,stroke:#d97706,color:#451a03
+    classDef output fill:#ecfdf5,stroke:#059669,color:#064e3b
+    class identity,ado service
+    class connection,collectors,definitions,engine,results,projection step
+    class targets,coverage data
+    class sarif,assessment,report output
 ```
 
-The diagram combines supported paths. An individual pipeline does not necessarily produce every output.
+Collection requires Azure DevOps access. Saved targets can be evaluated offline.
+Coverage metadata stays outside rule inputs and informs report confidence; it is
+not a rule target. Report presentation belongs to the dashboard repository.
 
 ### Module loading and authentication
 
@@ -101,59 +133,64 @@ English help resides in `en/`. Dutch help resides in `nl/` and does not cover ev
 The exported JSON is the boundary between collection and evaluation.
 Changes to object metadata can affect rule selection, target identity, tests, and workbook filters.
 
-## Azure DevOps pipeline structure
+## Delivery and assessment pipelines
 
-The module is published to PowerShell Gallery by the manually dispatched GitHub
-Actions workflow `.github/workflows/publish-on-release.yml`. It validates an
-existing version tag against the manifest, runs pinned offline tests, builds the
-ZIP and checksum, and publishes only when the `publish` input is enabled.
-The Azure Artifacts publisher has been retired; existing feed packages remain.
-
-The rule repository retains the following independent assessment entry point.
-
-| Definition | Trigger and agent | Ordered work | Outputs and failure behavior |
-| --- | --- | --- | --- |
-| `pipelines/psrule-assessment.yml` | Manual, or Sunday at 02:00 UTC. Schedule includes `main`. Self-hosted `AI-Pool`. | Install PSRule 2.9.0. Import checked-out module. Obtain a service-principal token. Export with strict completeness. Evaluate `Baseline.Default`. | `psrule-results` build artifact contains completeness JSON and SARIF when evaluation runs. Assessment uses `continueOnError`. Publication uses `always()`. Raw exports remain temporary. |
-
-The dashboard repository contains three independent entry points.
-
-| Definition | Trigger and agent | Ordered work | Outputs and failure behavior |
-| --- | --- | --- | --- |
-| `azure-pipelines/azure-pipelines.yml` | Daily at 06:00 UTC on `main`. No push trigger. Hosted `ubuntu-latest`. | One `Run` stage and job. Install modules. Load the rule module from Azure Artifacts. Export data through an Azure service connection. Run analysis and legacy Monitor publication. | `AzureDevOpsRawData` and `PSRuleAnalysisReports` pipeline artifacts. Both reference the export directory. Analysis artifact publication also requires a successful job status. |
-| `azure-pipelines/deploy-workbooks.yml` | Manual. Push and PR triggers disabled. Self-hosted `AI-Pool`. | Use `psrule-azure`. Run `Deploy-PSRuleWorkbooks.ps1` to validate, preview, deploy, and inspect resources. | Resource-group deployment `psrule-workbooks`, five workbooks, result table, and ingestion configuration. It does not run an assessment. |
-| `azure-pipelines/publish-workbooks.yml` | Manual. Push and PR triggers disabled. Self-hosted `AI-Pool`. | Check out dashboards and rules separately. Assess the organization. Generate local reports. Ingest results. Query the workspace to check counts. | `psrule-results` artifact, Markdown run summary, and conditional `PSRule Dashboard` HTML attachment. Workbook ingestion failure can fail the run after report generation. |
-
-The manual dashboard pipeline checks out the rule repository from `main` through `github.com_wesleycamargo`.
-It uses the rule source on `main`.
-Its assessment script exports without `-Strict` or a completeness report.
-Available JSON can therefore reach evaluation even when collection coverage is incomplete.
+The module publication workflow runs on pushes to `main` and can also validate
+an explicit version tag manually. It validates the manifest, runs pinned offline
+tests, builds the package and checks the Gallery before publishing a new version.
+An already published manifest version is skipped. Manual publication remains
+controlled by the workflow's `publish` input. Azure Artifacts publication is retired.
 
 ```mermaid
-flowchart TD
-    Release["Manual GitHub Actions publication"] --> Gallery["PowerShell Gallery"]
-    Feed["Existing Azure Artifacts packages"] --> Legacy["Daily legacy dashboard pipeline"]
-    Source["Rule source checkout"] --> Weekly["Weekly strict assessment"]
-    SourceBranch["Rule automation branch checkout"] --> Manual["Manual workbook assessment"]
-    Weekly --> Evidence["Completeness JSON and SARIF artifact"]
-    Deploy["Manual workbook deployment"] --> Infra["Workbooks, PSRule_CL, and ingestion rule"]
-    Infra --> Manual
-    Manual --> Reports["SARIF, HTML artifact, and Markdown summary"]
-    Manual --> History["Ingest and check Log Analytics results"]
-    Reports --> Viewer["Reports page through HTML Reports extension"]
+flowchart TB
+    source["Module repository<br/>main source and manifest version"]
+    subgraph delivery["Package delivery · GitHub Actions"]
+        validate["Validate manifest<br/>Pinned offline tests"]
+        package["Build ZIP and checksum"]
+        gallery[("PowerShell Gallery<br/>Publish a new version once")]
+        validate --> package --> gallery
+    end
+    source -->|"Push to main / manual tag"| validate
+
+    subgraph hosted["Assessment jobs · Azure Pipelines · ubuntu-latest"]
+        weekly["Module assessment<br/>Manual / Sunday 02:00 UTC<br/>Import checked-out source"]
+        strict["Strict collection<br/>Evaluate only with complete evidence"]
+        daily["Dashboard assessment<br/>Manual / daily 06:00 UTC<br/>Install pinned Gallery package"]
+        partial["Collect and evaluate available inputs<br/>Expose partial coverage explicitly"]
+        weekly --> strict
+        daily --> partial
+    end
+    source --> weekly
+    gallery -->|"Pinned package version"| daily
+    strict --> moduleEvidence[("psrule-results<br/>Completeness · SARIF · assessment JSON")]
+    partial --> dashboardEvidence[("Reports and raw-export artifacts<br/>Three-tab HTML · Markdown · snapshots")]
+
+    classDef source fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
+    classDef step fill:#eff6ff,stroke:#2563eb,color:#172554
+    classDef evidence fill:#ecfdf5,stroke:#059669,color:#064e3b
+    class source,gallery source
+    class validate,package,weekly,strict,daily,partial step
+    class moduleEvidence,dashboardEvidence evidence
 ```
 
-The arrows show data and resource dependencies. They are not automatic pipeline completion triggers.
-Open HTML reports on the run's **Reports** page. The **Code Coverage** page expects coverage data and a coverage HTML report.
-None of these Azure DevOps definitions publishes code coverage.
+| Entry point | Execution and outputs |
+| --- | --- |
+| Module `pipelines/psrule-assessment.yml` | Microsoft-hosted `Azure Pipelines`, `ubuntu-latest`; manual or Sunday 02:00 UTC. Imports checked-out source, authenticates with the service principal, exports with strict completeness and evaluates `Baseline.Default`. Separate reports are retained with `always()`; incomplete collection stops evaluation. |
+| Dashboard `azure-pipelines/run-assessment.yml` | Microsoft-hosted `Azure Pipelines`, `ubuntu-latest`; manual or daily 06:00 UTC. Installs the pinned Gallery package, evaluates available exports and publishes Project Health, Readiness and Evolution, including collection diagnostics and retained history. |
+
+The two assessments are independent entry points. Publication does not trigger
+an assessment automatically. The dashboard's Bicep and workbook publishing
+utilities remain legacy operator paths; the current daily pipeline does not
+provision Azure resources or ingest results into Log Analytics. See the dashboard
+repository's `docs/architecture.md` for its report and artifact contracts.
 
 ### Project Health reporting integration
 
 The dashboard repository owns the reporter, templates, effort configuration and
 historical artifact acquisition. This repository supplies collectors, rule
-evaluation and localized remediation help. The current three-tab report is
-reviewed on dashboard branch `feature/project-health-dashboard`, against its
-`feat/assessment-analytics` base. It supersedes the earlier report presentation
-described in the source inventory above.
+evaluation and localized remediation help. The three-tab report is integrated into dashboard `main` and is used by
+`run-assessment.yml`. Historical classic-run evidence below remains separate
+from validation of the current source-backed pipeline.
 
 Existing classic definition **17**, revision **15**, generated and published
 **Project Health & Compliance** in report-only run **121**. The job executed this
@@ -173,15 +210,14 @@ for the current report link, definitions, validation and ownership boundaries.
 
 | Definition | Trigger | Responsibility |
 | --- | --- | --- |
-| `.github/workflows/module-ci.yml` | Selected source and test paths on PRs to `main` and pushes to `main`. Push filters are narrower than PR filters. | Self-hosted Pester job with live credentials, NUnit results, JaCoCo coverage, and Codecov upload. Separate hosted SonarCloud job. The workflow comments out the ScriptAnalyzer step. |
-| `.github/workflows/publish-on-release.yml` | Published release or manual dispatch. | Update the manifest from release metadata and publish to PowerShell Gallery. Manual execution lacks the release metadata used by conditional publication steps. |
+| `.github/workflows/module-ci.yml` | Selected source and test paths on PRs to `main` and pushes to `main`. Push filters are narrower than PR filters. | Hosted Ubuntu job using the shared pinned Unit runner, NUnit results, coverage and retained diagnostics. ScriptAnalyzer is disabled. |
+| `.github/workflows/publish-on-release.yml` | Push to `main` or manual version tag. | Validate source and package; automatically publish a new manifest version on main. Manual publishing is opt-in; existing Gallery versions are skipped. |
 | `.github/workflows/wiki.yml` | Published release or manual dispatch. | Copy README, English rule help, and top-level Markdown docs. Generate command help with PlatyPS. Commit and push the wiki. |
 | `.github/workflows/psrule-monitor.yml` | Daily at 06:00 UTC or manual dispatch. | Legacy organization export and PSRule.Monitor publication with a shared workspace key. Its export call omits the currently mandatory organization arguments. |
 
-The CI workflow invokes Pester directly and does not filter tests to `Unit`.
-Its name and comments do not establish an offline-only test boundary.
-The local test runner selects `Unit`, `Integration`, or `Authentication` tags and requires Pester 5.7.1.
-`tests/requirements.psd1` pins local dependencies. GitHub CI installs PSRule and Pester without equivalent version pins.
+CI invokes the same pinned Unit runner used locally. Live Integration and
+Authentication selections remain explicit. `tests/requirements.psd1` pins PSRule
+and Pester; routine module CI does not require live Azure DevOps credentials.
 
 ## Decisions and technology rationale
 
@@ -202,14 +238,14 @@ This document does not propose replacement technologies.
 
 | Boundary or failure | Effect | Existing control or remaining gap |
 | --- | --- | --- |
-| Insufficient API access | Missing assessment inputs. | Completeness evidence and strict export exist. The manual workbook pipeline does not enable them. |
-| No input or execution errors | A dashboard could misrepresent an unsuccessful assessment. | Manual assessment rejects zero input files, zero results, and rule execution errors. Expected rule failures remain reportable. |
-| Azure ingestion failure | Historical results can remain absent or partial. | Reports precede ingestion. Publisher retries transient HTTP failures. Assessment queries record counts before success. |
-| Duplicate ingestion | A run can contain more records than expected. | Count checks reject excess records. They do not remove duplicates or enforce idempotent publication. |
-| Agent unavailable | Manual and scheduled jobs wait for capacity. | `AI-Pool` needs an online agent. The source defines no capacity objective. |
+| Insufficient API access | Missing assessment inputs. | The module pipeline rejects incomplete strict collection; the dashboard reports available evidence and explicit gaps. |
+| No usable input or results | A report could imply successful coverage without evidence. | The dashboard publishes collection diagnostics and a partial status for missing evidence; rule execution and report generation errors remain failures. |
+| Legacy Azure ingestion failure | Workbook history can remain absent or partial. | Legacy publisher utilities retry transient failures and verify record counts. The daily dashboard uses retained pipeline artifacts. |
+| Legacy duplicate ingestion | Workbook history can contain duplicate records. | Legacy count checks reject excess records without removing duplicates. The daily dashboard selects compatible run snapshots. |
+| Agent capacity unavailable | Manual and scheduled jobs wait for hosted capacity. | Assessment jobs use `Azure Pipelines` with `ubuntu-latest`; no container listener is required. |
 | Artifact expiration | Run snapshots become unavailable. | Azure DevOps run retention controls artifacts. Operators must retain or download required evidence. |
-| Sensitive assessment data | Target identities and exported configuration can expose organizational information. | Restrict pipeline, artifact, variable-group, and workspace access. The legacy pipeline publishes raw exports. |
-| Package or branch drift | Different pipelines can evaluate different module versions. | Weekly assessment uses source. Manual assessment uses `main`. Legacy assessment uses a feed package. Record versions with operational evidence. |
+| Sensitive assessment data | Target identities and exported configuration can expose organizational information. | Restrict pipeline, artifact, variable-group, and workspace access. The daily dashboard publishes raw exports in a separate artifact. |
+| Package or branch drift | Different pipelines can evaluate different module versions. | The module assessment imports checked-out source; the dashboard installs a pinned Gallery package. Record both the source revision and package version. |
 | Legacy workflow drift | Older paths can fail against the current module API. | The GitHub Monitor export call requires review before operational use. Documentation does not fix this code. |
 
 Protected variable groups and Azure service connections supply credentials for Azure pipelines.
