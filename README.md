@@ -43,9 +43,9 @@ to Azure Monitor.
 `DevOpsTools.AzureDevOps.PSRule` starts at version **0.2.0**, with module GUID
 `f77fbd3d-03be-4e42-98f3-4c185cc93bba`. It replaces
 [`DevOpsTools.AzureDevOps.Assessment` 0.1.0](https://www.powershellgallery.com/packages/DevOpsTools.AzureDevOps.Assessment/0.1.0).
-Development now lives in the renamed private repository
-`wesleycamargo/DevOpsTools.AzureDevOps.PSRule`, preserving the Git commit
-history of [the predecessor repository](https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps).
+Development lives in the public repository
+[`wesleycamargo/DevOpsTools.AzureDevOps.PSRule`](https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.PSRule),
+renamed from `PSRule.Rules.AzureDevOps` with its commit history, branches, and pull requests preserved.
 The 2026-10-25 migration preserves the GPLv3 license and original author credits.
 The existing `v0.1.0` tag and published Assessment package remain historical
 releases. The rename does not reset assessment policy or report schema versions.

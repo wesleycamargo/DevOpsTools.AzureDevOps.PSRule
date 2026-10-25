@@ -38,7 +38,7 @@ The `publish` input defaults to `false`. Enable it to publish the validated
 repository secret `PS_GALLERY_KEY`. Publishing requires credentials authorized
 for the new package name. GitHub releases do not automatically publish to Gallery.
 The published source includes `LICENSE`; its manifest links to the public GPLv3
-text so recipients can read the terms without access to the private repository.
+text so package recipients can read the terms directly.
 The former Azure Pipelines publisher has been retired; live pipeline definitions
 and existing Azure Artifacts packages are managed separately.
 
@@ -47,9 +47,10 @@ The new package starts at `0.2.0` with GUID
 `DevOpsTools.AzureDevOps.Assessment` 0.1.0, whose GUID is
 `60742743-bfdd-46c1-bd7a-8dfab61de69e`. Preserve the new GUID across subsequent
 versions. See [migration instructions](../README.md#migration-to-the-new-module-name)
-for consumer changes. The repository was renamed to
-`wesleycamargo/DevOpsTools.AzureDevOps.PSRule`, retaining its private visibility,
-commit history, and the existing `v0.1.0` tag. That tag still identifies the
+for consumer changes. The public original repository was renamed to
+`wesleycamargo/DevOpsTools.AzureDevOps.PSRule`, preserving its commit history,
+branches, pull requests, and historical tags. The temporary private copy is retained
+as `DevOpsTools.AzureDevOps.PSRule.Backup`. The existing `v0.1.0` tag still identifies the
 Assessment release; it must not be moved to the new package. The published
 Assessment package remains unchanged. Earlier releases of
 `PSRule.Rules.AzureDevOps` remain in [the predecessor repository](https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/releases).
