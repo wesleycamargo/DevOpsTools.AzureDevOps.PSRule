@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1') -Force;
 }
 
 Describe "Functions: DevOps.Tasks.VariableGroups.Tests" -Tag 'Integration' {
@@ -133,7 +133,7 @@ Describe "Functions: DevOps.Tasks.VariableGroups.Tests" -Tag 'Integration' {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $Project = $env:ADO_PROJECT
             $variableGroups = Export-AzDevOpsVariableGroups -Project $Project -PassThru
-            $ruleResult = $variableGroups | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
+            $ruleResult = $variableGroups | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.Assessment') -Culture en
         }
 
         It ' should return a list of variable groups' {
@@ -166,5 +166,5 @@ Describe "Functions: DevOps.Tasks.VariableGroups.Tests" -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force
 }

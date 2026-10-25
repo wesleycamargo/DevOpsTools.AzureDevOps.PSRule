@@ -9,7 +9,7 @@ BeforeAll {
 
     # Setup tests paths
     $rootPath = Split-Path -Path $PSScriptRoot -Parent
-    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment')
 
     Write-Verbose "Loading module from $ourModule"
     Import-Module -Name $ourModule -Force -ErrorAction Stop
@@ -40,19 +40,19 @@ BeforeAll {
 
     # Run rules with default token type
     Write-Verbose "Running PSRule for default token type in $outPath"
-    $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en -ErrorAction Stop
+    $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en -ErrorAction Stop
 
     # Run rules with the public baseline
     Write-Verbose "Running PSRule for public baseline in $outPath"
-    $ruleResultPublic = Invoke-PSRule -InputPath "$($outPath)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en -Baseline Baseline.PublicProject -ErrorAction Stop
+    $ruleResultPublic = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en -Baseline Baseline.PublicProject -ErrorAction Stop
 
     # Run rules with ReadOnly token type
     Write-Verbose "Running PSRule for ReadOnly token type in $outPathReadOnly"
-    $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en -ErrorAction Stop
+    $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en -ErrorAction Stop
 
     # Run rules with FineGrained token type
     Write-Verbose "Running PSRule for FineGrained token type in $outPathFineGrained"
-    $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en -ErrorAction Stop
+    $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en -ErrorAction Stop
 }
 
 Describe "Azure.DevOps.Organization.Pipelines.Settings rules" -Tag 'Integration' {
@@ -337,5 +337,5 @@ Describe "Azure.DevOps.Organization.Pipelines.Settings rules" -Tag 'Integration'
 
 AfterAll {
     # Remove Module
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force;
+    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force;
 }

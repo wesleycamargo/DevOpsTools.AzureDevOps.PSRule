@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Changed
+
+- Renamed the PowerShell package to `DevOpsTools.AzureDevOps.Assessment`, starting at version `0.1.0` with a new module GUID. Consumers must update module references; commands, rule IDs, baselines, and assessment contracts are preserved.
+- Module publication uses the manual GitHub Actions workflow and PowerShell Gallery; the Azure Pipelines publisher is retired.
+
 ### Added
 
 - Four opt-in assessment review baselines, a 117-control catalog, and versioned assessment JSON with same-target risk correlation and explicit Unknown/NotApplicable coverage.

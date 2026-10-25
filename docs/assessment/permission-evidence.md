@@ -24,7 +24,7 @@ $policy = @{
 $option = New-PSRuleOption -Configuration @{
     effectivePermissionPolicies = @{ 'Azure.DevOps.Pipeline' = $policy }
 }
-$pipeline | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name '*.InheritedPermissions' -Option $option -Outcome All
+$pipeline | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name '*.InheritedPermissions' -Option $option -Outcome All
 ```
 
 Use the exact target type from `source-inventory.json`; each type has its own policy. Sensitive masks must cover the relevant edit, queue/run, administer, deployment, check modification, service-connection use/authorization, or repository bypass/force-push/manage permissions from that namespace. Do not reuse numeric bits between namespaces. Only referenced organizational policy can decide which principals are authorized.

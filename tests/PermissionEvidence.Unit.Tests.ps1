@@ -1,9 +1,9 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
 }
 Describe 'Permission evidence collection' -Tag 'Unit' {
         BeforeEach {
-            InModuleScope PSRule.Rules.AzureDevOps {
+            InModuleScope DevOpsTools.AzureDevOps.Assessment {
             $script:connection = [pscustomobject]@{ Organization = 'fixture' }
             $script:connection | Add-Member -MemberType ScriptMethod -Name GetHeader -Value { @{} }
             Mock Invoke-RestMethod {
@@ -31,7 +31,7 @@ Describe 'Permission evidence collection' -Tag 'Unit' {
             }
         }
         It 'collects ancestor grants and nested members for evaluation' {
-            InModuleScope PSRule.Rules.AzureDevOps {
+            InModuleScope DevOpsTools.AzureDevOps.Assessment {
             $evidence = Get-AzDevOpsPermissionEvidence -NamespaceId '33344d9c-fc72-4d6f-aba5-fa317101a7e9' -Token 'project/pipeline' -AdministrativeBypass @{} -AdministrativeEvidenceReference 'synthetic-review-v1'
             $evidence.Status | Should -Be 'Complete'
             $evidence.Acls.Count | Should -Be 3
@@ -42,7 +42,7 @@ Describe 'Permission evidence collection' -Tag 'Unit' {
             }
         }
         It 'does not assume absence of administrative bypass' {
-            InModuleScope PSRule.Rules.AzureDevOps {
+            InModuleScope DevOpsTools.AzureDevOps.Assessment {
             $evidence = Get-AzDevOpsPermissionEvidence -NamespaceId '33344d9c-fc72-4d6f-aba5-fa317101a7e9' -Token 'project/pipeline'
             $evidence.Status | Should -Be 'Partial'
             $evidence.ReasonCode | Should -Be 'AdministrativeEvidenceUnavailable'
@@ -50,7 +50,7 @@ Describe 'Permission evidence collection' -Tag 'Unit' {
             }
         }
         It 'preserves unavailable evidence when an identity request is denied' {
-            InModuleScope PSRule.Rules.AzureDevOps {
+            InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Mock Invoke-RestMethod { throw 'synthetic 403' } -ParameterFilter { $Uri -like '*identities*' }
             $evidence = Get-AzDevOpsPermissionEvidence -NamespaceId '33344d9c-fc72-4d6f-aba5-fa317101a7e9' -Token 'project/pipeline' -AdministrativeBypass @{} -AdministrativeEvidenceReference 'synthetic-review-v1'
             $evidence.Status | Should -Be 'Partial'
@@ -58,7 +58,7 @@ Describe 'Permission evidence collection' -Tag 'Unit' {
             }
         }
         It 'does not infer the hierarchy of a translated namespace' {
-            InModuleScope PSRule.Rules.AzureDevOps {
+            InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Mock Invoke-RestMethod {
                 [pscustomobject]@{ value = @([pscustomobject]@{ namespaceId = '33344d9c-fc72-4d6f-aba5-fa317101a7e9'; useTokenTranslator = $true; structureValue = 1 }) }
             } -ParameterFilter { $Uri -like '*securitynamespaces*' }
@@ -67,6 +67,6 @@ Describe 'Permission evidence collection' -Tag 'Unit' {
             $evidence.Status | Should -Be 'Partial'
             }
         }
-        AfterEach { InModuleScope PSRule.Rules.AzureDevOps { $script:connection = $null } }
+        AfterEach { InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection = $null } }
 }
-AfterAll { Remove-Module PSRule.Rules.AzureDevOps -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.Assessment -Force }

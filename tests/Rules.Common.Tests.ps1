@@ -10,20 +10,20 @@ BeforeAll {
     # Setup tests paths
     # $rootPath = $PWD;
     $rootPath = Split-Path -Path $PSScriptRoot -Parent
-    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment')
 
     Import-Module -Name $ourModule -Force;
 }
 
-Describe "PSRule.Rules.AzureDevOps Rules" -Tag 'Unit' {
+Describe "DevOpsTools.AzureDevOps.Assessment Rules" -Tag 'Unit' {
     Context ' Base rules' {
         It ' should contain 119 rules' {
-            $rules = Get-PSRule -Module PSRule.Rules.AzureDevOps
+            $rules = Get-PSRule -Module DevOpsTools.AzureDevOps.Assessment
             $rules.Count | Should -Be 119
         }
 
         It ' should contain a markdown help file for each rule' {
-            $rules = Get-PSRule -Module PSRule.Rules.AzureDevOps
+            $rules = Get-PSRule -Module DevOpsTools.AzureDevOps.Assessment
             $rules | ForEach-Object {
                 $helpFile = Join-Path -Path "$ourModule/en" -ChildPath "$($_.Name).md"
                 Test-Path -Path $helpFile | Should -Be $true
@@ -33,7 +33,7 @@ Describe "PSRule.Rules.AzureDevOps Rules" -Tag 'Unit' {
 
     Context 'Rule Loading' {
         It ' should load all 24 organization pipeline settings rules' {
-            $rules = Get-PSRule -Module PSRule.Rules.AzureDevOps
+            $rules = Get-PSRule -Module DevOpsTools.AzureDevOps.Assessment
             $orgRules = $rules | Where-Object { $_.Name -like 'Azure.DevOps.Organization.Pipelines.Settings.*' }
             $orgRules.Count | Should -Be 24
             $orgRules | ForEach-Object { Write-Verbose "Loaded rule: $($_.Name)" }
@@ -64,5 +64,5 @@ Describe "Azure DevOps rule data exports" -Tag 'Integration' {
 AfterAll {
     # Remove Module
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force;
+    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force;
 }

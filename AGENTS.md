@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-The PowerShell module lives in `src/PSRule.Rules.AzureDevOps/`. Its manifest and loader sit beside `Functions/`, `Classes/`, and `rules/`; `en/` and `nl/` contain localized rule help. Keep API retrieval and JSON export functions separate, grouped by object type. Aggregate project exports through `Export-AzDevOpsRuleData`.
+The PowerShell module lives in `src/DevOpsTools.AzureDevOps.Assessment/`. Its manifest and loader sit beside `Functions/`, `Classes/`, and `rules/`; `en/` and `nl/` contain localized rule help. Keep API retrieval and JSON export functions separate, grouped by object type. Aggregate project exports through `Export-AzDevOpsRuleData`.
 
 Pester tests live in `tests/`. Supporting reports and utilities are in `src/reports/` and `src/helper-functions/`. Use `docs/` for guidance, `example/` for sample configurations, and `assets/media/` for images. CI configuration is in `.github/workflows/`; `pipelines/` contains Azure DevOps pipeline configuration.
 
@@ -11,7 +11,7 @@ Pester tests live in `tests/`. Supporting reports and utilities are in `src/repo
 Run these commands in PowerShell from the repository root:
 
 - `(Import-PowerShellDataFile tests/requirements.psd1).GetEnumerator() | ForEach-Object { Install-Module $_.Key -RequiredVersion $_.Value -Scope CurrentUser -Force -SkipPublisherCheck }`: install the pinned PSRule and Pester versions (the dev container image already has them). Install `PSScriptAnalyzer` separately for style checks.
-- `Import-Module ./src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1 -Force`: load the local module directly; no compilation step is required.
+- `Import-Module ./src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1 -Force`: load the local module directly; no compilation step is required.
 - `./tests/Run-Tests.ps1 -TestType Unit|Integration|Authentication`: run one test set (default `Unit`). Do not dot-source it; it exits the session with the failure count. VS Code has a launch entry per set.
 - `Invoke-ScriptAnalyzer -Path ./src -Recurse -Settings ./src/PSScriptAnalyzerSettings.psd1`: check PowerShell style locally. This check is currently disabled in module CI.
 

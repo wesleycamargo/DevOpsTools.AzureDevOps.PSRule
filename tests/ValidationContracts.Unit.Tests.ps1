@@ -16,7 +16,7 @@ Describe 'Validation and publishing contracts' -Tag Unit {
         }
         foreach ($eventName in 'pull_request', 'push') {
             $paths = $workflow['on'][$eventName]['paths']
-            $paths | Should -Contain 'src/PSRule.Rules.AzureDevOps/**'
+            $paths | Should -Contain 'src/DevOpsTools.AzureDevOps.Assessment/**'
             $paths | Should -Contain 'pipelines/**'
             $paths | Should -Contain 'tests/**'
             $paths | Should -Contain '.github/workflows/**'

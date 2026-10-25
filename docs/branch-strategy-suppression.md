@@ -4,7 +4,7 @@ Branch strategy based suppression
 Using PSRule suppression groups for branch strategies.
 ------------------------------------------------------
 
-Since version 0.4.0 PSRule.Rules.AzureDevOps exports all branches
+Since version 0.4.0 of the predecessor package, PSRule.Rules.AzureDevOps, the module exports all branches
 for a repository and inspects them with the full set of rules. Under
 normal circumstances, you don't want to run all rules against all
 branches. You will typically want users to work in feature branches that

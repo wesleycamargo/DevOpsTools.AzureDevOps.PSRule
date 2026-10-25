@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1') -Force;
 }
 
 Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
@@ -407,7 +407,7 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $Project = $env:ADO_PROJECT
             $repos = Export-AzDevOpsReposAndBranchPolicies -Project $Project -PassThru
-            $ruleResult = $repos | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
+            $ruleResult = $repos | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.Assessment') -Culture en
         }
 
         It " should return project repos" {
@@ -438,5 +438,5 @@ Describe "Functions: DevOps.Repos.Tests" -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force
 }

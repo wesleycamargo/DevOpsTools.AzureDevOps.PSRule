@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
 }
 Describe 'Effective permission evidence' -Tag 'Unit' {
     BeforeEach {
@@ -83,7 +83,7 @@ Describe 'Effective permission evidence' -Tag 'Unit' {
     }
     It 'evaluates all six legacy IDs using effective permissions' {
         # Derive target types from the actual rules to keep the assertion about retained IDs precise.
-        $rules = @(Get-PSRule -Module PSRule.Rules.AzureDevOps -Name '*.InheritedPermissions')
+        $rules = @(Get-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name '*.InheritedPermissions')
         $rules.Count | Should -Be 6
         $inventory = Get-Content "$PSScriptRoot/../docs/assessment/source-inventory.json" -Raw | ConvertFrom-Json
         $policies = @{}
@@ -92,9 +92,9 @@ Describe 'Effective permission evidence' -Tag 'Unit' {
             [pscustomobject]@{ ObjectType = $rule.targetType; ObjectName = $rule.ruleId; PermissionEvidence = $evidence }
         }
         $option = New-PSRuleOption -Configuration @{ effectivePermissionPolicies = $policies }
-        $results = @($targets | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name '*.InheritedPermissions' -Option $option -Culture en -ErrorAction Stop)
+        $results = @($targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name '*.InheritedPermissions' -Option $option -Culture en -ErrorAction Stop)
         $results.Count | Should -Be 6
         @($results | Where-Object Outcome -NE 'Pass').Count | Should -Be 0
     }
 }
-AfterAll { Remove-Module PSRule.Rules.AzureDevOps -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.Assessment -Force }

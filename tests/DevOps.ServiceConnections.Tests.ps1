@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1') -Force;
 }
 
 Describe "Functions: DevOps.ServiceConnections.Tests" -Tag 'Integration' {
@@ -176,7 +176,7 @@ Describe "Functions: DevOps.ServiceConnections.Tests" -Tag 'Integration' {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $Project = $env:ADO_PROJECT
             $serviceConnections = Export-AzDevOpsServiceConnections -Project $Project -PassThru
-            $ruleResult = $serviceConnections | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
+            $ruleResult = $serviceConnections | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.Assessment') -Culture en
         }
 
         It " should return a list of service connections" {
@@ -209,5 +209,5 @@ Describe "Functions: DevOps.ServiceConnections.Tests" -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force
 }

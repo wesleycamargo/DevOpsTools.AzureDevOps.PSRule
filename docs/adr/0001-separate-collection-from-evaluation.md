@@ -30,5 +30,5 @@ Changes to target metadata can affect rules, tests, and downstream reports.
 
 ## References
 
-- [Module loader and aggregate exporters](../../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1).
-- [PSRule bindings](../../src/PSRule.Rules.AzureDevOps/rules/Config.Rule.yaml).
+- [Module loader and aggregate exporters](../../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psm1).
+- [PSRule bindings](../../src/DevOpsTools.AzureDevOps.Assessment/rules/Config.Rule.yaml).

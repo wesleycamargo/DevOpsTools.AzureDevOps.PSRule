@@ -4,7 +4,7 @@ param (
 )
 
 $ErrorActionPreference = 'Stop'
-$moduleName = 'PSRule.Rules.AzureDevOps'
+$moduleName = 'DevOpsTools.AzureDevOps.Assessment'
 $repositoryPath = Split-Path $PSScriptRoot -Parent
 $sourcePath = Join-Path $repositoryPath "src/$moduleName"
 $manifest = Test-ModuleManifest -Path (Join-Path $sourcePath "$moduleName.psd1")

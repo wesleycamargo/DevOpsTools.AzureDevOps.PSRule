@@ -1,17 +1,17 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
 }
 
 Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
     BeforeEach {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Disconnect-AzDevOps
             Mock Invoke-RestMethod { [pscustomobject]@{ value = @() } }
         }
     }
 
     It 'creates a PAT connection with the supplied token profile and organization identifier' {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Connect-AzDevOps -Organization test-org -OrganizationId test-org-id -PAT test-pat -TokenType ReadOnly
             $script:connection.AuthType | Should -Be 'PAT'
             $script:connection.TokenType | Should -Be 'ReadOnly'
@@ -22,7 +22,7 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
     }
 
     It 'creates a service-principal connection and obtains a token' {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Mock Invoke-RestMethod { [pscustomobject]@{ access_token = 'service-principal-token'; expires_in = 3600 } } -ParameterFilter { $Method -eq 'Post' }
             Mock Invoke-RestMethod { [pscustomobject]@{ value = @() } } -ParameterFilter { $Method -eq 'Get' }
             Connect-AzDevOps -Organization test-org -OrganizationId test-org-id -TenantId tenant -ClientId client -ClientSecret secret -TokenType FineGrained
@@ -36,7 +36,7 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
     }
 
     It 'creates a managed-identity connection and obtains a token' {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Mock Invoke-RestMethod { [pscustomobject]@{ access_token = 'managed-identity-token'; expires_on = ([DateTimeOffset]::UtcNow.AddHours(1).ToUnixTimeSeconds()) } } -ParameterFilter { $Method -eq 'Get' }
             Connect-AzDevOps -Organization test-org -OrganizationId test-org-id -ManagedIdentity
             $script:connection.AuthType | Should -Be 'ManagedIdentity'
@@ -49,7 +49,7 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
     }
 
     It 'creates a bearer connection and preserves its organization identifier' {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Connect-AzDevOps -Organization test-org -OrganizationId test-org-id -AccessToken 'header.payload.signature'
             $script:connection.AuthType | Should -Be 'Bearer'
             $script:connection.OrganizationId | Should -Be 'test-org-id'
@@ -59,7 +59,7 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
     }
 
     It 'reports service-principal authentication failures at the token boundary' {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.Assessment {
             Mock Invoke-RestMethod { throw 'invalid client secret' } -ParameterFilter { $Method -eq 'Post' }
             { Connect-AzDevOps -Organization test-org -TenantId tenant -ClientId client -ClientSecret wrong } | Should -Throw '*Failed to connect to Azure DevOps*'
             Assert-MockCalled Invoke-RestMethod -ParameterFilter { $Method -eq 'Post' } -Times 1 -Exactly
@@ -68,5 +68,5 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
 }
 
 AfterAll {
-    Remove-Module PSRule.Rules.AzureDevOps -Force
+    Remove-Module DevOpsTools.AzureDevOps.Assessment -Force
 }

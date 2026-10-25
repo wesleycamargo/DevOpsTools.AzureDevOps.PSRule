@@ -1,7 +1,13 @@
 Azure DevOps pipelines
 ======================
 
-`azure-pipelines.yml` publishes this PowerShell module to Azure Artifacts.
+Module publication uses the manual GitHub Actions workflow
+`.github/workflows/publish-on-release.yml` and PowerShell Gallery. The former
+`azure-pipelines.yml` Azure Artifacts publisher has been retired. Existing feed
+packages are unchanged; any live definition pointing to the retired YAML must
+be disabled separately. See [module releases](../docs/releases.md) for validation,
+packaging, and publication instructions.
+
 `psrule-assessment.yml` is a separate, organization-wide PSRule assessment
 pipeline. It runs manually or every Sunday at 02:00 UTC on `main`.
 

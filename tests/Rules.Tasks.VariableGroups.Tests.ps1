@@ -10,7 +10,7 @@ BeforeAll {
     # Setup tests paths
     # $rootPath = $PWD;
     $rootPath = Split-Path -Path $PSScriptRoot -Parent
-    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps')
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment')
 
     Import-Module -Name $ourModule -Force
     . "$PSScriptRoot/helpers/LiveRuleTestData.ps1"
@@ -21,15 +21,15 @@ BeforeAll {
 
     
     # Run rules with default token type
-    $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
+    $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en
 
 
     # Run rules with ReadOnly token type
-    $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
+    $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en
 
 
     # Run rules with FineGrained token type
-    $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module PSRule.Rules.AzureDevOps -Format Detect -Culture en
+    $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en
 }
 
 Describe "Azure.DevOps.Tasks.VariableGroups rules" -Tag 'Integration' {
@@ -177,5 +177,5 @@ Describe "Azure.DevOps.Tasks.VariableGroups rules" -Tag 'Integration' {
 
 AfterAll {
     # Remove Module
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force;
+    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force;
 }

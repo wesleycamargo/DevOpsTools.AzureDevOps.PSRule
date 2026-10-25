@@ -1,0 +1,40 @@
+---
+category: Microsoft Azure DevOps Repos
+severity: Severe
+online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyResetVotes.md
+---
+
+# Azure.DevOps.Repos.DefaultBranchPolicyResetVotes
+
+## SYNOPSIS
+
+The branch policy should reset votes when changes are updated. This will help
+ensure that the code in the default branch is of a high quality and that the
+team's Git workflow is followed.
+
+## DESCRIPTION
+
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
+When a branch policy is configured to require a minimum number of reviewers and
+votes, the policy should be configured to reset votes when changes are updated.
+This will help ensure that the code in the default branch is of a high quality
+and that the team's Git workflow is followed.
+
+Mininum TokenType: `ReadOnly`
+
+## RECOMMENDATION
+
+Consider configuring the branch policy to reset votes when changes are updated.
+
+## LINKS
+
+- [Create a branch policy](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops)
+- [Branch policies](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies-overview?view=azure-devops)
+- [Azure DevOps Security best practices](https://docs.microsoft.com/en-us/azure/devops/user-guide/security-best-practices?view=azure-devops#repositories-and-branches)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

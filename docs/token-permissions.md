@@ -1,9 +1,9 @@
-# PSRule.Rules.AzureDevOps Token Permissions
+# DevOpsTools.AzureDevOps.Assessment Token Permissions
 
 ## Details on how to configure token permissions
 
-PSRule.Rules.AzureDevOps requires a personal access token with the appropriate
-permissions to export data from Azure DevOps. When running PSRule.Rules.AzureDevOps
+DevOpsTools.AzureDevOps.Assessment requires a personal access token with the appropriate
+permissions to export data from Azure DevOps. When running DevOpsTools.AzureDevOps.Assessment
 you can choose 3 different token types:
 
 - **FullAccess**: Allows for full access to Azure DevOps, use with caution
@@ -13,7 +13,7 @@ you can choose 3 different token types:
 ### FullAccess TokenType
 
 The `FullAccess` token type is the most permissive and allows for maximum rule
-coverage. This token type is recommended for use with PSRule.Rules.AzureDevOps
+coverage. This token type is recommended for use with DevOpsTools.AzureDevOps.Assessment
 but should be used with caution. Check your organization's security policies
 before using this token type.
 
@@ -33,7 +33,7 @@ steps:
 ### FineGrained TokenType
 
 The `FineGrained` token type is the recommended token type for use with
-PSRule.Rules.AzureDevOps. This token type allows for fine-grained access to
+DevOpsTools.AzureDevOps.Assessment. This token type allows for fine-grained access to
 Azure DevOps and is the most secure token type that allows for near-maximum
 rule coverage while still offering a detailed overview of the required permissions.
 
@@ -56,7 +56,7 @@ steps:
 ### ReadOnly TokenType
 
 The `ReadOnly` token type is the most restrictive and allows for read-only access
-to Azure DevOps. This token type is recommended for use with PSRule.Rules.AzureDevOps
+to Azure DevOps. This token type is recommended for use with DevOpsTools.AzureDevOps.Assessment
 when your security policies do not allow for the use of the `FullAccess` or `FineGrained`
 token types.
 
@@ -111,51 +111,51 @@ The following table lists the token scopes that are required for each rule.
 
 | Rule | Minimum TokenType |
 |------|-------------------|
-|[Azure.DevOps.Pipelines.Core.UseYamlDefinition](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.UseYamlDefinition.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Core.InheritedPermissions](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.InheritedPermissions.md)|FineGrained|
-|[Azure.DevOps.Pipelines.Core.NoPlainTextSecrets](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.NoPlainTextSecrets.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Environments.Description](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Environments.Description.md)|FineGrained|
-|[Azure.DevOps.Pipelines.Environments.ProductionBranchLimit](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Environments.ProductionBranchLimit.md)|FineGrained|
-|[Azure.DevOps.Pipelines.Environments.ProductionCheckProtection](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Environments.ProductionCheckProtection.md)|FineGrained|
-|[Azure.DevOps.Pipelines.Environments.ProductionHumanApproval](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Environments.ProductionHumanApproval.md)|FineGrained|
-|[Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Releases.Definition.SelfApproval](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Releases.Definition.SelfApproval.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions.md)|FineGrained|
-|[Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.RequireCommentForPullRequestFromFork](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.RequireCommentForPullRequestFromFork.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork.md)|ReadOnly|
-|[Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyAllowSelfApproval](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyAllowSelfApproval.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyCommentResolution](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyCommentResolution.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyEnforceLinkedWorkItems](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyEnforceLinkedWorkItems.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyIsEnabled](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyIsEnabled.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyMergeStrategy](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyMergeStrategy.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyMinimumReviewers](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyMinimumReviewers.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyRequireBuild](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyRequireBuild.md)|ReadOnly|
-|[Azure.DevOps.Repos.BranchPolicyResetVotes](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyResetVotes.md)|ReadOnly|
-|[Azure.DevOps.Repos.HasBranchPolicy](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.HasBranchPolicy.md)|ReadOnly|
-|[Azure.DevOps.Repos.License](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.License.md)|ReadOnly|
-|[Azure.DevOps.Repos.Readme](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.Readme.md)|ReadOnly|
-|[Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled.md)|FullAccess|
-|[Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes.md)|FullAccess|
-|[Azure.DevOps.Repos.InheritedPermissions](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.InheritedPermissions.md)|FineGrained|
-|[Azure.DevOps.ServiceConnections.ClassicAzure](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ClassicAzure.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.Description](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.Description.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.GitHubPAT](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.GitHubPAT.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.ProductionBranchLimit](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ProductionBranchLimit.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.ProductionCheckProtection](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ProductionCheckProtection.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.ProductionHumanApproval](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ProductionHumanApproval.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.Scope](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.Scope.md)|ReadOnly|
-|[Azure.DevOps.ServiceConnections.WorkloadIdentityFederation](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.WorkloadIdentityFederation.md)|ReadOnly|
-|[Azure.DevOps.Tasks.VariableGroup.Description](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Tasks.VariableGroup.Description.md)|ReadOnly|
-|[Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets.md)|ReadOnly|
-|[Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Core.UseYamlDefinition](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Core.UseYamlDefinition.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Core.InheritedPermissions](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Core.InheritedPermissions.md)|FineGrained|
+|[Azure.DevOps.Pipelines.Core.NoPlainTextSecrets](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Core.NoPlainTextSecrets.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Environments.Description](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Environments.Description.md)|FineGrained|
+|[Azure.DevOps.Pipelines.Environments.ProductionBranchLimit](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Environments.ProductionBranchLimit.md)|FineGrained|
+|[Azure.DevOps.Pipelines.Environments.ProductionCheckProtection](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Environments.ProductionCheckProtection.md)|FineGrained|
+|[Azure.DevOps.Pipelines.Environments.ProductionHumanApproval](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Environments.ProductionHumanApproval.md)|FineGrained|
+|[Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Releases.Definition.SelfApproval](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Releases.Definition.SelfApproval.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions.md)|FineGrained|
+|[Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.RequireCommentForPullRequestFromFork](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.RequireCommentForPullRequestFromFork.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork.md)|ReadOnly|
+|[Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyAllowSelfApproval](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyCommentResolution](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyCommentResolution.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyEnforceLinkedWorkItems](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyEnforceLinkedWorkItems.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyIsEnabled](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyIsEnabled.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyMergeStrategy](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyMergeStrategy.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyMinimumReviewers](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyRequireBuild](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild.md)|ReadOnly|
+|[Azure.DevOps.Repos.BranchPolicyResetVotes](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.DefaultBranchPolicyResetVotes.md)|ReadOnly|
+|[Azure.DevOps.Repos.HasBranchPolicy](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.HasDefaultBranchPolicy.md)|ReadOnly|
+|[Azure.DevOps.Repos.License](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.License.md)|ReadOnly|
+|[Azure.DevOps.Repos.Readme](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.Readme.md)|ReadOnly|
+|[Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled.md)|FullAccess|
+|[Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes.md)|FullAccess|
+|[Azure.DevOps.Repos.InheritedPermissions](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.InheritedPermissions.md)|FineGrained|
+|[Azure.DevOps.ServiceConnections.ClassicAzure](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.ClassicAzure.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.Description](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.Description.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.GitHubPAT](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.GitHubPAT.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.ProductionBranchLimit](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.ProductionBranchLimit.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.ProductionCheckProtection](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.ProductionCheckProtection.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.ProductionHumanApproval](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.ProductionHumanApproval.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.Scope](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.Scope.md)|ReadOnly|
+|[Azure.DevOps.ServiceConnections.WorkloadIdentityFederation](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.ServiceConnections.WorkloadIdentityFederation.md)|ReadOnly|
+|[Azure.DevOps.Tasks.VariableGroup.Description](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Tasks.VariableGroup.Description.md)|ReadOnly|
+|[Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets.md)|ReadOnly|
+|[Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets](../src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets.md)|ReadOnly|
 
 ## Service Principle Authentication
 

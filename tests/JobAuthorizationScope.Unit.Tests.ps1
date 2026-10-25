@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
 }
 
 Describe 'Independent organization job authorization settings' -Tag 'Unit' {
@@ -16,7 +16,7 @@ Describe 'Independent organization job authorization settings' -Tag 'Unit' {
             enforceJobAuthScopeForReleases = $Release
         }
         $prefix = 'Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScope'
-        $results = @($fixture | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name @(
+        $results = @($fixture | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name @(
             "${prefix}NonRelease", "${prefix}Release"
         ) -Culture en)
         $results.Count | Should -Be 2
@@ -26,5 +26,5 @@ Describe 'Independent organization job authorization settings' -Tag 'Unit' {
 }
 
 AfterAll {
-    Remove-Module PSRule.Rules.AzureDevOps -Force
+    Remove-Module DevOpsTools.AzureDevOps.Assessment -Force
 }

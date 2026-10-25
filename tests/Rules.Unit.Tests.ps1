@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
 }
 
 Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
@@ -16,7 +16,7 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
                 New-Item -Path $fixturePath -ItemType Directory | Out-Null
                 $fixture | ConvertTo-Json | Set-Content (Join-Path $fixturePath 'private-project.prj.ado.json')
                 $inputObject = Get-Content (Join-Path $fixturePath 'private-project.prj.ado.json') -Raw | ConvertFrom-Json
-                $result = @($inputObject | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name Azure.DevOps.Project.Visibility -Culture en)
+                $result = @($inputObject | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name Azure.DevOps.Project.Visibility -Culture en)
                 $result.Count | Should -Be 1
                 $result[0].Outcome | Should -Be 'Pass'
             }
@@ -29,7 +29,7 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
                 visibility = 'public'
             }
 
-            $result = @($fixture | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name Azure.DevOps.Project.Visibility -Culture en)
+            $result = @($fixture | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name Azure.DevOps.Project.Visibility -Culture en)
             $result.Count | Should -Be 1
             $result[0].Outcome | Should -Be 'Fail'
         }
@@ -47,7 +47,7 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
                 }
             }
 
-            $result = @($fixture | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name @(
+            $result = @($fixture | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name @(
                 'Azure.DevOps.Tasks.VariableGroup.Description',
                 'Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets'
             ) -Culture en)
@@ -66,7 +66,7 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
                 }
             }
 
-            $result = @($fixture | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets -Culture en)
+            $result = @($fixture | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets -Culture en)
             $result.Count | Should -Be 1
             $result[0].Outcome | Should -Be 'Pass'
         }
@@ -74,5 +74,5 @@ Describe 'Rules with synthetic fixtures' -Tag 'Unit' {
 }
 
 AfterAll {
-    Remove-Module PSRule.Rules.AzureDevOps -Force
+    Remove-Module DevOpsTools.AzureDevOps.Assessment -Force
 }

@@ -3,7 +3,7 @@
 on: 
   pull_request:
     paths:
-      - 'src/PSRule.Rules.AzureDevOps/**'
+      - 'src/DevOpsTools.AzureDevOps.Assessment/**'
       - 'pipelines/**'
       - 'scripts/**'
       - 'tests/**'
@@ -12,7 +12,7 @@ on:
       - main
   push:
     paths:
-      - 'src/PSRule.Rules.AzureDevOps/**'
+      - 'src/DevOpsTools.AzureDevOps.Assessment/**'
       - 'pipelines/**'
       - 'scripts/**'
       - 'tests/**'

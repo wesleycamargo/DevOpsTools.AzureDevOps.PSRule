@@ -62,7 +62,7 @@ The diagram combines supported paths. An individual pipeline does not necessaril
 
 ### Module loading and authentication
 
-The manifest and loader reside in `src/PSRule.Rules.AzureDevOps/`.
+The manifest and loader reside in `src/DevOpsTools.AzureDevOps.Assessment/`.
 The loader initializes module connection state and imports scripts from `Classes/` and `Functions/`.
 PSRule discovers the rule definitions under `rules/`.
 
@@ -103,11 +103,16 @@ Changes to object metadata can affect rule selection, target identity, tests, an
 
 ## Azure DevOps pipeline structure
 
-The rule repository contains two independent entry points. Neither includes the other as a template.
+The module is published to PowerShell Gallery by the manually dispatched GitHub
+Actions workflow `.github/workflows/publish-on-release.yml`. It validates an
+existing version tag against the manifest, runs pinned offline tests, builds the
+ZIP and checksum, and publishes only when the `publish` input is enabled.
+The Azure Artifacts publisher has been retired; existing feed packages remain.
+
+The rule repository retains the following independent assessment entry point.
 
 | Definition | Trigger and agent | Ordered work | Outputs and failure behavior |
 | --- | --- | --- | --- |
-| `pipelines/azure-pipelines.yml` | Push to `main`. Hosted `windows-latest`. | Install prerequisite modules. Register an Azure Artifacts feed. Publish the module source package. | Module package in Azure Artifacts. Uses `devops-assessment-vg001`. This definition contains no test stage. |
 | `pipelines/psrule-assessment.yml` | Manual, or Sunday at 02:00 UTC. Schedule includes `main`. Self-hosted `AI-Pool`. | Install PSRule 2.9.0. Import checked-out module. Obtain a service-principal token. Export with strict completeness. Evaluate `Baseline.Default`. | `psrule-results` build artifact contains completeness JSON and SARIF when evaluation runs. Assessment uses `continueOnError`. Publication uses `always()`. Raw exports remain temporary. |
 
 The dashboard repository contains three independent entry points.
@@ -125,8 +130,8 @@ Available JSON can therefore reach evaluation even when collection coverage is i
 
 ```mermaid
 flowchart TD
-    Release["Module package publication"] --> Feed["Azure Artifacts"]
-    Feed --> Legacy["Daily legacy dashboard pipeline"]
+    Release["Manual GitHub Actions publication"] --> Gallery["PowerShell Gallery"]
+    Feed["Existing Azure Artifacts packages"] --> Legacy["Daily legacy dashboard pipeline"]
     Source["Rule source checkout"] --> Weekly["Weekly strict assessment"]
     SourceBranch["Rule automation branch checkout"] --> Manual["Manual workbook assessment"]
     Weekly --> Evidence["Completeness JSON and SARIF artifact"]
@@ -225,6 +230,6 @@ Stakeholder review can resolve the operational gaps above and approve any future
 
 ### Source entry points
 
-- [Module loader](../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1), [connection](../src/PSRule.Rules.AzureDevOps/Classes/AzureDevOpsConnection.ps1), and [bindings](../src/PSRule.Rules.AzureDevOps/rules/Config.Rule.yaml).
-- [Module publication pipeline](../pipelines/azure-pipelines.yml) and [weekly assessment pipeline](../pipelines/psrule-assessment.yml).
+- [Module loader](../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psm1), [connection](../src/DevOpsTools.AzureDevOps.Assessment/Classes/AzureDevOpsConnection.ps1), and [bindings](../src/DevOpsTools.AzureDevOps.Assessment/rules/Config.Rule.yaml).
+- [Module publication workflow](../.github/workflows/publish-on-release.yml) and [weekly assessment pipeline](../pipelines/psrule-assessment.yml).
 - [Module CI](../.github/workflows/module-ci.yml), [Gallery publication](../.github/workflows/publish-on-release.yml), [wiki publication](../.github/workflows/wiki.yml), and [legacy Monitor workflow](../.github/workflows/psrule-monitor.yml).
