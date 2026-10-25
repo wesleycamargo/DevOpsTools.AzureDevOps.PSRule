@@ -1,6 +1,9 @@
 name: Validate and publish module to PSGallery
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       tag:
@@ -15,11 +18,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: psgallery-publication
+  cancel-in-progress: false
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - name: Validate tag input
+        if: github.event_name == 'workflow_dispatch'
         shell: pwsh
         env:
           RELEASE_TAG: ${{ inputs.tag }}
@@ -29,7 +37,7 @@ jobs:
           }
       - uses: actions/checkout@v4
         with:
-          ref: refs/tags/${{ inputs.tag }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.sha }}
       - name: Install pinned test dependencies
         shell: pwsh
         run: |
@@ -37,23 +45,46 @@ jobs:
             Install-Module $_.Key -RequiredVersion $_.Value -Scope CurrentUser -Force -SkipPublisherCheck
           }
       - name: Validate manifest version
+        id: module
         shell: pwsh
         env:
           RELEASE_TAG: ${{ inputs.tag }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           $manifest = Test-ModuleManifest ./src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1
           $version = $manifest.Version.ToString()
           $prerelease = $manifest.PrivateData.PSData.Prerelease
           if ($prerelease) { $version += "-$prerelease" }
-          if ($env:RELEASE_TAG -cne "v$version") { throw 'Tag and module manifest versions differ.' }
+          if ($env:EVENT_NAME -eq 'workflow_dispatch' -and $env:RELEASE_TAG -cne "v$version") {
+            throw 'Tag and module manifest versions differ.'
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
       - name: Run offline tests
         shell: pwsh
         run: ./tests/Run-Tests.ps1 -TestType Unit
       - name: Build module package
         shell: pwsh
         run: ./scripts/Build-Module.ps1
+      - name: Check published version
+        id: gallery
+        if: github.event_name == 'push' || inputs.publish
+        shell: pwsh
+        env:
+          MODULE_VERSION: ${{ steps.module.outputs.version }}
+        run: |
+          $version = $env:MODULE_VERSION
+          $uri = "https://www.powershellgallery.com/api/v2/Packages(Id='DevOpsTools.AzureDevOps.PSRule',Version='$version')"
+          $response = Invoke-WebRequest -Uri $uri -SkipHttpErrorCheck
+          switch ([int]$response.StatusCode) {
+            200 {
+              'exists=true' >> $env:GITHUB_OUTPUT
+              Write-Host "DevOpsTools.AzureDevOps.PSRule $version is already published; skipping publication."
+            }
+            404 { 'exists=false' >> $env:GITHUB_OUTPUT }
+            default { throw "PowerShell Gallery returned HTTP $($response.StatusCode); publication stopped." }
+          }
       - name: Publish validated module
-        if: ${{ inputs.publish }}
+        if: (github.event_name == 'push' || inputs.publish) && steps.gallery.outputs.exists == 'false'
         shell: pwsh
         env:
           PS_GALLERY_KEY: ${{ secrets.PS_GALLERY_KEY }}

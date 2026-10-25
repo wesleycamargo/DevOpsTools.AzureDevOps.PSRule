@@ -27,16 +27,23 @@ a release whose tag matches the manifest version.
 
 ## Validate and publish
 
-The manual `.github/workflows/publish-on-release.yml` GitHub Actions workflow
-checks out an existing tag, validates its version against the manifest, runs
-pinned offline tests, builds the ZIP and checksum, and retains validation
-artifacts. For this package's initial version, use tag `v0.2.0` on a commit
-containing the renamed module. Historical tags still contain the old package.
+The `.github/workflows/publish-on-release.yml` GitHub Actions workflow runs on
+every push to `main`. It validates the manifest, runs pinned offline tests,
+builds the ZIP and checksum, and publishes the declared module version to
+PowerShell Gallery. If that exact version is already published, validation and
+packaging still run, but publication is skipped. Gallery lookup failures stop
+publication. Runs are serialized to avoid concurrent publication attempts.
 
-The `publish` input defaults to `false`. Enable it to publish the validated
-`DevOpsTools.AzureDevOps.PSRule` package to PowerShell Gallery using the
-repository secret `PS_GALLERY_KEY`. Publishing requires credentials authorized
-for the new package name. GitHub releases do not automatically publish to Gallery.
+To publish a new version, update the module manifest version before merging to
+`main`. Automatic publication does not require or create a Git tag. The existing
+`0.2.0` package is not republished when this workflow is enabled.
+
+Manual execution remains available: supply an existing tag matching the manifest
+version, such as `v0.2.0`. The manual `publish` input defaults to `false` for
+validation only; enable it to publish a version that is not already in Gallery.
+Both publication modes use the repository secret `PS_GALLERY_KEY`. Publishing
+requires credentials authorized for the package name. GitHub releases do not
+trigger this workflow.
 The published source includes `LICENSE`; its manifest links to the public GPLv3
 text so package recipients can read the terms directly.
 The former Azure Pipelines publisher has been retired; live pipeline definitions
