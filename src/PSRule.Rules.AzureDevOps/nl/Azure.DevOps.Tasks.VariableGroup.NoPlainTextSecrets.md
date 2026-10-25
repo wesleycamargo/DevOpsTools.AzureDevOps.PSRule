@@ -12,6 +12,8 @@ Variable groups zouden geen geheimen in platte tekst moeten bevatten.
 
 ## DESCRIPTION
 
+Detectie is heuristisch en beperkt tot geëxporteerde waarden. Herkenbare verbindingspatronen en Azure DevOps PAT's van 84 tekens met een vaste signatuur worden gecontroleerd. Willekeurige waarden van 32/40 tekens en oude PAT's zonder signatuur zijn niet betrouwbaar aan hun lengte te herkennen. Een geslaagde controle bewijst niet dat geheimen ontbreken. Foutmeldingen bevatten geen gevonden waarden.
+
 Variable groups zouden geen geheimen in platte tekst moeten bevatten. Geheimen moeten
 worden opgeslagen in Azure Key Vault en worden gerefereerd in de variabele groep. Dit
 voorkomt dat het geheim wordt blootgesteld in de build logs. Als het geheim in platte

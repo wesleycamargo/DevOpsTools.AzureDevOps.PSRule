@@ -3,38 +3,41 @@
 on: 
   pull_request:
     paths:
-      - 'src/PSRule.Rules.AzureDevOps/Functions/**'
-      - 'src/PSRule.Rules.AzureDevOps/Classes/**'
-      - 'src/PSRule.Rules.AzureDevOps/rules/**'
-      - 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1'
+      - 'src/PSRule.Rules.AzureDevOps/**'
+      - 'pipelines/**'
+      - 'scripts/**'
       - 'tests/**'
-      - '.github/workflows/module-ci.yml'
+      - '.github/workflows/**'
     branches:
       - main
   push:
     paths:
-      - 'src/PSRule.Rules.AzureDevOps/Functions/**'
-      - 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psm1'
+      - 'src/PSRule.Rules.AzureDevOps/**'
+      - 'pipelines/**'
+      - 'scripts/**'
       - 'tests/**'
+      - '.github/workflows/**'
     branches:
       - main
 
 name: PS Module CI
 
 permissions:
+  contents: read
   checks: write
   pull-requests: write
 
 jobs:
   run-pester:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install PSRule and Pester
         run: |
-          Install-Module -Name PSRule -Force -SkipPublisherCheck
-          Install-Module -Name Pester -Force -SkipPublisherCheck
+          (Import-PowerShellDataFile ./tests/requirements.psd1).GetEnumerator() | ForEach-Object {
+            Install-Module $_.Key -RequiredVersion $_.Value -Scope CurrentUser -Force -SkipPublisherCheck
+          }
         shell: pwsh
 
       # Temporarily disabled until PSScriptAnalyzer is updated to support PowerShell 7
@@ -45,47 +48,30 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          # Set Pester configuration for detailed output with code coverage and Nunit test results
-          Import-Module Pester -Force
-          # Set Pester configuration for detailed output with code coverage and Nunit test results
-          $config = New-PesterConfiguration
-          $config.Run.Path = Join-Path $env:GITHUB_WORKSPACE 'tests'
-          $config.Filter.Tag = 'Unit'
-          $config.CodeCoverage.Enabled = $true
-          $config.CodeCoverage.OutputPath = "$($env:GITHUB_WORKSPACE)\coverage.xml"
-          $config.CodeCoverage.OutputFormat = 'JaCoCo'
-          $config.CodeCoverage.Path = "$($env:GITHUB_WORKSPACE)\src\PSRule.Rules.AzureDevOps\Functions","$($env:GITHUB_WORKSPACE)\src\PSRule.Rules.AzureDevOps\Classes"
-          $config.Output.Verbosity = 'Detailed'
-          $config.TestResult.Enabled = $true
-          $config.TestResult.OutputFormat = 'NUnitXml'
-          $config.TestResult.OutputPath = "$($env:GITHUB_WORKSPACE)\testresults.xml"
-          $config.Output.CIFormat = 'GitHubActions'
-          # Run Pester tests
-          Invoke-Pester -Configuration $config
+          ./tests/Run-Tests.ps1 -TestType Unit -Coverage
         shell: pwsh
 
       - name: Upload Test Results
+        if: always()
         uses: EnricoMi/publish-unit-test-result-action/composite@v2
         with:
           files: |
             **/testresults.xml
 
-      - name: Upload Code Coverage
-        uses: codecov/codecov-action@v1
+      - name: Retain validation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          file: coverage.xml
+          name: offline-validation
+          path: |
+            testresults.xml
+            coverage.xml
+
+      - name: Upload Code Coverage
+        if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.xml
           flags: unittests
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  sonarcloud:
-    name: SonarCloud
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

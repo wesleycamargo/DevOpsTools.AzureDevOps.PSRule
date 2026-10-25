@@ -12,6 +12,8 @@ Build pipeline variables should not contain secrets in plain text.
 
 ## DESCRIPTION
 
+Detection is heuristic and limited to exported values. Structured credential patterns and the signed 84-character Azure DevOps PAT format are checked. Arbitrary 32/40-character values and legacy unsigned PATs cannot reliably be identified by length alone and are not flagged. A passing result does not establish the absence of secrets. Failure reasons do not include matched values.
+
 Build pipeline variables should not contain secrets in plain text. Secrets should be
 stored in Azure Key Vault and referenced in the variable group. This will prevent the
 secret from being exposed in the build logs. If the secret is stored in plain text, it

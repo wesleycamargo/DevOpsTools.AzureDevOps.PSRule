@@ -29,7 +29,7 @@ function Get-AzDevOpsPipelines {
     $uri = "https://dev.azure.com/$Organization/$Project/_apis/pipelines?api-version=6.0-preview.1"
     Write-Verbose "Getting pipelines from $uri"
     try {
-        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+        $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
         # if the response is not an object but a string, the authentication failed
         if ($response -is [string]) {
             throw "Authentication failed or project not found"

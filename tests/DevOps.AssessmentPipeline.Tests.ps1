@@ -40,12 +40,22 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
             if ($script:collectionStatus -ne 'Complete' -and $Strict) {
                 throw 'Assessment collection is incomplete.'
             }
-            '{}' | Set-Content (Join-Path $OutputPath 'fixture.prj.ado.json')
+            $projectDirectory = Join-Path $OutputPath 'fixture-project'
+            New-Item $projectDirectory -ItemType Directory -Force | Out-Null
+            '{}' | Set-Content (Join-Path $projectDirectory 'fixture.prj.ado.json')
+            '{}' | Set-Content (Join-Path $OutputPath 'organization.ado.json')
         }
         Mock Assert-PSRule {
-            param ($InputPath, $OutputPath)
-            @((Get-ChildItem $InputPath).Name) | Should -Be @('fixture.prj.ado.json')
+            param ($InputPath, $OutputPath, $ResultVariable)
+            @((Get-ChildItem $InputPath -File).Name | Sort-Object) | Should -Be @('fixture.prj.ado.json', 'organization.ado.json')
             '{}' | Set-Content $OutputPath
+            for ($scopeIndex = 1; $scopeIndex -le 8; $scopeIndex++) {
+                $scopedResultVariable = Get-Variable -Name $ResultVariable -Scope $scopeIndex -ErrorAction SilentlyContinue
+                if ($null -ne $scopedResultVariable) {
+                    $scopedResultVariable.Value = @([pscustomobject]@{ Outcome = 'Pass' })
+                    break
+                }
+            }
         }
     }
 
@@ -87,6 +97,11 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
         $assessment['continueOnError'] | Should -BeTrue
         $publish['condition'] | Should -Be 'always()'
+    }
+
+    It 'rejects an assessment that evaluates no rule results' {
+        Mock Assert-PSRule { param($ResultVariable) Set-Variable -Name $ResultVariable -Scope 1 -Value @() }
+        { & $assessmentScript } | Should -Throw '*zero rule results*'
     }
 
     It 'uses fresh exports when the same agent runs again' {

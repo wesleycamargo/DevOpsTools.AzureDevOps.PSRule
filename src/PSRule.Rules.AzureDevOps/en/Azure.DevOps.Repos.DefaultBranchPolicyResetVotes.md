@@ -14,6 +14,10 @@ team's Git workflow is followed.
 
 ## DESCRIPTION
 
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
 When a branch policy is configured to require a minimum number of reviewers and
 votes, the policy should be configured to reset votes when changes are updated.
 This will help ensure that the code in the default branch is of a high quality

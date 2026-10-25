@@ -13,6 +13,10 @@ number of reviewers.
 
 ## DESCRIPTION
 
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
 Having a minimum number of reviewers for a branch policy helps ensure that the
 code in the default branch is of a high quality and that the team's Git
 workflow is followed. 

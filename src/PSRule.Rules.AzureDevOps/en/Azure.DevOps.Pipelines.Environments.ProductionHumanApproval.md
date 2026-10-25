@@ -14,6 +14,8 @@ production resources.
 
 ## DESCRIPTION
 
+This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+
 Protecting a service connection with a human check will help prevent accidental
 changes to production resources. For example, a service connection scoped to
 production should be protected with a check that requires a minimum number of

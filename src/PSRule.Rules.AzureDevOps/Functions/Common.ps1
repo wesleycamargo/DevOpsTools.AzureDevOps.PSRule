@@ -106,24 +106,26 @@
     try {
         switch ($PSCmdlet.ParameterSetName) {
             'Pat' {
-                $script:connection = [AzureDevOpsConnection]::new($Organization, $PAT, $TokenType)
+                $candidate = [AzureDevOpsConnection]::new($Organization, $PAT, $TokenType)
             }
             'ServicePrincipal' {
-                $script:connection = [AzureDevOpsConnection]::new($Organization, $ClientId, $ClientSecret, $TenantId, $TokenType)
+                $candidate = [AzureDevOpsConnection]::new($Organization, $ClientId, $ClientSecret, $TenantId, $TokenType)
             }
             'ManagedIdentity' {
-                $script:connection = [AzureDevOpsConnection]::new($Organization, $TokenType)
+                $candidate = [AzureDevOpsConnection]::new($Organization, $TokenType)
             }
             'Bearer' {
-                $script:connection = [AzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, $TokenType, $true)
+                $candidate = [AzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, $TokenType, $true)
             }
         }
 
-        $script:connection.OrganizationId = $OrganizationId
+        $candidate.OrganizationId = $OrganizationId
 
         # Verify connection with a simple API call
         $uri = "https://dev.azure.com/$Organization/_apis/projects?api-version=7.0"
-        Invoke-RestMethod -Uri $uri -Method Get -Headers $script:connection.GetHeader() | Out-Null
+        $verification = Invoke-RestMethod -Uri $uri -Method Get -Headers $candidate.GetHeader()
+        if ($verification -is [string]) { throw 'Authentication failed.' }
+        $script:connection = $candidate
         Write-Verbose "Successfully connected to Azure DevOps organization: $Organization"
     }
     catch {
@@ -183,7 +185,11 @@ function Get-AzDevOpsProject {
     }
     Write-Verbose "URI: $uri"
     try {
-        $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+        $response = if ($Project) {
+            Invoke-RestMethod -Uri $uri -Method Get -Headers $header
+        } else {
+            Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
+        }
         # If the response is not an object but a string, the authentication failed
         if ($response -is [string]) {
             throw "Authentication failed or organization not found"

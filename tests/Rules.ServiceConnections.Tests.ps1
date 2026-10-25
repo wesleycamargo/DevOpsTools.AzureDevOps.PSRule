@@ -151,28 +151,15 @@ Describe "Azure.DevOps.ServiceConnections rules" -Tag 'Integration' {
     }
 
     Context ' Azure.DevOps.ServiceConnections.ProductionBranchLimit' {
-        It ' should pass for production targets named success' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' -and $_.TargetName -like '*success*' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should be the same with a ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' -and $_.TargetName -match 'fail$' })
-            $ruleHits.Count | Should -Be 3;
-
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' -and $_.TargetName -like '*success*' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should be the same with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' -and $_.TargetName -match 'fail$' })
-            $ruleHits.Count | Should -Be 3;
-
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' -and $_.TargetName -like '*success*' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
+        It ' skips development service connections for <Profile>' -ForEach @(
+            @{ Profile = 'FullAccess' }, @{ Profile = 'ReadOnly' }, @{ Profile = 'FineGrained' }
+        ) {
+            $results = switch ($Profile) {
+                FullAccess { $ruleResult }
+                ReadOnly { $ruleResultReadOnly }
+                FineGrained { $ruleResultFineGrained }
+            }
+            @($results | Where-Object RuleName -Like 'Azure.DevOps.ServiceConnections.Production*').Count | Should -Be 0
         }
 
         It ' should have a markdown help file' {

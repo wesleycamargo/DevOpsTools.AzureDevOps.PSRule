@@ -12,6 +12,8 @@ Een productieserviceverbinding moet beperkt zijn in de branches waarin deze kan 
 
 ## DESCRIPTION
 
+Deze productieregel gebruikt de naamselector `IsProduction`. Ontwikkelbronnen worden overgeslagen. Naamherkenning is een conventie; stem namen of uitzonderingen af op uw productie-inventaris.
+
 Een productieserviceverbinding moet beperkt zijn in de branches waarin deze kan worden gebruikt. Dit zorgt ervoor dat de serviceverbinding niet wordt gebruikt in een
 niet-productiebranch. Deze regel controleert of de serviceverbinding is beperkt tot een
 productiebranch.
