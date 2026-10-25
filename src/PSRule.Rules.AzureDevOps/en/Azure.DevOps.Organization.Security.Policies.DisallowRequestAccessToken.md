@@ -23,3 +23,7 @@ Disable request access token in Azure DevOps organization security settings.
 ## LINKS
 
 - [Security Best Practices](https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices)
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

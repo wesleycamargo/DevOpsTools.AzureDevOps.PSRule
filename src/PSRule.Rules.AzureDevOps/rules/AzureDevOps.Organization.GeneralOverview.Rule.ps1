@@ -14,32 +14,30 @@ Rule 'Azure.DevOps.Organization.GeneralOverview.DescriptionSet' `
         $Assert.HasFieldValue($TargetObject, "description", "Not Set") -eq $false
 }
 
-# Synopsis: Organization time zone should be set to CET
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.GeneralOverview.TimeZoneSet' `
     -Ref 'ADO-OGO-002' `
     -Type 'Azure.DevOps.Organization.GeneralOverview' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralOverview.TimeZoneSet' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralOverview.TimeZoneSet').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Setting the organization time zone to CET ensures that timestamps and schedules are accurate for Central European Time.
-        Reason 'The organization time zone is not set to CET.'
-        Recommend 'Set the time zone to CET (e.g., "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna") in Azure DevOps organization settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/settings/organization-overview?view=azure-devops
-        $Assert.HasField($TargetObject, "timeZone", $true)
-        $Assert.HasFieldValue($TargetObject, "timeZone", "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna")
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralOverview.TimeZoneSet' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralOverview.TimeZoneSet'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Organization geography should be set to Europe
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.GeneralOverview.GeographySet' `
     -Ref 'ADO-OGO-003' `
     -Type 'Azure.DevOps.Organization.GeneralOverview' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralOverview.GeographySet' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralOverview.GeographySet').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Setting the organization geography to Europe ensures compliance with regional data residency requirements for European organizations.
-        Reason 'The organization geography is not set to Europe.'
-        Recommend 'Set the geography to Europe in Azure DevOps organization settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/settings/organization-overview?view=azure-devops
-        $Assert.HasField($TargetObject, "geography", $true)
-        $Assert.HasFieldValue($TargetObject, "geography", "Europe")
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralOverview.GeographySet' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralOverview.GeographySet'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: Organization owner should be set

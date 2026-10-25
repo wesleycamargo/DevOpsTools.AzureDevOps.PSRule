@@ -26,3 +26,7 @@ Consider adding a description to the environment.
 ## LINKS
 
 - [Create an environment](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops&tabs=yaml#create-an-environment)
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Information remain compatibility metadata; they are not the four-grade assessment scale.

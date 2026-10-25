@@ -163,7 +163,7 @@ function Get-AzDevOpsEnvironmentAcls {
         $header = $script:connection.GetHeader()
         $Organization = $script:connection.Organization
         Write-Verbose "Getting environment ACLs for environment $Environment"
-        $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/83d4c2e6-e57d-4d6e-892b-b87222b7ad20?api-version=7.2-preview.1&token=Environments/{1}/{2}" -f $Organization, $ProjectId, $EnvironmentId
+        $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/83d4c2e6-e57d-4d6e-892b-b87222b7ad20?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/{1}/{2}" -f $Organization, $ProjectId, $EnvironmentId
         Write-Verbose "URI: $uri"
         try {
             $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header

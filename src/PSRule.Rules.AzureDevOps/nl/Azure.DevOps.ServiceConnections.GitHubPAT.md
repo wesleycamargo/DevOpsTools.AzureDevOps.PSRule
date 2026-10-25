@@ -30,3 +30,7 @@ Overweeg een oauth-gebaseerde serviceverbinding te gebruiken.
 
 - [Azure DevOps security best practices](https://learn.microsoft.com/nl-nl/azure/devops/organizations/security/security-best-practices?view=azure-devops#secure-github-integrations)
 - [Create a service connection](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/library/connect-to-azure?view=azure-devops)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

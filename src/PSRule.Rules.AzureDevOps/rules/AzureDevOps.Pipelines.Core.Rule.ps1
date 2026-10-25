@@ -20,17 +20,13 @@ Rule 'Azure.DevOps.Pipelines.Core.UseYamlDefinition' `
 Rule 'Azure.DevOps.Pipelines.Core.InheritedPermissions' `
     -Ref 'ADO-PL-002' `
     -Type 'Azure.DevOps.Pipeline' `
-    -Tag @{ release = 'GA'} `
-    -If { "Acls" -in $TargetObject.psobject.Properties.Name } `
+    -If { (Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Pipeline').Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA'; assessment = 'EffectivePermissions'; legacyName = 'InheritedPermissions' } `
     -Level Warning {
-        # Description "Pipelines should not have inherited permissions"
-        Reason "The pipeline is using inherited permissions"
-        Recommend "Consider using explicit permissions for your pipelines"
-        # Links "https://docs.microsoft.com/en-us/azure/devops/pipelines/policies/permissions?view=azure-devops&tabs=yaml"
-        AllOf {
-            $Assert.HasField($TargetObject, "Acls.inheritPermissions", $true)
-            $Assert.HasFieldValue($TargetObject, "Acls.inheritPermissions", $false)
-        }
+        $assessment = Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Pipeline'
+        Reason $assessment.ReasonCode
+        Recommend 'Restrict unauthorized effective privileges or update the approved permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: GUI Designer pipelines should not have secrets as plain text variables

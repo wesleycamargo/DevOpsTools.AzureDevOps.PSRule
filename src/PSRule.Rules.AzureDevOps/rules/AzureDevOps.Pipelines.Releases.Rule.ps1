@@ -41,17 +41,13 @@ Rule 'Azure.DevOps.Pipelines.Releases.Definition.SelfApproval' `
 Rule 'Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions' `
     -Ref 'ADO-RD-003' `
     -Type 'Azure.DevOps.Pipelines.Releases.Definition' `
-    -Tag @{ release = 'GA'} `
-    -If { "Acls" -in $TargetObject.psobject.Properties.Name } `
-    -Level Error {
-        # Description 'Release pipeline should not inherit permissions from the project.'
-        Reason 'The release pipeline inherits permissions from the project.'
-        Recommend 'Consider removing inherited permissions'
-        # Links 'https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#scoped-permissions'
-        AllOf {
-            $Assert.HasField($TargetObject, "Acls.inheritPermissions", $true)
-            $Assert.HasFieldValue($TargetObject, "Acls.inheritPermissions", $false)
-        }
+    -If { (Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Pipelines.Releases.Definition').Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA'; assessment = 'EffectivePermissions'; legacyName = 'InheritedPermissions' } `
+    -Level Warning {
+        $assessment = Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Pipelines.Releases.Definition'
+        Reason $assessment.ReasonCode
+        Recommend 'Restrict unauthorized effective privileges or update the approved permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: Release pipeline should not have plain text secrets in variables

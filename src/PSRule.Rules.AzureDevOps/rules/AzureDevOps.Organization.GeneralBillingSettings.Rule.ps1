@@ -14,29 +14,28 @@ Rule 'Azure.DevOps.Organization.GeneralBillingSettings.SubscriptionActive' `
         $Assert.HasFieldValue($TargetObject, "subscriptionStatus", "active")
 }
 
-# Synopsis: Enterprise billing should be explicitly configured
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured' `
     -Ref 'ADO-OGB-002' `
     -Type 'Azure.DevOps.Organization.GeneralBillingSettings' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description: Enterprise billing should be explicitly enabled or disabled based on organizational needs.
-        Reason 'The enterprise billing setting is not explicitly configured.'
-        Recommend 'Review and configure enterprise billing in Azure DevOps billing settings based on organizational requirements.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/billing/enterprise-billing
-        $Assert.HasField($TargetObject, "isEnterpriseBillingEnabled", $true)
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Assignment-based billing should be enabled
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled' `
     -Ref 'ADO-OGB-003' `
     -Type 'Azure.DevOps.Organization.GeneralBillingSettings' `
-    -Tag @{ release = 'GA' } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Error {
-        # Description: Assignment-based billing allows flexible per-user billing and is recommended for modern Azure DevOps organizations.
-        Reason 'Assignment-based billing is not enabled.'
-        Recommend 'Enable assignment-based billing in Azure DevOps billing settings.'
-        # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/billing/change-billing-model
-        $Assert.HasField($TargetObject, "isAssignmentBillingEnabled", $true)
-        $Assert.HasFieldValue($TargetObject, "isAssignmentBillingEnabled", $true)
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }

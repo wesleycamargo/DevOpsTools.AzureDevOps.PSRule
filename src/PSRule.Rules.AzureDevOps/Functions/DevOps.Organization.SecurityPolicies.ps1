@@ -109,8 +109,8 @@ function Read-AdoOrganizationSecurityPolicies {
                 $settings[$settingsKey] = $effective  # Removed extra "policy." prefix
 
                 # Track policy names without Policy. prefix for validation
-                $cleanName = $name -replace '^Policy\.', ''
-                $foundPolicies += $cleanName -replace '\s+', ''
+                $cleanName = $name -replace '^Policy\.', '' -replace '\s+', ''
+                $foundPolicies += $cleanName
             }
         }
 

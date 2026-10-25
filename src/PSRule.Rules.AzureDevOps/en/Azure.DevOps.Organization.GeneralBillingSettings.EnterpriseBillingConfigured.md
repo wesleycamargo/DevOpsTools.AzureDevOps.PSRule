@@ -8,18 +8,16 @@ online version: https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/tr
 
 ## SYNOPSIS
 
-Enterprise billing should be explicitly configured.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Enterprise billing should be explicitly enabled or disabled based on organizational needs. This rule checks that the `isEnterpriseBillingEnabled` setting is explicitly configured in Azure DevOps billing settings.
-
-Minimum TokenType: `FullAccess`
+This control follows `assessmentPolicies['Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured']`. Each explicit policy needs a Reference. Set Expected to the approved boolean enterprise-billing preference; false is a valid explicit policy. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Review and configure enterprise billing in Azure DevOps billing settings based on organizational requirements.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Enterprise Billing](https://learn.microsoft.com/en-us/azure/devops/organizations/billing/overview)
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

@@ -4,24 +4,24 @@ severity: Informational
 online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/main/src/PSRule.Rules.AzureDevOps/nl/AzureDevOps.Repos.License.md
 ---
 
-# AzureDevOps.Repos.License
+# Azure.DevOps.Repos.License
 
 ## SYNOPSIS
 
-Gebruik een LICENSE bestand in de standaard branch om te communiceren hoe je
-project mag worden gebruikt.
+Het doel moet voldoen aan toepasselijk organisatiebeleid.
 
 ## DESCRIPTION
 
-Een software licentie vertelt anderen wat ze wel en niet mogen doen met je
-broncode. Openbare repositories op Azure DevOps worden vaak gebruikt om open
-source software te delen.
-
-Om je project te licenseren, maak je een LICENSE bestand in de repository
-root.
-
-Mininum TokenType: `ReadOnly`
+Deze controle volgt `assessmentPolicies['Azure.DevOps.Repos.License']`. Elk expliciet beleid vereist een Reference. Zonder optioneel beleid is de controle niet van toepassing. Ontbrekend bewijs voor toepasselijk beleid resulteert in Unknown. PSRule geeft hiervoor None terug met -Outcome All; de beoordelingsprojectie onderscheidt deze uitkomsten. Zie de Engelstalige beleidsdocumentatie voor de exacte velden.
 
 ## RECOMMENDATION
 
-Overweeg om een LICENSE bestand in de repository root te maken.
+Configureer en pas het beleid met bronverwijzing toe. Zie [beleidsconfiguratie](../../../docs/assessment/policies.md).
+
+## ASSESSMENT
+
+Onafhankelijk beoordelingsrisico: **Low** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

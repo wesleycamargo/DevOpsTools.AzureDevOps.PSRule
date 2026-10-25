@@ -1,0 +1,1079 @@
+{
+  "baseCommit": "cd23e9a6da17a1dafd3bb467633547f736be5795",
+  "documentedCount": 117,
+  "sourceCount": 119,
+  "missingSource": [],
+  "rules": [
+    {
+      "ruleId": "Azure.DevOps.Groups.ProjectAdmins.MinMembers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Groups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Group"
+    },
+    {
+      "ruleId": "Azure.DevOps.Groups.ProjectAdmins.MaxMembers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Groups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Group"
+    },
+    {
+      "ruleId": "Azure.DevOps.Groups.ProjectValidUsers.DoNotAssignMemberOfOtherGroups",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Groups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Group"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralBillingSettings.SubscriptionActive",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralBillingSettings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.GeneralBillingSettings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralBillingSettings.EnterpriseBillingConfigured",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralBillingSettings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.GeneralBillingSettings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralBillingSettings.AssignmentBillingEnabled",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralBillingSettings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.GeneralBillingSettings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralOverview.DescriptionSet",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralOverview.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.GeneralOverview"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralOverview.TimeZoneSet",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralOverview.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.GeneralOverview"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralOverview.GeographySet",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralOverview.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.GeneralOverview"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.GeneralOverview.OwnerSet",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.GeneralOverview.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.GeneralOverview"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableAnonymousBadgeAccess",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.LimitSettableVariables",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeNonRelease",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeRelease",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.ProtectRepoAccessInYaml",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableClassicBuildPipelines",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableClassicReleasePipelines",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.LimitPRsFromForks",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableBuildsFromForks",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.SanitizeShellTaskArguments",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableStageChooser",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableInBoxTasksVar",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableMarketplaceTasksVar",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableNode6TasksVar",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.LimitJobAuthScopeForForks",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableSecretsFromForks",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.DisableImpliedYAMLCiTrigger",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.EnableAuditSettableVar",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.EnableTaskLockdown",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.RestrictPipelinePoliciesPermission",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForPullRequest",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForNonTeamMembers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForNonTeamAndNonContributors",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Pipelines.Settings.EnableShellTasksArgsSanitizingAudit",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.Debug",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": false,
+      "helpExists": true,
+      "legacySeverity": "Information",
+      "level": "Information",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowSecureShell",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowRequestAccessToken",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowTeamAdminsInvitations",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowFeedbackCollection",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Moderate",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.EnforceAADConditionalAccess",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowOAuthAuthentication",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.EnableLogAuditEvents",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.EnableArtifactsProtection",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowAnonymousAccess",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Organization.Security.Policies.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Organization.Security.Policies"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Core.UseYamlDefinition",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Core.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipeline"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Core.InheritedPermissions",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Core.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipeline"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Core.NoPlainTextSecrets",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Core.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipeline"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Core.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Core.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipeline"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Environments.ProductionCheckProtection",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Environments.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Environment"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Environments.ProductionHumanApproval",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Environments.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Environment"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Environments.Description",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Environments.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Information",
+      "targetType": "Azure.DevOps.Pipelines.Environment"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Environments.ProductionBranchLimit",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Environments.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Environment"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Environments.InheritedPermissions",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Environments.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Environment"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Environments.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Environments.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Environment"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.PipelineYaml.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.PipelineYaml"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.PipelineYaml.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.PipelineYaml"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Releases.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Pipelines.Releases.Definition"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Releases.Definition.SelfApproval",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Releases.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Pipelines.Releases.Definition"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Releases.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Pipelines.Releases.Definition"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Releases.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Releases.Definition"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Releases.Definition.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Releases.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Releases.Definition"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.RequireCommentForPullRequestFromFork",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Pipelines.Settings.StatusBadgesPrivate",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Pipelines.Settings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Pipelines.Settings"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.Visibility",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.MainPipelineAcl.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.MainServiceConnectionAcl.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.MainRepositoryAcl.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.MainEnvironmentAcl.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.MainReleaseDefinitionAcl.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Project.MainVariableGroupAcl.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Projects.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Project"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.HasBranchPolicy",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyIsEnabled",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyMinimumReviewers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyAllowSelfApproval",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyResetVotes",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyEnforceLinkedWorkItems",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyCommentResolution",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyMergeStrategy",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.BranchPolicyRequireBuild",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Branch.CommitRecent",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repo.Branches.Rule.ps1",
+      "documented": false,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo.Branch"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.HasDefaultBranchPolicy",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyIsEnabled",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyResetVotes",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.Readme",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.License",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyEnforceLinkedWorkItems",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyCommentResolution",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyMergeStrategy",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.InheritedPermissions",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.Repos.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Repos.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Repo"
+    },
+    {
+      "ruleId": "Azure.DevOps.RetentionSettings.ArtifactMinimumRetentionDays",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.RetentionSettings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.RetentionSettings"
+    },
+    {
+      "ruleId": "Azure.DevOps.RetentionSettings.PullRequestRunsMinimumRetentionDays",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.RetentionSettings.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.RetentionSettings"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.ProductionCheckProtection",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.ProductionHumanApproval",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.Description",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Information",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.Scope",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Information",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.WorkloadIdentityFederation",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Important",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.ProductionBranchLimit",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.ClassicAzure",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.GitHubPAT",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.InheritedPermissions",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.ServiceConnections.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.ServiceConnection.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.ServiceConnection"
+    },
+    {
+      "ruleId": "Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Tasks.VariableGroups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Tasks.VariableGroup"
+    },
+    {
+      "ruleId": "Azure.DevOps.Tasks.VariableGroup.Description",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Tasks.VariableGroups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Informational",
+      "level": "Information",
+      "targetType": "Azure.DevOps.Tasks.VariableGroup"
+    },
+    {
+      "ruleId": "Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Tasks.VariableGroups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Critical",
+      "level": "Error",
+      "targetType": "Azure.DevOps.Tasks.VariableGroup"
+    },
+    {
+      "ruleId": "Azure.DevOps.Tasks.VariableGroup.InheritedPermissions",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Tasks.VariableGroups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Tasks.VariableGroup"
+    },
+    {
+      "ruleId": "Azure.DevOps.Tasks.VariableGroup.ProjectValidUsers",
+      "source": "src/PSRule.Rules.AzureDevOps/rules/AzureDevOps.Tasks.VariableGroups.Rule.ps1",
+      "documented": true,
+      "helpExists": true,
+      "legacySeverity": "Severe",
+      "level": "Warning",
+      "targetType": "Azure.DevOps.Tasks.VariableGroup"
+    }
+  ]
+}

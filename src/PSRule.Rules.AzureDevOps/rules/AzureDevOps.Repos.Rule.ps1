@@ -84,17 +84,17 @@ Rule 'Azure.DevOps.Repos.Readme' `
         $Assert.HasFieldValue($TargetObject, "ReadmeExists", $true)
 }
 
-# Synopsis: The repository should contain a LICENSE file
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Repos.License' `
     -Ref 'ADO-RP-006' `
     -Type 'Azure.DevOps.Repo' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.License' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Repos.License').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description: The repository should contain a LICENSE file
-        Reason 'The repository does not contain a LICENSE file.'
-        Recommend 'Add a LICENSE file to the repository to explain its purpose.'
-        $Assert.HasField($TargetObject, "LicenseExists", $true)
-        $Assert.HasFieldValue($TargetObject, "LicenseExists", $true)
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.License' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Repos.License'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: The default branch policy enforce linked work items
@@ -139,51 +139,43 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyMergeStrategy' `
         $Assert.Greater($policies, 'Count', 0)
 }
 
-# Synopsis: GitHub Advanced Security should be enabled
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' `
     -Ref 'ADO-RP-010' `
     -Type 'Azure.DevOps.Repo' `
-    -Tag @{ release = 'GA'} `
-    -If { "Ghas" -in $TargetObject.psobject.Properties.Name } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description 'GitHub Advanced Security should be enabled'
-        Reason 'GitHub Advanced Security is not enabled'
-        Recommend 'Enable GitHub Advanced Security'
-        # Links 'https://learn.microsoft.com/en-us/azure/devops/repos/security/configure-github-advanced-security-features?'
-        $Assert.HasField($TargetObject, "Ghas.advSecEnabled", $true)
-        $Assert.HasFieldValue($TargetObject, "Ghas.advSecEnabled", $Configuration.GetBoolOrDefault('ghasEnabled', $True))
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: GitHub Advanced Security should block pushes
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' `
     -Ref 'ADO-RP-011' `
     -Type 'Azure.DevOps.Repo' `
-    -Tag @{ release = 'GA'} `
-    -If { "Ghas" -in $TargetObject.psobject.Properties.Name } `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description 'GitHub Advanced Security should block pushes'
-        Reason 'GitHub Advanced Security does not block pushes'
-        Recommend 'Consider blocking pushes'
-        # Links 'https://learn.microsoft.com/en-us/azure/devops/repos/security/configure-github-advanced-security-features?'
-        $Assert.HasField($TargetObject, "Ghas.blockPushes", $true)
-        $Assert.HasFieldValue($TargetObject, "Ghas.blockPushes", $Configuration.GetBoolOrDefault('ghasBlockPushesEnabled', $True))
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Repository should not have inherited permissions
+# Synopsis: Effective repository privileges must be authorized
 Rule 'Azure.DevOps.Repos.InheritedPermissions' `
     -Ref 'ADO-RP-012' `
     -Type 'Azure.DevOps.Repo' `
-    -Tag @{ release = 'GA'} `
-    -If { "Acls" -in $TargetObject.psobject.Properties.Name } `
+    -If { (Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Repo').Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA'; assessment = 'EffectivePermissions'; legacyName = 'InheritedPermissions' } `
     -Level Warning {
-        # Description 'Repository should not have inherited permissions'
-        Reason 'Repository has inherited permissions'
-        Recommend 'Consider removing inherited permissions'
-        # Links 'https://docs.microsoft.com/en-us/azure/devops/repos/git/set-git-repository-permissions?view=azure-devops'
-        AllOf {
-            $Assert.HasField($TargetObject, "Acls.inheritPermissions", $true)
-            $Assert.HasFieldValue($TargetObject, "Acls.inheritPermissions", $false)
-        }
+        $assessment = Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Repo'
+        Reason $assessment.ReasonCode
+        Recommend 'Restrict unauthorized effective privileges or update the approved permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: The default branch policy should require a build/pipeline to pass

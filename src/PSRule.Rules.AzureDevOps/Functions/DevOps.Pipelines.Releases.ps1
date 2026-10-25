@@ -87,11 +87,11 @@ Function Get-AzDevOpsReleaseDefinitionAcls {
     } else {
         Write-Verbose "Getting release definition ACLs for release definition $ReleaseDefinitionId"
         if ($Folder -eq '') {
-            $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?api-version=7.2-preview.1&token={1}/{2}" -f $Organization, $ProjectId, $ReleaseDefinitionId
+            $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?includeExtendedInfo=true&api-version=7.2-preview.1&token={1}/{2}" -f $Organization, $ProjectId, $ReleaseDefinitionId
         }
         else {
             $Folder = $Folder.Trim('/')
-            $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?api-version=7.2-preview.1&token={1}/{2}/{3}" -f $Organization, $ProjectId, $Folder, $ReleaseDefinitionId
+            $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?includeExtendedInfo=true&api-version=7.2-preview.1&token={1}/{2}/{3}" -f $Organization, $ProjectId, $Folder, $ReleaseDefinitionId
         }
         Write-Verbose "URI: $uri"
         $header = $script:connection.GetHeader()

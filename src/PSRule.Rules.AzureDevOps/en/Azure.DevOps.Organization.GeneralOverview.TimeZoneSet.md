@@ -8,18 +8,16 @@ online version: https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/tr
 
 ## SYNOPSIS
 
-Organization time zone should be set to CET.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Setting the organization time zone to CET ensures that timestamps and schedules are accurate for Central European Time. This rule checks that the `timeZone` setting is set to `"(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna"` in Azure DevOps organization settings.
-
-Minimum TokenType: `FullAccess`
+This control follows `assessmentPolicies['Azure.DevOps.Organization.GeneralOverview.TimeZoneSet']`. Each explicit policy needs a Reference. Set Expected to the approved time zone string. There is no universal CET requirement. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Set the time zone to CET (e.g., `"(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna"`) in Azure DevOps organization settings.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Organization Overview](https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/organization-overview)
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

@@ -5,32 +5,27 @@ Rule 'Azure.DevOps.Pipelines.Environments.ProductionCheckProtection' `
     -Ref 'ADO-E-001' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
     -With 'IsProduction' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA' } `
     -Level Warning {
-        # Description: Production environment should be protected by one or more checks
-        # Reason: No checks are configured for the environment
-        # Recommendation: Add one or more check gates to the production environment
-        # Links: https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops#check-gates
-        AllOf {
-            $Assert.HasField($TargetObject, "checks", $true)
-            $Assert.NotCount($TargetObject, "checks", 0)
-            $Assert.NotNull($TargetObject, "checks")
-        }
+        $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject
+        Reason $assessment.ReasonCode
+        Recommend 'Configure an enabled production protection check; human approval is a separate policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
-# Synopsis: Production environment should be protected by a human approval
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval' `
     -Ref 'ADO-E-002' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
     -With 'IsProduction' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description 'Production environment should be protected by a human approval'
-        Reason 'No approval check is configured for the environment'
-        Recommend 'Add one or more check gates to the production environment'
-        # Links 'https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops#check-gates'
-        $approvalCount = @($TargetObject.checks | Where-Object { $_.type.name -eq 'Approval' })
-        $Assert.Greater($approvalCount, "Count", 0)
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: Environments should have a description
@@ -62,21 +57,17 @@ Rule 'Azure.DevOps.Pipelines.Environments.ProductionBranchLimit' `
         $Assert.HasFieldValue($TargetObject, "checks[?@settings.displayName == 'Branch control'].settings.inputs.allowedBranches")
 }
 
-# Synopsis: Environment should not have inherited permissions
+# Synopsis: Effective environment privileges must be authorized
 Rule 'Azure.DevOps.Pipelines.Environments.InheritedPermissions' `
     -Ref 'ADO-E-005' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Pipelines.Environment').Outcome -ne 'Unknown' } `
+    -Tag @{ release = 'GA'; assessment = 'EffectivePermissions'; legacyName = 'InheritedPermissions' } `
     -Level Warning {
-        # Description 'Environment should not have inherited permissions'
-        Reason 'The environment has inherited permissions'
-        Recommend 'Remove inherited permissions from the environment'
-        # Links 'https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops#check-gates'
-        AllOf {
-            $Assert.HasField($TargetObject, "Acls", $true)
-            $Assert.HasField($TargetObject.Acls[0], "inheritPermissions", $true)
-            $Assert.HasFieldValue($TargetObject.Acls[0], "inheritPermissions", $false)
-        }
+        $assessment = Get-AzDevOpsEffectivePermissionAssessment -Evidence $TargetObject.PermissionEvidence -Policy $Configuration.effectivePermissionPolicies.'Azure.DevOps.Pipelines.Environment'
+        Reason $assessment.ReasonCode
+        Recommend 'Restrict unauthorized effective privileges or update the approved permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synposis: Environments should not have direct permissions for Project Valid Users

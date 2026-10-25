@@ -1,19 +1,16 @@
 # PSRule rule definitions for Azure DevOps Pipelines definitions
 
-# Synopsis: Pipelines should use YAML definitions
+# Synopsis: The target should satisfy its applicable organizational policy
 Rule 'Azure.DevOps.Project.Visibility' `
     -Ref 'ADO-PRJ-001' `
     -Type 'Azure.DevOps.Project' `
-    -Tag @{ release = 'GA'} `
+    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Project.Visibility' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Project.Visibility').Outcome -in @('Pass', 'Fail') } `
+    -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
-        # Description "Projects should not be public"
-        Reason "The project is public"
-        Recommend "Consider making the project private"
-        # Links "https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#definitions"
-        AllOf {
-            $Assert.HasField($TargetObject, "visibility", $true)
-            $Assert.HasFieldValue($TargetObject, "visibility", "private")
-        }
+        $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Project.Visibility' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.Project.Visibility'
+        Reason $assessment.ReasonCode
+        Recommend 'Apply the referenced organizational policy or collect the missing evidence.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synposis: Project level pipeline acl should not have custom permissions for Project Valid Users

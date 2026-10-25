@@ -124,7 +124,7 @@ function Get-AzDevOpsServiceConnectionAcls {
     }
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
-    $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/49b48001-ca20-4adc-8111-5b60c903a50c?api-version=7.2-preview.1&token=endpoints/{1}/{2}" -f $Organization, $ProjectId, $ServiceConnectionId
+    $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/49b48001-ca20-4adc-8111-5b60c903a50c?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/{1}/{2}" -f $Organization, $ProjectId, $ServiceConnectionId
     try {
         $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
         # If the response is not an object but a string, the authentication failed

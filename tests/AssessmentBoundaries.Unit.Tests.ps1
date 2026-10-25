@@ -158,10 +158,13 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
         @{ Scenario = 'protected production'; Name = 'production'; Protected = $true; Count = 3; Outcome = 'Pass' }
     ) {
         $checks = if ($Protected) {
-            @(@{ type = @{ name = 'Approval' } }, @{ settings = @{ displayName = 'Branch control'; inputs = @{ allowedBranches = 'refs/heads/main' } } })
+            @(@{ type = @{ name = 'Approval' }; settings = @{ approvers = @(@{ id = 'fixture-reviewer' }) } }, @{ type = @{ name = 'Branch control' }; settings = @{ displayName = 'Branch control'; inputs = @{ allowedBranches = 'refs/heads/main' } } })
         } else { @() }
-        $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = "fixture.$Name"; name = $Name; Checks = $checks }
-        $result = @($target | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name 'Azure.DevOps.ServiceConnections.Production*' -Culture en)
+        $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = "fixture.$Name"; name = $Name; Checks = @($checks) }
+        $option = New-PSRuleOption -Configuration @{ assessmentPolicies = @{
+            'Azure.DevOps.ServiceConnections.ProductionHumanApproval' = @{ Reference = 'production-review-v1' }
+        } }
+        $result = @($target | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name 'Azure.DevOps.ServiceConnections.Production*' -Option $option -Culture en)
         $result.Count | Should -Be $Count
         if ($Count) { @($result | Where-Object Outcome -NE $Outcome).Count | Should -Be 0 }
     }

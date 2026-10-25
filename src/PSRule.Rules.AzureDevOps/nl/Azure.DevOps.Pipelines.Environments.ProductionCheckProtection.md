@@ -8,29 +8,24 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Een Azure DevOps Pipelines environment die is beperkt tot productie zou
-moeten worden beschermd met een of meer controles om te voorkomen dat er
-per ongeluk wijzigingen worden aangebracht in productiebronnen.
+Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
 Deze productieregel gebruikt de naamselector `IsProduction`. Ontwikkelbronnen worden overgeslagen. Naamherkenning is een conventie; stem namen of uitzonderingen af op uw productie-inventaris.
 
-Een Azure DevOps Pipelines environment die is beperkt tot productie zou
-moeten worden beschermd met een of meer controles om te voorkomen dat er
-per ongeluk wijzigingen worden aangebracht in productiebronnen. Controles
-kunnen worden gebruikt om te eisen dat een gebruiker een implementatie
-goedkeurt of dat er een succesvolle build moet zijn voordat een
-implementatie kan worden uitgevoerd.
+Een ingeschakelde geconfigureerde controle voldoet, ook als deze geautomatiseerd is. Menselijke goedkeuring is afzonderlijk beleid. Lege of uitgeschakelde controles falen; ontbrekende gegevens zijn Unknown. Dit beoordeelt de configuratie en bewijst geen succesvolle uitvoering van een deployment.
 
 Mininum TokenType: `FineGrained`
 
 ## RECOMMENDATION
 
-Overweeg om een of meer controles toe te voegen aan de Azure DevOps
-Pipelines environment die is beperkt tot productie.
+Configure an enabled protection check and retain deployment execution evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-- [Create an environment](https://docs.microsoft.com/nl-nl/azure/devops/pipelines/process/environments?view=azure-devops&tabs=yaml#create-an-environment)
+Onafhankelijk beoordelingsrisico: **High** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

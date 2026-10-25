@@ -23,3 +23,7 @@ Consider requiring a comment for pull requests from a fork in the project settin
 ## LINKS
 
 - [Azure DevOps Security best practices - Repos and branches](https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#repositories-and-branches)
+
+## ASSESSMENT
+
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

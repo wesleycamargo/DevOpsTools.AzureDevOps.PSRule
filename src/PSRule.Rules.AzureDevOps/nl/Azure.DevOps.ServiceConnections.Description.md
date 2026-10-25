@@ -26,3 +26,7 @@ Overweeg om een beschrijving toe te voegen aan de service connection.
 ## LINKS
 
 - [Create a service connection](https://docs.microsoft.com/nl-nl/azure/devops/pipelines/library/connect-to-azure?view=azure-devops&tabs=yaml)
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Information remain compatibility metadata; they are not the four-grade assessment scale.

@@ -1,0 +1,31 @@
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Baseline
+metadata:
+  name: Baseline.EngineeringReview
+spec:
+  rule:
+    include:
+      - Azure.DevOps.Groups.ProjectAdmins.MinMembers
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableClassicBuildPipelines
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableClassicReleasePipelines
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableStageChooser
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableInBoxTasksVar
+      - Azure.DevOps.Organization.Pipelines.Settings.DisableImpliedYAMLCiTrigger
+      - Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForPullRequest
+      - Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForNonTeamMembers
+      - Azure.DevOps.Organization.Pipelines.Settings.RequireCommentsForNonTeamAndNonContributors
+      - Azure.DevOps.Pipelines.Core.UseYamlDefinition
+      - Azure.DevOps.Pipelines.Environments.Description
+      - Azure.DevOps.Pipelines.PipelineYaml.StepDisplayName
+      - Azure.DevOps.Repos.Branch.BranchPolicyEnforceLinkedWorkItems
+      - Azure.DevOps.Repos.Branch.BranchPolicyMergeStrategy
+      - Azure.DevOps.Repos.Branch.BranchPolicyRequireBuild
+      - Azure.DevOps.Repos.Readme
+      - Azure.DevOps.Repos.DefaultBranchPolicyEnforceLinkedWorkItems
+      - Azure.DevOps.Repos.DefaultBranchPolicyMergeStrategy
+      - Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild
+      - Azure.DevOps.ServiceConnections.Description
+      - Azure.DevOps.Tasks.VariableGroup.Description
+  configuration:
+    branchMinimumApproverCount: 1
+    releaseMinimumProductionApproverCount: 1

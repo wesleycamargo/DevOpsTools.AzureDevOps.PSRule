@@ -8,30 +8,24 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Een service connection die is beperkt tot productie zou moeten worden
-beschermd. Dit zal helpen om ervoor te zorgen dat er geen onbedoelde
-wijzigingen worden aangebracht in de productie resources.
+Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
 Deze productieregel gebruikt de naamselector `IsProduction`. Ontwikkelbronnen worden overgeslagen. Naamherkenning is een conventie; stem namen of uitzonderingen af op uw productie-inventaris.
 
-Door een service connection te beperken tot productie, wordt voorkomen dat
-deze wordt gebruikt voor het wijzigen van resources in andere omgevingen.
-Het beschermen van een service connection met één of meer checks zal helpen
-voorkomen dat er per ongeluk wijzigingen worden aangebracht in productie
-resources. Bijvoorbeeld, een service connection die is beperkt tot productie
-zou moeten worden beschermd met een check die een minimum aantal reviewers
-vereist of een specifieke CI pipeline moet doorlopen.
+Een ingeschakelde geconfigureerde controle voldoet, ook als deze geautomatiseerd is. Menselijke goedkeuring is afzonderlijk beleid. Lege of uitgeschakelde controles falen; ontbrekende gegevens zijn Unknown. Dit beoordeelt de configuratie en bewijst geen succesvolle uitvoering van een deployment.
 
 Mininum TokenType: `ReadOnly`
 
 ## RECOMMENDATION
 
-Overweeg om een service connection die is beperkt tot productie te
-beschermen met één of meer checks.
+Configure an enabled protection check and retain deployment execution evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/nl-nl/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
+Onafhankelijk beoordelingsrisico: **High** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.
 
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

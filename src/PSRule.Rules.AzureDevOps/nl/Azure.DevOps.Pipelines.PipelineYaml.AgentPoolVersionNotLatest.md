@@ -8,20 +8,20 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-Microsoft Hosted agent pools zouden vastgepind moeten worden op een versie.
+Het doel moet voldoen aan toepasselijk organisatiebeleid.
 
 ## DESCRIPTION
 
-Microsoft Hosted agent pools zouden vastgepind moeten worden op een versie. Dit
-zorgt ervoor dat de pipeline niet beïnvloed wordt door wijzigingen aan de agent
-pool en het besturingssysteem.
-
-Mininum TokenType: `ReadOnly`
+Deze controle volgt `assessmentPolicies['Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest']`. Elk expliciet beleid vereist een Reference. Zonder optioneel beleid is de controle niet van toepassing. Ontbrekend bewijs voor toepasselijk beleid resulteert in Unknown. PSRule geeft hiervoor None terug met -Outcome All; de beoordelingsprojectie onderscheidt deze uitkomsten. Zie de Engelstalige beleidsdocumentatie voor de exacte velden.
 
 ## RECOMMENDATION
 
-Overweeg om de agent pool vast te pinnen op een specifieke versie.
+Configureer en pas het beleid met bronverwijzing toe. Zie [beleidsconfiguratie](../../../docs/assessment/policies.md).
 
-## LINKS
+## ASSESSMENT
 
-- [Azure Pipelines YAML schema reference](https://docs.microsoft.com/nl-nl/azure/devops/pipelines/yaml-schema)
+Onafhankelijk beoordelingsrisico: **Low** (severity policy `1.0.0`). De bestaande helpclassificatie en het PSRule-niveau blijven compatibiliteitsmetadata; dit is een afzonderlijke risicoschaal.
+
+## ASSESSMENT
+
+Independent assessment risk: **Low** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

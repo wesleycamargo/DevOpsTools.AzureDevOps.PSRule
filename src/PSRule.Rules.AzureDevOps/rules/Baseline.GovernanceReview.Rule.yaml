@@ -1,0 +1,16 @@
+apiVersion: github.com/microsoft/PSRule/v1
+kind: Baseline
+metadata:
+  name: Baseline.GovernanceReview
+spec:
+  rule:
+    include:
+      - Azure.DevOps.Organization.GeneralBillingSettings.SubscriptionActive
+      - Azure.DevOps.Organization.GeneralOverview.DescriptionSet
+      - Azure.DevOps.Organization.GeneralOverview.OwnerSet
+      - Azure.DevOps.Organization.Pipelines.Settings.EnableAuditSettableVar
+      - Azure.DevOps.Organization.Pipelines.Settings.EnableShellTasksArgsSanitizingAudit
+      - Azure.DevOps.Organization.Security.Policies.DisallowFeedbackCollection
+  configuration:
+    branchMinimumApproverCount: 1
+    releaseMinimumProductionApproverCount: 1

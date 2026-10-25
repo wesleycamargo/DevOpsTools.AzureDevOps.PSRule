@@ -8,25 +8,20 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-An environment scoped to production should be protected with one or more
-checks to prevent accidental changes to production resources.
+Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
 This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
 
-An environment scoped to production should be protected with one or more
-checks to prevent accidental changes to production resources. Checks can
-be used to require a user to approve a deployment or require a successful
-build before a deployment can be made.
+An enabled configured protection check satisfies this diagnostic, including an automated check. Human approval is a separate policy. Empty checks fail; disabled checks fail; unavailable or incomplete check collection is Unknown and not evaluated by PSRule. This verifies gate configuration, not successful execution of a deployment. Raw findings remain distinct; only the same target's common missing or disabled gate is correlated in assessment scoring.
 
 Mininum TokenType: `FineGrained`
 
 ## RECOMMENDATION
 
-Consider adding one or more checks to the environment.
+Configure an enabled protection check and retain deployment execution evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-- [Create an environment](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops&tabs=yaml#create-an-environment)
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

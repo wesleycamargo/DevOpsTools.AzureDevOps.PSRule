@@ -437,15 +437,25 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
     Context 'Security policy response validation' {
         BeforeAll { $unmockedCommands = @('Export-AdoOrganizationSecurityPolicies') }
 
-        It 'recognizes the canonical policy names returned by Azure DevOps' {
+        It 'accepts complete security policy identifiers in <Naming> form' -ForEach @(
+            @{ Naming = 'API'; Spaced = $false }
+            @{ Naming = 'legacy spaced'; Spaced = $true }
+        ) {
             Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-WebRequest {
-                $names = 'DisallowSecureShell', 'AllowRequestAccessToken', 'AllowTeamAdminsInvitationsAccessToken', 'AllowFeedbackCollection', 'EnforceAADConditionalAccess', 'DisallowOAuthAuthentication', 'LogAuditEvents', 'ArtifactsExternalPackageProtectionToken', 'AllowAnonymousAccess', 'DisallowAadGuestUserAccess'
-                $entries = @($names | ForEach-Object { @{ policy = @{ name = "Policy.$_"; effectiveValue = $false }; description = 'fixture' } })
-                $json = @{ fps = @{ dataProviders = @{ data = @{ 'ms.vss-admin-web.organization-policies-data-provider' = @{ policies = @{ fixture = $entries } } } } } } | ConvertTo-Json -Depth 10
+                $names = @('Disallow Secure Shell', 'Allow Request Access Token', 'Allow Team Admins Invitations Access Token', 'Allow Feedback Collection', 'Enforce AAD Conditional Access', 'Disallow OAuth Authentication', 'Log Audit Events', 'Artifacts External Package Protection Token', 'Allow Anonymous Access', 'Disallow Aad Guest User Access')
+                $entries = foreach ($name in $names) {
+                    if (-not $Spaced) { $name = $name -replace '\s+', '' }
+                    @{ policy = @{ name = "Policy.$name"; effectiveValue = $false }; description = 'fixture' }
+                }
+                $json = @{ fps = @{ dataProviders = @{ data = @{ 'ms.vss-admin-web.organization-policies-data-provider' = @{ policies = @{ fixture = @($entries) } } } } } } | ConvertTo-Json -Depth 10
                 [pscustomobject]@{ Content = $json; RawContent = $json }
             }
-            Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -CompletenessReportPath $reportPath -Strict
-            (Get-Content $reportPath -Raw | ConvertFrom-Json).OrganizationCollection.Status | Should -Be Complete
+
+            $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -CompletenessReportPath $reportPath -Strict)
+
+            ($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Organization.Security.Policies').'policy.disallowSecureShell' | Should -BeFalse
+            (Get-Content -Raw $reportPath | ConvertFrom-Json).Status | Should -Be 'Complete'
+            (Get-Content -Raw $reportPath | ConvertFrom-Json).OrganizationCollection.Status | Should -Be 'Complete'
         }
 
         It 'reports a missing security provider as unavailable' {

@@ -8,18 +8,16 @@ online version: https://github.com/thecloudexplorers/PSRule.Rules.AzureDevOps/tr
 
 ## SYNOPSIS
 
-Azure AD guest user access should be disabled.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-Disabling Azure AD guest user access restricts external users from accessing the organization. This rule checks that the `policy.disallowAadGuestUserAccess` setting is enabled in Azure DevOps organization settings.
-
-Minimum TokenType: `FullAccess`
+This control follows `assessmentPolicies['Azure.DevOps.Organization.Security.Policies.DisallowAadGuestUserAccess']`. Each explicit policy needs a Reference. Set Expected=false for approved governed guest access, or true when guest access is prohibited. Permitted guest access also requires complete GuestAccessEvidence, a Reference listed in ApprovedGuestReviews, and guest descriptors listed in ApprovedGuests. Unapproved guests fail; missing governance evidence is Unknown. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 ## RECOMMENDATION
 
-Disable Azure AD guest user access in Azure DevOps organization settings.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Guest Access](https://docs.microsoft.com/en-us/azure/active-directory/external-identities/what-is-b2b)
+Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.

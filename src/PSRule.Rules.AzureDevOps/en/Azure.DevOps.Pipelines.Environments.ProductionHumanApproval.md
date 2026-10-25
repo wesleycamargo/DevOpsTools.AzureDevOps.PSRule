@@ -8,27 +8,20 @@ online version: https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/blob/ma
 
 ## SYNOPSIS
 
-An environment scoped to production should be protected by a human review
-and approval. This will help ensure no accidental changes are made to the
-production resources.
+The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
 This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
 
-Protecting a service connection with a human check will help prevent accidental
-changes to production resources. For example, a service connection scoped to
-production should be protected with a check that requires a minimum number of
-reviewers or a specific CI pipeline must pass.
+This control follows `assessmentPolicies['Azure.DevOps.Pipelines.Environments.ProductionHumanApproval']`. Each explicit policy needs a Reference. A referenced policy makes human review required for the selected Targets. A configured enabled Approval check with approvers satisfies it. ApprovedEquivalentControls can reference approved effective automated review when policy allows it. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
 Mininum TokenType: `FineGrained`
 
 ## RECOMMENDATION
 
-Consider protecting a service connection scoped to production with a human
-approval check.
+Configure and apply the referenced policy. See [policy configuration](../../../docs/assessment/policies.md) for examples, scope, and equivalent-control evidence.
 
-## LINKS
+## ASSESSMENT
 
-- [Define approvals and checks](https://learn.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass)
-- [Create an environment](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/environments?view=azure-devops&tabs=yaml#create-an-environment)
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

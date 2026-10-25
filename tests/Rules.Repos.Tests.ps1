@@ -269,41 +269,13 @@ Describe "Azure.DevOps.Repos rules" -Tag 'Integration' {
     }
 
     Context ' Azure.DevOps.Repos.License' {
-        It ' should fail for targets named fail' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.License' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.Repos.License').Count | Should -Be 0
         }
 
-        It ' should pass for targets named success' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.License' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should be the same with a ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.License' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
-
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.License' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should be the same with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.License' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
-
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.License' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should have a markdown help file' {
-            $fileExists = Test-Path -Path (Join-Path -Path $ourModule -ChildPath 'en/Azure.DevOps.Repos.License.md');
-            $fileExists | Should -Be $true;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.Repos.License.md') | Should -Be $true
         }
     }
 
@@ -425,104 +397,35 @@ Describe "Azure.DevOps.Repos rules" -Tag 'Integration' {
     }
 
     Context ' Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' {
-        It ' should fail for targets named fail' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled').Count | Should -Be 0
         }
 
-        It ' should pass none' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should not be run in the Baseline.NoExtraLicense baseline' {
-            $ruleHits = @($noExtraLicenseBaselineResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should not be present with a ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should not be present with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should have an English markdown help file' {
-            $fileExists = Test-Path -Path (Join-Path -Path $ourModule -ChildPath 'en/Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled.md');
-            $fileExists | Should -Be $true;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.Repos.GitHubAdvancedSecurityEnabled.md') | Should -Be $true
         }
     }
 
     Context ' Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' {
-        It ' should fail for targets named fail' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes').Count | Should -Be 0
         }
 
-        It ' should pass none' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should not be run in the Baseline.NoExtraLicense baseline' {
-            $ruleHits = @($noExtraLicenseBaselineResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should not be present with a ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should not be present with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should have an English markdown help file' {
-            $fileExists = Test-Path -Path (Join-Path -Path $ourModule -ChildPath 'en/Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes.md');
-            $fileExists | Should -Be $true;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.Repos.GitHubAdvancedSecurityBlockPushes.md') | Should -Be $true
         }
     }
 
     Context ' Azure.DevOps.Repos.InheritedPermissions' {
-        It ' should fail for targets named fail' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.InheritedPermissions' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
+        It 'does not evaluate without the required referenced policy and evidence' {
+            $allResults = @($ruleResult) + @($ruleResultFineGrained) + @($ruleResultReadOnly)
+            @($allResults | Where-Object RuleName -EQ 'Azure.DevOps.Repos.InheritedPermissions').Count | Should -Be 0
         }
 
-        It ' should pass for targets named success' {
-            $ruleHits = @($ruleResult | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.InheritedPermissions' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should not be present with the ReadOnly TokenType' {
-            $ruleHits = @($ruleResultReadOnly | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.InheritedPermissions' })
-            $ruleHits.Count | Should -Be 0;
-        }
-
-        It ' should be the same as default with a FineGrained TokenType' {
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.InheritedPermissions' -and $_.TargetName -match 'fail-project$' })
-            $ruleHits[0].Outcome | Should -Be 'Fail';
-            $ruleHits.Count | Should -Be 1;
-
-            $ruleHits = @($ruleResultFineGrained | Where-Object { $_.RuleName -eq 'Azure.DevOps.Repos.InheritedPermissions' -and $_.TargetName -match 'success' })
-            $ruleHits[0].Outcome | Should -Be 'Pass';
-            $ruleHits.Count | Should -Be 1;
-        }
-
-        It ' should have a markdown help file' {
-            $fileExists = Test-Path -Path (Join-Path -Path $ourModule -ChildPath 'en/Azure.DevOps.Repos.InheritedPermissions.md');
-            $fileExists | Should -Be $true;
+        It 'retains its English rule help' {
+            Test-Path (Join-Path $ourModule 'en/Azure.DevOps.Repos.InheritedPermissions.md') | Should -Be $true
         }
     }
 

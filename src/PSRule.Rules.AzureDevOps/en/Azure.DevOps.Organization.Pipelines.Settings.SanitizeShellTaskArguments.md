@@ -23,3 +23,7 @@ Enable "Sanitize shell task arguments" in Azure DevOps organization settings.
 ## LINKS
 
 - [Security Overview](https://docs.microsoft.com/en-us/azure/devops/organizations/security/security-overview)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

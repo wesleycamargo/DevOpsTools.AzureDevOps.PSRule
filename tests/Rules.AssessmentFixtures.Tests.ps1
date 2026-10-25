@@ -20,8 +20,13 @@ Describe 'Assessment with synthetic rule fixtures' -Tag 'Unit' {
     It 'evaluates passing, failing, missing-field and inapplicable <FixtureName> targets' -ForEach $fixtures {
         $fixture = Get-Content $FixturePath -Raw | ConvertFrom-Json
         $fixture.Cases.Count | Should -Be 4
-        $results = @($fixture.Cases.Target | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name $fixture.Rule -Culture en)
-        $results.Count | Should -Be 3
+        $configuration = @{}
+        if ($fixture.Configuration) {
+            $configuration = $fixture.Configuration | ConvertTo-Json -Depth 20 | ConvertFrom-Json -AsHashtable
+        }
+        $option = New-PSRuleOption -Configuration $configuration
+        $results = @($fixture.Cases.Target | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name $fixture.Rule -Option $option -Culture en)
+        $results.Count | Should -Be @($fixture.Cases | Where-Object Outcome -NE 'None').Count
 
         foreach ($case in $fixture.Cases) {
             $targetName = "$($case.Target.ObjectType)/$($case.Target.ObjectName)"
