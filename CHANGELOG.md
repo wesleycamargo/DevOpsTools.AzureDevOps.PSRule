@@ -26,6 +26,9 @@
 
 ### Fixed
 
+- Organization collection retains sanitized permission, endpoint and response-shape failure reasons; invalid setting types cannot become boolean compliance evidence.
+- Repository Advanced Security collection uses the documented enablement API while preserving `Ghas` fields and token-profile restrictions. Project pipeline/retention settings use stable API versions and repository pipeline permissions use an explicit version.
+
 - Assessment pipeline export discovery now includes nested project files and retains both raw SARIF and versioned per-project reports. Policy or denominator changes invalidate numerical history comparisons.
 
 - Masked Azure DevOps variable-group secrets no longer require Key Vault. The historical `NoKeyVaultNoSecrets` ID remains a deprecated alias; unavailable data is not evaluated.

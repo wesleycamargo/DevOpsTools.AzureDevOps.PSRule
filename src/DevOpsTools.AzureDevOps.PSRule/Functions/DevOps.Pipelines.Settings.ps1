@@ -23,7 +23,7 @@ Function Get-AzDevOpsPipelinesSettings {
     }
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
-    $uri = "https://dev.azure.com/$Organization/$Project/_apis/build/generalsettings?api-version=7.1-preview.1"
+    $uri = "https://dev.azure.com/$Organization/$Project/_apis/build/generalsettings?api-version=7.1"
     Write-Verbose "URI: $uri"
     try {
         $pipelinesSettings = Invoke-RestMethod -Uri $uri -Method Get -Headers $header -ContentType 'application/json'

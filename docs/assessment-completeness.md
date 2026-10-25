@@ -77,6 +77,8 @@ Reason codes identify conditions without including credentials, raw responses, o
 exception messages: `EmptyCollection`, `PermissionDenied`, `MissingRequiredData`,
 `YamlUnavailable`, `CollectorFailed`, `ProjectDiscoveryFailed`, and
 `ProjectExportFailed`, and `OrganizationExportFailed`.
+Organization request failures additionally use `EndpointUnavailable`,
+`RequestFailed`, `MalformedResponse`, and `SchemaChanged`.
 
 Required settings must be present and non-null. Legitimately nullable fields,
 such as an unset organization description or an unconfigured billing subscription,
@@ -93,3 +95,42 @@ and policy discovery follow continuation headers. A missing or failed later page
 fails collection. Completeness still does not prove retry resilience or complete
 coverage of undocumented remote behavior. A collected false or
 unset setting may still fail a rule; that is a finding, not a retrieval failure.
+
+## Organization response validation
+
+Organization overview, billing, security-policy and pipeline-settings readers
+share request failure classification. HTTP 401/403 or sign-in HTML records
+`Unavailable`/`PermissionDenied`; HTTP 404/410/429 or server errors record
+`Unavailable`/`EndpointUnavailable`. Other request failures use `RequestFailed`,
+and invalid JSON uses `MalformedResponse`. These statuses survive aggregate
+collection; unexpected collector exceptions still use `Failed`/`CollectorFailed`.
+Request exceptions are replaced with stable diagnostics before propagation, so
+response bodies and request credentials do not enter those messages or reports.
+
+Missing fields retain `MissingRequiredData`. Unexpected setting types become null
+or are omitted and record `SchemaChanged`; a string such as `"false"` never becomes
+boolean evidence. Valid false values and legitimately nullable fields remain usable.
+Strict export still attempts remaining collectors, writes the report, then rejects
+incomplete collection. The organization portal and commerce dependencies remain
+internal contracts; these checks detect failures and schema drift without making
+them optional or supplying passing defaults.
+
+## Versioned collection endpoints
+
+Repository Advanced Security uses Microsoft's documented
+[Repo Enablement GET](https://learn.microsoft.com/en-us/rest/api/azure/devops/advancedsecurity/repo-enablement/get?view=azure-devops-rest-7.2)
+with `includeAllProperties=true` and `7.2-preview.3`, replacing the portal
+Contribution provider. The existing `Ghas.advSecEnabled` output is true when both
+Code Security and Secret Protection are enabled; `Ghas.blockPushes` retains the
+secret-protection flag. Missing or nonboolean flags remain null and incomplete.
+ReadOnly/FineGrained restrictions are unchanged, and an API failure does not fall
+back to portal evidence. The documented OAuth scope is `vso.advsec`; identity
+permissions still apply, and this endpoint remains preview.
+
+Project [General Settings](https://learn.microsoft.com/en-us/rest/api/azure/devops/build/general-settings/get?view=azure-devops-rest-7.1),
+[Retention](https://learn.microsoft.com/en-us/rest/api/azure/devops/build/retention/get?view=azure-devops-rest-7.1)
+and [Build Settings](https://learn.microsoft.com/en-us/rest/api/azure/devops/build/settings/get?view=azure-devops-rest-7.1)
+use stable `7.1` contracts. General Settings documents `vso.project`, while
+Retention and Build Settings document `vso.build`. Repository
+[Pipeline Permissions](https://learn.microsoft.com/en-us/rest/api/azure/devops/approvalsandchecks/pipeline-permissions/get?view=azure-devops-rest-7.1)
+uses explicit `7.1-preview.1` and documents `vso.build`.

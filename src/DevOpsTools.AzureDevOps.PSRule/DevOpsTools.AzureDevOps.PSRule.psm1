@@ -182,7 +182,12 @@ function Invoke-AzDevOpsCollectors {
         }
         catch {
             $failedExports += $export.Name
-            Set-AzDevOpsCollectionStatus -Status Failed -ReasonCode CollectorFailed
+            $requestFailure = @($script:collectionStatus.ReasonCodes | Where-Object {
+                $_ -in 'PermissionDenied', 'EndpointUnavailable', 'RequestFailed', 'MalformedResponse'
+            }).Count -gt 0
+            if (-not $OrganizationScope -or $script:collectionStatus.Status -ne 'Unavailable' -or -not $requestFailure) {
+                Set-AzDevOpsCollectionStatus -Status Failed -ReasonCode CollectorFailed
+            }
             Write-Error "[$($export.Name)]: Collection failed." -ErrorAction Continue
         }
         finally {

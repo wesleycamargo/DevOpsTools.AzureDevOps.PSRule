@@ -28,8 +28,8 @@ Function Get-AzDevOpsRetentionSettings {
     $header = $script:connection.GetHeader()
 
     # Azure DevOps REST API endpoint for project retention settings
-    $settingsUri = "https://dev.azure.com/$($Organization)/$($Project)/_apis/build/retention?api-version=7.1-preview.1"
-    $policyUri = "https://dev.azure.com/$($Organization)/$($Project)/_apis/build/settings?api-version=7.1-preview.1"
+    $settingsUri = "https://dev.azure.com/$($Organization)/$($Project)/_apis/build/retention?api-version=7.1"
+    $policyUri = "https://dev.azure.com/$($Organization)/$($Project)/_apis/build/settings?api-version=7.1"
     try {
         $settingsResponse = Invoke-RestMethod -Uri $settingsUri -Method Get -Headers $header
         $policyResponse = Invoke-RestMethod -Uri $policyUri -Method Get -Headers $header
