@@ -25,7 +25,8 @@ variables:
     value: "2.9.0"
 
 pool:
-  name: AI-Pool
+  name: 'Azure Pipelines'
+  vmImage: ubuntu-latest
 
 steps:
   - checkout: self
