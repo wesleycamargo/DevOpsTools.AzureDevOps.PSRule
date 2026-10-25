@@ -48,15 +48,7 @@ function Read-AdoOrganizationSecurityPolicies {
     try {
         # Use Invoke-WebRequest to allow content inspection before parsing
         Write-Verbose "Querying API: $uri"
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
-
-        # Check for HTML content indicating invalid/expired token
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-            throw "Access denied or token expired. Please verify your Bearer token is still valid."
-        }
-
-        # Parse JSON response
-        $response = $rawResponse.Content | ConvertFrom-Json
+        $response = Invoke-AzDevOpsOrganizationRequest -Uri $uri -Headers $headers
 
         # Navigate to the internal data provider
         $policyData = $response.fps.dataProviders.data.'ms.vss-admin-web.organization-policies-data-provider'
@@ -97,7 +89,11 @@ function Read-AdoOrganizationSecurityPolicies {
                 $name = $p.name
                 $desc = $entry.description
                 Set-AzDevOpsMissingCollectionData -Data $p -RequiredProperties @('name', 'effectiveValue')
-                $effective = [bool]$p.effectiveValue  # Ensure boolean type
+                if ($name -isnot [string] -or $p.effectiveValue -isnot [bool]) {
+                    Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode SchemaChanged
+                    continue
+                }
+                $effective = $p.effectiveValue
 
                 Write-Host " - $desc"
                 Write-Host "   Name: $name"

@@ -66,17 +66,10 @@ function Read-AdoOrganizationPipelinesSettings {
 
     try {
         # Invoke API to retrieve settings
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Post -Headers $headers -Body $body -UseBasicParsing
+        $response = Invoke-AzDevOpsOrganizationRequest -Uri $uri -Method Post -Headers $headers -Body $body
 
-        # Validate response for authentication errors
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-            throw "Access denied or token expired. Please verify your Bearer token is still valid."
-        }
-
-        # Parse response
-        $response = $rawResponse.Content | ConvertFrom-Json
         $settings = $response.dataProviders.'ms.vss-build-web.pipelines-org-settings-data-provider'
-        Set-AzDevOpsMissingCollectionData -Data $settings -RequiredProperties @(
+        $requiredSettings = @(
             'statusBadgesArePrivate', 'enforceSettableVar', 'enforceJobAuthScope', 'enforceJobAuthScopeForReleases',
             'enforceReferencedRepoScopedToken', 'disableStageChooser', 'disableClassicBuildPipelineCreation',
             'disableClassicReleasePipelineCreation', 'disableInBoxTasksVar', 'disableMarketplaceTasksVar',
@@ -86,6 +79,8 @@ function Read-AdoOrganizationPipelinesSettings {
             'isCommentRequiredForPullRequest', 'requireCommentsForNonTeamMembersOnly',
             'requireCommentsForNonTeamMemberAndNonContributors', 'enableShellTasksArgsSanitizingAudit'
         )
+        Test-AzDevOpsOrganizationDataType -Data $settings -BooleanProperties $requiredSettings
+        Set-AzDevOpsMissingCollectionData -Data $settings -RequiredProperties $requiredSettings
 
         # Output settings to console (optional, retained for debugging)
         Write-Host ""

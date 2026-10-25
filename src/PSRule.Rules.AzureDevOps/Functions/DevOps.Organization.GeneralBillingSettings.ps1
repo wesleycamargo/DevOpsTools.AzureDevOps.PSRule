@@ -48,12 +48,8 @@ function Read-AdoOrganizationGeneralBillingSettings {
     }
 
     try {
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-            throw "Access denied or token expired. Please verify your Bearer token is still valid."
-        }
-
-        $response = $rawResponse.Content | ConvertFrom-Json
+        $response = Invoke-AzDevOpsOrganizationRequest -Uri $uri -Headers $headers
+        Test-AzDevOpsOrganizationDataType -Data $response -BooleanProperties @('isEnterpriseBillingEnabled', 'isAssignmentBillingEnabled') -StringProperties 'currentOrganizationName'
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties @('currentOrganizationName', 'subscriptionStatus', 'isEnterpriseBillingEnabled', 'isAssignmentBillingEnabled') -AllowNullProperties 'subscriptionStatus'
 
 

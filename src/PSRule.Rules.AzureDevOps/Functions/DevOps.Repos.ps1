@@ -213,7 +213,7 @@ Function Get-AzDevOpsRepositoryPipelinePermissions {
     }
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
-    $uri = "https://dev.azure.com/{0}/{1}/_apis/pipelines/pipelinePermissions/repository/{2}.{3}" -f $Organization, $ProjectId, $ProjectId, $RepositoryId
+    $uri = "https://dev.azure.com/{0}/{1}/_apis/pipelines/pipelinePermissions/repository/{2}.{3}?api-version=7.1-preview.1" -f $Organization, $ProjectId, $ProjectId, $RepositoryId
     try {
         $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header -ContentType "application/json"
         # If the response is a string and not an object, throw an exception for authentication failure or project not found
@@ -387,21 +387,9 @@ Function Get-AzDevOpsRepositoryGhas {
         return $null
     } else {
         $header = $script:connection.GetHeader()
-        $payload = @{
-            contributionIds = @(
-                "ms.vss-features.my-organizations-data-provider"
-                "ms.vss-advsec.advanced-security-enablement-data-provider"
-            )
-            dataProviderContext = @{
-                properties = @{
-                    givenProjectId = $ProjectId
-                    givenRepoId = $RepositoryId
-                }
-            }
-        }
-        $url = "https://dev.azure.com/$Organization/_apis/Contribution/HierarchyQuery?api-version=5.0-preview.1"
+        $url = "https://advsec.dev.azure.com/$Organization/$ProjectId/_apis/management/repositories/$RepositoryId/enablement?includeAllProperties=true&api-version=7.2-preview.3"
         try {
-            $response = Invoke-RestMethod -Uri $url -Method Post -Headers $header -Body ($payload | ConvertTo-Json) -ContentType "application/json"
+            $response = Invoke-RestMethod -Uri $url -Method Get -Headers $header -ContentType "application/json"
             # If the response is a string and not an object, throw an exception for authentication failure or project not found
             if ($response -is [string]) {
                 throw "Authentication failed or project not found"
@@ -410,8 +398,15 @@ Function Get-AzDevOpsRepositoryGhas {
         catch {
             throw $_.Exception.Message
         }
-        Set-AzDevOpsMissingCollectionData -Data $response.dataProviders.'ms.vss-advsec.advanced-security-enablement-data-provider' -Partial
-        return $response.dataProviders.'ms.vss-advsec.advanced-security-enablement-data-provider'
+        $codeSecurity = $response.codeSecurityFeatures.codeSecurityEnabled
+        $secretProtection = $response.secretProtectionFeatures.secretProtectionEnabled
+        $blockPushes = $response.secretProtectionFeatures.blockPushes
+        $settings = [pscustomobject]@{
+            advSecEnabled = if ($codeSecurity -is [bool] -and $secretProtection -is [bool]) { $codeSecurity -and $secretProtection } else { $null }
+            blockPushes = if ($blockPushes -is [bool]) { $blockPushes } else { $null }
+        }
+        Set-AzDevOpsMissingCollectionData -Data $settings -RequiredProperties @('advSecEnabled', 'blockPushes') -Partial
+        return $settings
     }
 }
 Export-ModuleMember -Function Get-AzDevOpsRepositoryGhas

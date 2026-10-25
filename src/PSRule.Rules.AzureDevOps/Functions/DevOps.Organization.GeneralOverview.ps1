@@ -49,15 +49,11 @@ function Read-AdoOrganizationGeneralOverview {
 
     try {
         # Invoke API to retrieve settings
-        $rawResponse = Invoke-WebRequest -Uri $uri -Method Get -Headers $headers -UseBasicParsing
+        $response = Invoke-AzDevOpsOrganizationRequest -Uri $uri -Headers $headers
 
-        # Validate response for authentication errors
-        if ($rawResponse.Content -match '<html' -or $rawResponse.RawContent -match 'Sign In') {
-            throw "Access denied or token expired. Please verify your Bearer token is still valid."
-        }
-
-        # Parse response
-        $response = $rawResponse.Content | ConvertFrom-Json
+        Test-AzDevOpsOrganizationDataType -Data $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider' -StringProperties @('description', 'geography', 'region') -AllowEmptyStringProperties 'description'
+        Test-AzDevOpsOrganizationDataType -Data $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'.timeZone -StringProperties 'displayName'
+        Test-AzDevOpsOrganizationDataType -Data $response.fps.dataProviders.data.'ms.vss-web.page-data'.user -StringProperties 'displayName'
         Set-AzDevOpsMissingCollectionData -Data $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider' -RequiredProperties @('description', 'timeZone', 'geography', 'region') -AllowNullProperties 'description'
         Set-AzDevOpsMissingCollectionData -Data $response.fps.dataProviders.data.'ms.vss-admin-web.organization-admin-overview-data-provider'.timeZone -RequiredProperties 'displayName' -Partial
         Set-AzDevOpsMissingCollectionData -Data $response.fps.dataProviders.data.'ms.vss-web.page-data'.user -RequiredProperties 'displayName' -Partial

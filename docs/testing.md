@@ -30,3 +30,29 @@ Invoke-Pester -Path ./tests/Rules.Groups.Tests.ps1 -Tag Integration
 ```
 
 Missing live prerequisites produce an error naming the required variables before connecting. Live exports are temporary and are not committed.
+
+## Collection regression checks
+
+The Unit selection includes deterministic empty-list cases for pipelines,
+environments, release definitions, variable groups and repository branches.
+These supplement the retained live Integration tests; no live scenario or
+permission-profile test is replaced with a shared synthetic response.
+
+Organization failure tests exercise the real collectors and strict completion
+boundary with mocked HTTP responses. They cover denied/unavailable endpoints,
+malformed JSON, missing data, changed field types and preservation of sanitized
+reason codes. Repository-security tests cover the documented API projection,
+missing/malformed flags, permission restrictions and failure without portal fallback.
+Versioned API tests retain false settings and retention values across the request
+and response boundary. The existing completeness suite checks legitimate null
+billing/overview fields and false-valued settings.
+
+To run only these focused checks:
+
+```powershell
+Invoke-Pester -Path ./tests/OrganizationFailures.Unit.Tests.ps1, ./tests/RepositorySecurityApi.Unit.Tests.ps1, ./tests/EmptyCollections.Unit.Tests.ps1, ./tests/CollectionApiVersions.Unit.Tests.ps1 -Output Detailed
+```
+
+The API mappings were checked against Microsoft REST documentation. Offline
+results do not establish current permissions or endpoint availability for a live
+assessment identity. Run Integration with the intended credentials separately.
