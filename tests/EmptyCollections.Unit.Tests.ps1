@@ -1,10 +1,10 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe 'Empty collection contracts with deterministic API fixtures' -Tag Unit {
     BeforeEach {
-        Mock -ModuleName PSRule.Rules.AzureDevOps Invoke-RestMethod { [pscustomobject]@{ value = @(); count = 0 } }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @(); count = 0 } }
         Connect-AzDevOps -Organization fixture-org -PAT fixture-token
     }
 
@@ -16,6 +16,6 @@ Describe 'Empty collection contracts with deterministic API fixtures' -Tag Unit 
         @{ Command = 'Get-AzDevOpsBranches'; Parameters = @{ Project = 'fixture-project'; Repository = 'empty-repo' } }
     ) {
         & $Command @Parameters | Should -BeNullOrEmpty
-        Should -Invoke -ModuleName PSRule.Rules.AzureDevOps Invoke-RestMethod -ParameterFilter { $Uri -match '_apis/(pipelines|distributedtask|release|git)' }
+        Should -Invoke -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -match '_apis/(pipelines|distributedtask|release|git)' }
     }
 }

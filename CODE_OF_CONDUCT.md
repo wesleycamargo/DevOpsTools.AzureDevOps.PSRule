@@ -1,4 +1,4 @@
-# Code of Conduct - PSRule.Rules.AzureDevOps
+# Code of Conduct - DevOpsTools.AzureDevOps.PSRule
 
 ## Our Pledge
 

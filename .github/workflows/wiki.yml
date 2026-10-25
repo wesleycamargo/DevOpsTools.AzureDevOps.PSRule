@@ -16,7 +16,7 @@ jobs:
   build-publish-wiki:
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout PSRule.Rules.AzureDevOps
+      - name: Checkout DevOpsTools.AzureDevOps.PSRule
         uses: actions/checkout@v3
         with:
           path: main
@@ -35,7 +35,7 @@ jobs:
           # Copy wiki base page
           cp ./main/README.md ./wiki/Home.md
           # Copy wiki rules
-          cp ./main/src/PSRule.Rules.AzureDevOps/en/*.md ./wiki/rules
+          cp ./main/src/DevOpsTools.AzureDevOps.PSRule/en/*.md ./wiki/rules
           # Copy docs
           cp ./main/docs/*.md ./wiki
 
@@ -49,8 +49,8 @@ jobs:
           Install-Module Az.Resources
           Install-Module PlatyPS
           Import-Module PlatyPS
-          Import-Module ./main/src/PSRule.Rules.AzureDevOps
-          New-MarkdownHelp -Module PSRule.Rules.AzureDevOps `
+          Import-Module ./main/src/DevOpsTools.AzureDevOps.PSRule
+          New-MarkdownHelp -Module DevOpsTools.AzureDevOps.PSRule `
             -Verbose `
             -Force `
             -NoMetadata `

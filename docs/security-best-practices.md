@@ -71,12 +71,12 @@ The system manages permissions at different levels - individual, collection, pro
 
 - Only give users and services the minimum amount of access needed to perform their business functions.
 - Disable inheritance where possible. Due to the allow-by-default nature of inheritance, unexpected users can get access or permissions. For more information, read about [inheritance](https://learn.microsoft.com/en-us/azure/devops/organizations/security/about-permissions.md#permission-inheritance-and-security-groups).
-  > :o: [**Azure.DevOps.Pipelines.Core.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.InheritedPermissions.md)
-  > :o: [**Azure.DevOps.Pipelines.Environments.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Environments.InheritedPermissions.md)
-  > :o: [**Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions.md)
-  > :o: [**Azure.DevOps.Repos.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.InheritedPermissions.md)
-  > :o: [**Azure.DevOps.ServiceConnections.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.InheritedPermissions.md)
-  > :o: [**Azure.DevOps.Tasks.VariableGroup.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Tasks.VariableGroup.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.Pipelines.Core.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Core.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.Pipelines.Environments.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Environments.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Releases.Definition.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.Repos.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.ServiceConnections.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.Tasks.VariableGroup.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Tasks.VariableGroup.InheritedPermissions.md)
     
 - Learn more about permissions here:
   - [Permissions and role lookup guide](https://learn.microsoft.com/en-us/azure/devops/organizations/security/permissions-lookup-guide.md)
@@ -112,9 +112,9 @@ See the following recommendations for assigning permissions to security groups a
 
 |**Do** :::image type="icon" source="../../media/icons/checkmark.png" border="false":::|**Don't** :::image type="icon" source="../../media/icons/delete-icon.png" border="false"::: |
 |---------|---------|
-|Use Azure Active Directory, Active Directory, or Windows security groups when you're managing lots of users.    | Don’t change the default permissions for the *Project Valid Users* group. This group can access and view project information. :o: [**Azure.DevOps.`*.ProjectValidUsers**](src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ProjectValidUsers.md)      |
+|Use Azure Active Directory, Active Directory, or Windows security groups when you're managing lots of users.    | Don’t change the default permissions for the *Project Valid Users* group. This group can access and view project information. :o: [**Azure.DevOps.`*.ProjectValidUsers**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.ProjectValidUsers.md)      |
 |When you're adding teams, consider what permissions you want to assign to team members who need to create and modify area paths, iteration paths, and queries.   | Don't add users to multiple security groups that contain different permission levels. In certain cases, a *Deny* permission level may override an *Allow* permission level.        |
-|When you're adding many teams, consider creating a *Team Administrators* custom group where you allocate a subset of the permissions available to *Project Administrators*.     | Don't change the default assignments made to the *Project Valid Users* groups. If you remove or set *View instance-level information* to *Deny* for one of the *Project Valid Users* groups, no users in the group can access whatever project, collection, or deployment you set the permission on. :o: [**Azure.DevOps.`*.ProjectValidUsers**](src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ProjectValidUsers.md)       |
+|When you're adding many teams, consider creating a *Team Administrators* custom group where you allocate a subset of the permissions available to *Project Administrators*.     | Don't change the default assignments made to the *Project Valid Users* groups. If you remove or set *View instance-level information* to *Deny* for one of the *Project Valid Users* groups, no users in the group can access whatever project, collection, or deployment you set the permission on. :o: [**Azure.DevOps.`*.ProjectValidUsers**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.ProjectValidUsers.md)       |
 |Consider granting the work item query folders *Contribute* permission to users or groups who require the ability to create and share work item queries for the project.    | Don't assign permissions that are noted as *Assign only to service accounts* to user accounts.        |
 |Keep groups as small as possible. Access should be restricted, and the groups should be frequently audited.    |         |
 |Take advantage of built-in roles and default to Contributor for developers. Admins get assigned to the Project Administrator security group for elevated permissions, allowing them to configure security permissions.|     |
@@ -156,11 +156,11 @@ You can change the configuration of your organization or project if you have [Pr
 
 - Scope [Azure Resource Manager](/azure/azure-resource-manager/management/overview), and [other service connections](../../pipelines/library/service-endpoints.md), only to the resources and groups to which they need access. Service connections shouldn't have broad contributor rights on the entire Azure subscription.
 
-  > :o: [**Azure.DevOps.ServiceConnections.Scope**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.Scope.md)
+  > :o: [**Azure.DevOps.ServiceConnections.Scope**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.Scope.md)
 
 - Don’t give users generic or broad contributor rights on the Azure subscription. 
 - Don’t use Azure Classic service connections, as there’s no way to scope the permissions.
-  > :o: [**Azure.DevOps.ServiceConnections.ClassicAzure**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ClassicAzure.md)
+  > :o: [**Azure.DevOps.ServiceConnections.ClassicAzure**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.ClassicAzure.md)
 - Make sure the resource group only contains Virtual Machines (VMs) or resources that the build needs access to.
 - Use a purpose-specific team service account to authenticate a service connection. 
 - For more information, see [Common service connection types](../../pipelines/library/service-endpoints.md).
@@ -223,28 +223,28 @@ If possible, we recommended to always use identity services for authentication i
 
 - Require at least one reviewer outside of the original requester. The approver shares coownership of the changes and should be held equally accountable for any potential impact.
 
-  > :o: [**AzureDevOps.Repos.BranchPolicyMinimumReviewers**](../src/PSRule.Rules.AzureDevOps/en/AzureDevOps.Repos.BranchPolicyMinimumReviewers.md)
+  > :o: [**AzureDevOps.Repos.BranchPolicyMinimumReviewers**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers.md)
 
 - Require CI build to pass. This requirement is useful for establishing baseline code quality, through code linting, unit tests, and security checks, like virus and credential scans. 
 
-  > :o: [**Azure.DevOps.Repos.BranchPolicyRequireBuild**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyRequireBuild.md)
+  > :o: [**Azure.DevOps.Repos.BranchPolicyRequireBuild**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild.md)
 
 - Ensure that the original pull requester can’t approve the change.
 
-  > :o: [**AzureDevOps.Repos.BranchPolicyAllowSelfApproval**](../src/PSRule.Rules.AzureDevOps/en/AzureDevOps.Repos.BranchPolicyAllowSelfApproval.md)
+  > :o: [**AzureDevOps.Repos.BranchPolicyAllowSelfApproval**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval.md)
 
 - Disallow completion of a PR (Pull Request), even if some reviewers vote to wait or reject. 
 
-  > :o: [**AzureDevOps.Repos.BranchPolicyMinimumReviewers**](../src/PSRule.Rules.AzureDevOps/en/AzureDevOps.Repos.BranchPolicyMinimumReviewers.md)
+  > :o: [**AzureDevOps.Repos.BranchPolicyMinimumReviewers**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers.md)
 
 - Reset code reviewer votes when recent changes get pushed.
 
-  > :o: [**AzureDevOps.Repos.BranchPolicyResetVotes**](../src/PSRule.Rules.AzureDevOps/en/AzureDevOps.Repos.BranchPolicyResetVotes.md)
+  > :o: [**AzureDevOps.Repos.BranchPolicyResetVotes**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyResetVotes.md)
 
 - Lock down release pipelines by running them only on specific production branches. 
 - Enable “Enforce settable at queue time for variables” in your organization’s pipeline settings. 
 
-  > :o: [**Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime.md)
+  > :o: [**Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime.md)
 
 - Don’t allow “Let users override this value when running this pipeline,” for variables set in the editor. 
 
@@ -260,7 +260,7 @@ If possible, we recommended to always use identity services for authentication i
 
 - Manage pipeline definitions with YAML (Yet Another Markup Language). YAML is the preferred method for managing pipeline definitions, as it provides traceability for changes and can follow approval guidelines.
 
-  > :o: [**Azure.DevOps.Pipelines.Core.UseYamlDefinition**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.UseYamlDefinition.md)
+  > :o: [**Azure.DevOps.Pipelines.Core.UseYamlDefinition**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Core.UseYamlDefinition.md)
 
 - Secure the pipeline definition *Edit* access to the minimum number of accounts. 
 
@@ -268,7 +268,7 @@ If possible, we recommended to always use identity services for authentication i
 
 - Include sanity checks for variables in build scripts. A sanity check can mitigate a command injection attack through the settable variables.
 
-  > :o: [**Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments.md)
+  > :o: [**Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Settings.SanitizeShellTaskArguments.md)
 
 - Set as few build variables as possible to “Settable at release time.” 
 
@@ -278,17 +278,17 @@ If possible, we recommended to always use identity services for authentication i
 - Don’t log secrets. 
 - Don’t store secrets in pipeline variables, use Azure KeyVault. Regularly scan your build pipelines to ensure secrets aren’t being stored in build pipeline variables.
 
-  > :o: [**Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets.md)
-  > [**Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets.md)
-  > [**Azure.DevOps.Pipelines.Core.NoPlainTextSecrets**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.NoPlainTextSecrets.md)
-  > [**Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets.md)
+  > :o: [**Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets.md)
+  > [**Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets.md)
+  > [**Azure.DevOps.Pipelines.Core.NoPlainTextSecrets**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Core.NoPlainTextSecrets.md)
+  > [**Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets.md)
 
 - Don’t let users run builds against arbitrary branches or tags on security-critical pipelines.
 - Disable inheritance on the pipeline, as inherited permissions are broad and don’t accurately reflect your needs for permissions.
-  > :o: [**Azure.DevOps.Pipelines.Core.InheritedPermissions**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Core.InheritedPermissions.md)
+  > :o: [**Azure.DevOps.Pipelines.Core.InheritedPermissions**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Core.InheritedPermissions.md)
 - Limit job authorization scopes in all cases.
 
-  > :o: [**Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope.md), [**Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines.md) and [**Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines.md)
+  > :o: [**Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScope.md), [**Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForReleasePipelines.md) and [**Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Settings.LimitJobAuthorizationScopeForYamlPipelines.md)
 
 
 
@@ -296,7 +296,7 @@ If possible, we recommended to always use identity services for authentication i
 
 - Set the “Require a minimum number of reviewers,” policy to *on*, so that every pull request gets reviewed by at least two approvers.
 
-  > :o: [**AzureDevOps.Repos.BranchPolicyMinimumReviewers**](../src/PSRule.Rules.AzureDevOps/en/AzureDevOps.Repos.BranchPolicyMinimumReviewers.md)
+  > :o: [**AzureDevOps.Repos.BranchPolicyMinimumReviewers**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers.md)
 
 - Configure security policies specific to each repository or branch, instead of project wide. Security policies reduce risk, enforce change management standards, and improve your team’s quality of code.
 - Store production secrets in a separate KeyVault and ensure that access is only granted on a need-to-know basis to keep nonproduction builds separate. 
@@ -304,14 +304,14 @@ If possible, we recommended to always use identity services for authentication i
 - Disable forking. The more forks there are, the harder it's to keep track of each fork’s security. Also, a user can easily fork a copy of a repository to their own private account.
 - [Don't provide secrets to fork builds](../../pipelines/security/repos.md#dont-provide-secrets-to-fork-builds).
 
-  > :o: [**Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork.md)
+  > :o: [**Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Settings.RestrictSecretsForPullRequestFromFork.md)
 
 - [Consider manually triggering fork builds](../../pipelines/security/repos.md#consider-manually-triggering-fork-builds). 
 - [Use Microsoft-hosted agents for fork builds](../../pipelines/security/repos.md#use-microsoft-hosted-agents-for-fork-builds).
 - For Git, check your production build definitions in the project’s git repository, so they can be scanned for credentials.
 - Configure a branch control check so that only pipelines running in the context of the `production` branch may use the `prod-connection`.
 
-  > :o: [**Azure.DevOps.ServiceConnections.ProductionBranchLimit**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.ProductionBranchLimit.md) and [**Azure.DevOps.Pipelines.Environments.ProductionBranchLimit**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Pipelines.Environments.ProductionBranchLimit.md)
+  > :o: [**Azure.DevOps.ServiceConnections.ProductionBranchLimit**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.ProductionBranchLimit.md) and [**Azure.DevOps.Pipelines.Environments.ProductionBranchLimit**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Pipelines.Environments.ProductionBranchLimit.md)
 
 - For more information, see [Other security considerations](../../pipelines/security/misc.md).
 
@@ -319,7 +319,7 @@ If possible, we recommended to always use identity services for authentication i
 
 - [Improve code quality with branch policies](../../repos/git/branch-policies.md). For more information about branch permissions and policies, see [Set branch permissions](../../repos/git/branch-permissions.md).
 
-  > :o: [**Azure.DevOps.Repos.BranchPolicyIsEnabled**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.Repos.BranchPolicyIsEnabled.md)
+  > :o: [**Azure.DevOps.Repos.BranchPolicyIsEnabled**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyIsEnabled.md)
 
 ## Secure Azure Test Plans
 
@@ -329,7 +329,7 @@ If possible, we recommended to always use identity services for authentication i
 ## Secure GitHub Integrations
 
 - Disable Personal Access Token (PAT)-based authentication, so the OAuth flow gets used with the GitHub service connection. 
-  > :o: [**Azure.DevOps.ServiceConnections.GitHubPAT**](../src/PSRule.Rules.AzureDevOps/en/Azure.DevOps.ServiceConnections.GitHubPAT.md)
+  > :o: [**Azure.DevOps.ServiceConnections.GitHubPAT**](../src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.ServiceConnections.GitHubPAT.md)
 - Never authenticate GitHub service connections as an identity that's an administrator or owner of any repositories.
 - Never use a full-scope GitHub PAT (Personal Access Token) to authenticate GitHub service connections. 
 - Don't use a personal GitHub account as a service connection with Azure DevOps. 

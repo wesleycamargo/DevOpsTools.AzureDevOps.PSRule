@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 Describe 'Production protection diagnostics' -Tag 'Unit' {
     It 'distinguishes missing, disabled, configured, and unavailable gates' {
@@ -22,11 +22,11 @@ Describe 'Production protection diagnostics' -Tag 'Unit' {
         } }
         $option = New-PSRuleOption -Configuration $configuration
         $rules = @('Azure.DevOps.Pipelines.Environments.ProductionCheckProtection', 'Azure.DevOps.Pipelines.Environments.ProductionHumanApproval', 'Azure.DevOps.ServiceConnections.ProductionCheckProtection', 'Azure.DevOps.ServiceConnections.ProductionHumanApproval')
-        $raw = @($targets | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name $rules -Option $option -Outcome All -Culture en -ErrorAction Stop)
+        $raw = @($targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Option $option -Outcome All -Culture en -ErrorAction Stop)
         $report = ConvertTo-AzDevOpsAssessment $raw $targets 'fixture/project' -Configuration $configuration
         @($report.Findings | Where-Object { $_.RuleId -like '*.ProductionCheckProtection' -and $_.Outcome -eq 'Pass' }).Count | Should -Be 2
         @($report.Findings | Where-Object { $_.RuleId -like '*.ProductionHumanApproval' -and $_.Outcome -eq 'Fail' }).Count | Should -Be 2
         $report.RiskObjectives.Count | Should -Be 4
     }
 }
-AfterAll { Remove-Module PSRule.Rules.AzureDevOps -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.PSRule -Force }

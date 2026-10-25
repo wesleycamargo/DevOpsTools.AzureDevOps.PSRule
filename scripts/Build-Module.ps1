@@ -4,7 +4,7 @@ param (
 )
 
 $ErrorActionPreference = 'Stop'
-$moduleName = 'PSRule.Rules.AzureDevOps'
+$moduleName = 'DevOpsTools.AzureDevOps.PSRule'
 $repositoryPath = Split-Path $PSScriptRoot -Parent
 $sourcePath = Join-Path $repositoryPath "src/$moduleName"
 $manifest = Test-ModuleManifest -Path (Join-Path $sourcePath "$moduleName.psd1")
@@ -18,7 +18,6 @@ try {
     $versionPath = Join-Path $stagingPath "$moduleName/$version"
     New-Item -Path $versionPath -ItemType Directory -Force | Out-Null
     Copy-Item -Path (Join-Path $sourcePath '*') -Destination $versionPath -Recurse
-    Copy-Item -Path (Join-Path $repositoryPath 'LICENSE') -Destination $versionPath
     Test-ModuleManifest -Path (Join-Path $versionPath "$moduleName.psd1") | Out-Null
     Compress-Archive -Path (Join-Path $stagingPath $moduleName) -DestinationPath $archivePath -Force
     $checksumPath = "$archivePath.sha256"

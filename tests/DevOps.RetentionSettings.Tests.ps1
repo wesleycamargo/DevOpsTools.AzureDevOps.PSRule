@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1') -Force;
 }
 
 Describe 'Azure.DevOps.RetentionSettings' -Tag 'Integration' {
@@ -139,7 +139,7 @@ Describe 'Azure.DevOps.RetentionSettings' -Tag 'Integration' {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $settings = Export-AzDevOpsRetentionSettings -Project $env:ADO_PROJECT -PassThru
-            $ruleResult = $settings | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
+            $ruleResult = $settings | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.PSRule') -Culture en
         }
 
         It 'should return a hashtable' {
@@ -178,5 +178,5 @@ Describe 'Azure.DevOps.RetentionSettings' -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.PSRule -Force
 }

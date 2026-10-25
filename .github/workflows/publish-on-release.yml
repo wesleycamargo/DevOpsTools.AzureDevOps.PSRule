@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing version tag matching the module manifest (v0.5.12)
+        description: Existing version tag matching the module manifest (v0.2.0)
         required: true
         type: string
       publish:
@@ -25,7 +25,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
           if ($env:RELEASE_TAG -cnotmatch '^v\d+\.\d+\.\d+(-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?$') {
-            throw 'Supply an existing version tag such as v0.5.12.'
+            throw 'Supply an existing version tag such as v0.2.0.'
           }
       - uses: actions/checkout@v4
         with:
@@ -41,7 +41,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          $manifest = Test-ModuleManifest ./src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1
+          $manifest = Test-ModuleManifest ./src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1
           $version = $manifest.Version.ToString()
           $prerelease = $manifest.PrivateData.PSData.Prerelease
           if ($prerelease) { $version += "-$prerelease" }
@@ -59,7 +59,7 @@ jobs:
           PS_GALLERY_KEY: ${{ secrets.PS_GALLERY_KEY }}
         run: |
           if (-not $env:PS_GALLERY_KEY) { throw 'PowerShell Gallery publishing credential is unavailable.' }
-          Publish-Module -Path ./src/PSRule.Rules.AzureDevOps -NuGetApiKey $env:PS_GALLERY_KEY -Repository PSGallery
+          Publish-Module -Path ./src/DevOpsTools.AzureDevOps.PSRule -NuGetApiKey $env:PS_GALLERY_KEY -Repository PSGallery
       - uses: actions/upload-artifact@v4
         if: always()
         with:

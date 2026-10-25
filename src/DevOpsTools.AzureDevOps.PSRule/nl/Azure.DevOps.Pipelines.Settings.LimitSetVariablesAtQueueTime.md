@@ -1,0 +1,33 @@
+---
+category: Microsoft Azure DevOps Pipelines
+severity: Severe
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.PSRule/blob/main/src/DevOpsTools.AzureDevOps.PSRule/nl/Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime.md
+---
+
+# Azure.DevOps.Pipelines.Settings.LimitSetVariablesAtQueueTime
+
+## SYNOPSIS
+
+De projectinstellingen moeten het instellen van variabelen bij het wachtrijen beperken.
+
+## DESCRIPTION
+
+Het instellen van variabelen bij het wachtrijen kan worden gebruikt om variabelen die in de
+pipeline zijn gedefinieerd te overschrijven. Dit kan handig zijn voor testen of debuggen.
+Dit kan echter ook worden gebruikt om variabelen te overschrijven die worden gebruikt om
+het gedrag van de pipeline te regelen en kan resulteren in onverwacht gedrag.
+
+Mininum TokenType: `ReadOnly`
+
+## RECOMMENDATION
+
+Overweeg om het instellen van variabelen bij het wachtrijen uit te schakelen in de
+projectinstellingen.
+
+## LINKS
+
+- [Azure DevOps Security best practices - Policies](https://learn.microsoft.com/nl-nl/azure/devops/organizations/security/security-best-practices?view=azure-devops#policies)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

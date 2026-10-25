@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1') -Force;
 }
 
 Describe "Functions: DevOps.Pipelines.Core.Tests" -Tag 'Integration' {
@@ -268,7 +268,7 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" -Tag 'Integration' {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             # YAML pipelines emit their YAML before the pipeline object, so the last item is always a pipeline.
             $pipelines = Export-AzDevOpsPipelines -Project $env:ADO_PROJECT -PassThru
-            $ruleResult = $pipelines | Where-Object { $null -ne $_ } | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
+            $ruleResult = $pipelines | Where-Object { $null -ne $_ } | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.PSRule') -Culture en
         }
 
         It " should return a list of pipelines" {
@@ -304,5 +304,5 @@ Describe "Functions: DevOps.Pipelines.Core.Tests" -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.PSRule -Force
 }

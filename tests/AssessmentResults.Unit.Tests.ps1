@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
     function New-FixtureResult {
         param([string]$Rule, [string]$Type, [string]$Name = 'fixture', [string]$Outcome = 'Fail')
         [pscustomobject]@{ RuleName = $Rule; TargetType = $Type; TargetName = "$Type/$Name"; Outcome = $Outcome; OutcomeReason = 'Processed'; Reason = @('synthetic diagnostic') }
@@ -115,11 +115,11 @@ Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
             [pscustomobject]@{ ObjectType = 'Azure.DevOps.Repo.Branch'; ObjectName = 'disabled'; BranchPolicy = @(@{ isEnabled = $false }) }
         )
         $rules = 'Azure.DevOps.Repos.Branch.HasBranchPolicy', 'Azure.DevOps.Repos.Branch.BranchPolicyIsEnabled'
-        $raw = @($targets | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Name $rules -Outcome All -Culture en -ErrorAction Stop)
+        $raw = @($targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Outcome All -Culture en -ErrorAction Stop)
         $report = ConvertTo-AzDevOpsAssessment $raw $targets 'fixture/project'
         $report.Findings.Count | Should -Be 4
         $report.RiskObjectives.Count | Should -Be 2
         @($report.Findings | Where-Object { $_.TargetName -like '*/disabled' -and $_.Outcome -eq 'Pass' }).Count | Should -Be 1
     }
 }
-AfterAll { Remove-Module PSRule.Rules.AzureDevOps -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.PSRule -Force }

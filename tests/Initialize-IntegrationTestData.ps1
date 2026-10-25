@@ -124,7 +124,7 @@ steps:
 
 $successRepo = Get-OrCreateRepo -Name 'repository-success'
 Initialize-RepoContent -Repo $successRepo -Files @{
-    'README.md'           = "# repository-success`n`nIntegration test data for PSRule.Rules.AzureDevOps.`n"
+    'README.md'           = "# repository-success`n`nIntegration test data for DevOpsTools.AzureDevOps.PSRule.`n"
     'LICENSE'             = "MIT License`n`nDummy license file for integration test data.`n"
     'azure-pipelines.yml' = $pipelineYaml
     'parameters.yml'      = $parametersYaml

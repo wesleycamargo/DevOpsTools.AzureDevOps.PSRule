@@ -41,7 +41,7 @@ Export-AzDevOpsOrganizationRuleData `
     -Strict
 
 $inputFiles = @(Get-ChildItem $targetDirectory -File -Recurse -Filter '*.json' | Select-Object -ExpandProperty FullName)
-Assert-PSRule -InputPath $inputFiles -Module PSRule.Rules.AzureDevOps
+Assert-PSRule -InputPath $inputFiles -Module DevOpsTools.AzureDevOps.PSRule
 ```
 
 For one project, use the same options with

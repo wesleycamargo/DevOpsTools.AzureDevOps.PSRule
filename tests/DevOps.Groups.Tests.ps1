@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1') -Force;
 }
 
 Describe "Azure.DevOps.Group" -Tag 'Integration' {
@@ -301,7 +301,7 @@ Describe "Azure.DevOps.Group" -Tag 'Integration' {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $groups = Export-AzDevOpsGroups -Project $env:ADO_PROJECT -PassThru
-            $ruleResult = $groups | Invoke-PSRule -Module @('PSRule.Rules.AzureDevOps') -Culture en
+            $ruleResult = $groups | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.PSRule') -Culture en
         }
 
         It " Should return a list of groups" {
@@ -332,5 +332,5 @@ Describe "Azure.DevOps.Group" -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.PSRule -Force
 }

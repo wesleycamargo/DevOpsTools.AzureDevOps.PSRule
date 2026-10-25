@@ -1,0 +1,37 @@
+---
+category: Microsoft Azure DevOps Repos
+severity: Critical
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.PSRule/blob/main/src/DevOpsTools.AzureDevOps.PSRule/en/Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval.md
+---
+
+# Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval
+
+## SYNOPSIS
+
+Change authors should not be allowed to approve their own changes.
+
+## DESCRIPTION
+
+The applicable policy must be enabled and blocking. Optional or disabled policy
+configuration does not satisfy this control. Branch policy scope supports exact
+and prefix branch matches and policies covering all repositories.
+
+The branch policy on the default branch should not allow creators to approve
+their own changes. This will help ensure that the code in the default branch
+is of a high quality and that the team's Git workflow is followed.
+
+Mininum TokenType: `ReadOnly`
+
+## RECOMMENDATION
+
+Consider disabling the option to allow creators to approve their own changes.
+
+## LINKS
+
+- [Create a branch policy](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops)
+- [Branch policies](https://docs.microsoft.com/en-us/azure/devops/repos/git/branch-policies-overview?view=azure-devops)
+- [Azure DevOps Security best practices](https://docs.microsoft.com/en-us/azure/devops/user-guide/security-best-practices?view=azure-devops#repositories-and-branches)
+
+## ASSESSMENT
+
+Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.

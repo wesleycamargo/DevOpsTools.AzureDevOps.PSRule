@@ -9,7 +9,7 @@ The supplied inventory covers all 117 controls but does not identify a standalon
 ## Project raw results without rewriting them
 
 ```powershell
-$raw = @($targets | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Baseline Baseline.Default -Option $option -Outcome All)
+$raw = @($targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Baseline Baseline.Default -Option $option -Outcome All)
 $report = ConvertTo-AzDevOpsAssessment -Result $raw -TargetObject $targets `
     -ScopeId 'organization/project' -Baseline Baseline.Default -Configuration $configuration
 $report | ConvertTo-Json -Depth 50 | Set-Content assessment-results.json

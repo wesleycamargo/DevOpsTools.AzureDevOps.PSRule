@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe 'Organization API failure boundaries' -Tag Unit {
@@ -10,7 +10,7 @@ Describe 'Organization API failure boundaries' -Tag Unit {
             }
         }
     ) {
-        InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ Collector = $Collector; Failure = $Failure; ReportPath = "$TestDrive/status.json"; ExportPath = "$TestDrive/targets" } {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ Collector = $Collector; Failure = $Failure; ReportPath = "$TestDrive/status.json"; ExportPath = "$TestDrive/targets" } {
             Mock Invoke-RestMethod { [pscustomobject]@{ value = @() } }
             Connect-AzDevOps -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -PAT fixture-secret
             Mock Invoke-WebRequest {
@@ -38,7 +38,7 @@ Describe 'Organization API failure boundaries' -Tag Unit {
         @{ Reader = 'Read-AdoOrganizationGeneralBillingSettings'; Payload = @{ currentOrganizationName = 'fixture-org'; subscriptionStatus = $null; isEnterpriseBillingEnabled = 'false'; isAssignmentBillingEnabled = $false }; Field = 'isEnterpriseBillingEnabled' }
         @{ Reader = 'Read-AdoOrganizationGeneralOverview'; Payload = @{ fps = @{ dataProviders = @{ data = @{ 'ms.vss-admin-web.organization-admin-overview-data-provider' = @{ description = $null; geography = 'Europe'; region = @{ renamed = 'west' }; timeZone = @{ displayName = 'UTC' } }; 'ms.vss-web.page-data' = @{ user = @{ displayName = 'Fixture' } } } } } }; Field = 'region' }
     ) {
-        InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ Reader = $Reader; Payload = $Payload; Field = $Field } {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ Reader = $Reader; Payload = $Payload; Field = $Field } {
             Mock Invoke-WebRequest {
                 $json = $Payload | ConvertTo-Json -Depth 10
                 [pscustomobject]@{ Content = $json; RawContent = $json }
@@ -55,7 +55,7 @@ Describe 'Organization API failure boundaries' -Tag Unit {
     }
 
     It 'does not convert an invalid security policy value into compliant evidence' {
-        InModuleScope PSRule.Rules.AzureDevOps {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
             Mock Invoke-WebRequest {
                 $json = @{ fps = @{ dataProviders = @{ data = @{ 'ms.vss-admin-web.organization-policies-data-provider' = @{ policies = @{ fixture = @(@{ policy = @{ name = 'Policy.DisallowSecureShell'; effectiveValue = 'false' } }) } } } } } } | ConvertTo-Json -Depth 10
                 [pscustomobject]@{ Content = $json; RawContent = $json }
@@ -71,7 +71,7 @@ Describe 'Organization API failure boundaries' -Tag Unit {
     It 'records unexpected organization exceptions as failed after <PriorStatus> evidence' -ForEach @(
         @{ PriorStatus = 'Partial' }, @{ PriorStatus = 'Unavailable' }
     ) {
-        InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ PriorStatus = $PriorStatus } {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ PriorStatus = $PriorStatus } {
             Mock Invoke-RestMethod { [pscustomobject]@{ value = @() } }
             Connect-AzDevOps -Organization fixture-org -PAT fixture-token
             Mock Export-AdoOrganizationGeneralOverview {
@@ -93,7 +93,7 @@ Describe 'Organization API failure boundaries' -Tag Unit {
         @{ Case = 'transport error'; StatusCode = 0; Reason = 'RequestFailed' }
         @{ Case = 'sign-in HTML'; StatusCode = -1; Reason = 'PermissionDenied' }
     ) {
-        InModuleScope PSRule.Rules.AzureDevOps -Parameters @{ StatusCode = $StatusCode; Reason = $Reason } {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ StatusCode = $StatusCode; Reason = $Reason } {
             Mock Invoke-WebRequest {
                 if ($StatusCode -eq -1) { return [pscustomobject]@{ Content = '<html>Sign In fixture-secret</html>' } }
                 if ($StatusCode -eq 0) { throw 'Request failed with fixture-secret.' }

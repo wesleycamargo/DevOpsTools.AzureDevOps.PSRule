@@ -37,7 +37,7 @@ function Register-AzureDevOpsArtifactFeed {
             FeedName         = 'Modules'
             PatUser          = 'build'
             PatToken         = (ConvertTo-SecureString -String $env:ADO_PAT -AsPlainText -Force)
-            CustomModules    = @('PSRule.Rules.AzureDevOps', 'Another.Module')
+            CustomModules    = @('DevOpsTools.AzureDevOps.PSRule', 'Another.Module')
             Verbose          = $true
         }
 

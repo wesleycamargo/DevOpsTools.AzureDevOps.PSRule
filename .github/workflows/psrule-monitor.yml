@@ -23,12 +23,12 @@ jobs:
         run: |
           Import-Module PSRule
           Import-Module PSRule.Monitor
-          Import-Module ./src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1 -Force
+          Import-Module ./src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1 -Force
           Connect-AzDevOps -Organization ${{ secrets.ADO_ORGANIZATION }} -PAT ${{ secrets.ADO_PAT }}
           New-Item -Path ./data -ItemType Directory -Force
           Export-AzDevOpsOrganizationRuleData -OutputPath ./data
           $result = Invoke-PSRule -InputPath ./data/ `
-            -Module "PSRule.Rules.AzureDevOps","PSRule.Monitor" `
+            -Module "DevOpsTools.AzureDevOps.PSRule","PSRule.Monitor" `
             -Format Detect -Culture en
           $result |  Send-PSRuleMonitorRecord -WorkspaceId $Env:PSRULE_CONFIGURATION_MONITOR_WORKSPACE_ID `
             -SharedKey $Env:PSRULE_CONFIGURATION_MONITOR_WORKSPACE_KEY -LogName RjbTest

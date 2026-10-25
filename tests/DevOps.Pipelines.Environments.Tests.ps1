@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/PSRule.Rules.AzureDevOps/PSRule.Rules.AzureDevOps.psd1') -Force
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1') -Force
 }
 
 Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integration' {
@@ -278,7 +278,7 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integratio
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $environmentChecks = Export-AzDevOpsEnvironmentChecks -Project $env:ADO_PROJECT -PassThru
-            $ruleResult = $environmentChecks | Invoke-PSRule -Module PSRule.Rules.AzureDevOps -Culture en
+            $ruleResult = $environmentChecks | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Culture en
         }
 
         It " should return a list of environment checks" {
@@ -314,6 +314,6 @@ Describe "Functions: Azure.DevOps.Pipelines.Environments.Tests" -Tag 'Integratio
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name PSRule.Rules.AzureDevOps -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.PSRule -Force
 }
 # End of tests/DevOps.Pipelines.Environments.Tests.ps1
