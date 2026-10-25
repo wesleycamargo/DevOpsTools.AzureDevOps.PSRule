@@ -1,3 +1,10 @@
+## [0.2.0]
+
+### Changed
+
+- Renamed the package and private source repository to `DevOpsTools.AzureDevOps.PSRule`, with module GUID `f77fbd3d-03be-4e42-98f3-4c185cc93bba`. Consumers must install the new package and update module references; commands, rule IDs, baselines, policies, and report contracts are preserved.
+- Retained the published `DevOpsTools.AzureDevOps.Assessment` 0.1.0 package and its Git tag as historical releases.
+
 ## [Unreleased]
 
 ### Changed

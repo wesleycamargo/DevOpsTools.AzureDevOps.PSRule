@@ -69,9 +69,9 @@ $configuration.TestResult.OutputPath = $ResultPath
 if ($Coverage) {
     $configuration.CodeCoverage.Enabled = $true
     $configuration.CodeCoverage.Path = @(
-        (Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.Assessment/Functions'),
-        (Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.Assessment/Classes'),
-        (Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psm1')
+        (Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.PSRule/Functions'),
+        (Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.PSRule/Classes'),
+        (Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psm1')
     )
     $configuration.CodeCoverage.OutputFormat = 'JaCoCo'
     $configuration.CodeCoverage.OutputPath = Join-Path (Split-Path $ResultPath -Parent) 'coverage.xml'

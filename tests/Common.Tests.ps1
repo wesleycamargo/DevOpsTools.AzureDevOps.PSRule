@@ -1,6 +1,6 @@
-using module ../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1
+using module ../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe "Functions: Common.Tests" -Tag 'Integration' {
@@ -69,7 +69,7 @@ Describe "Functions: Common.Tests" -Tag 'Integration' {
         It " should throw an error" {
             { 
                 Disconnect-AzDevOps
-                InModuleScope DevOpsTools.AzureDevOps.Assessment -Parameters @{ ProjectId = '00000000-0000-0000-0000-000000000001' } {
+                InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ ProjectId = '00000000-0000-0000-0000-000000000001' } {
                     param($ProjectId)
                     Get-AzDevOpsProjectAcls -ProjectId $ProjectId
                 }
@@ -81,7 +81,7 @@ Describe "Functions: Common.Tests" -Tag 'Integration' {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $project = Get-AzDevOpsProject -Project $env:ADO_PROJECT
-            $acls = InModuleScope DevOpsTools.AzureDevOps.Assessment -Parameters @{ ProjectId = $project.id } {
+            $acls = InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ ProjectId = $project.id } {
                 param($ProjectId)
                 Get-AzDevOpsProjectAcls -ProjectId $ProjectId
             }
@@ -98,7 +98,7 @@ Describe "Functions: Common.Tests" -Tag 'Integration' {
         It " The operation should fail with a wrong Organization" {
             { 
                 Connect-AzDevOps -Organization 'wrong' -PAT $env:ADO_PAT
-                InModuleScope DevOpsTools.AzureDevOps.Assessment -Parameters @{ ProjectId = $project.id } {
+                InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ ProjectId = $project.id } {
                     param($ProjectId)
                     Get-AzDevOpsProjectAcls -ProjectId $ProjectId -ErrorAction Stop
                 }
@@ -108,7 +108,7 @@ Describe "Functions: Common.Tests" -Tag 'Integration' {
         It " The operation should fail with a wrong PAT" {
             { 
                 Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT 'wrong'
-                InModuleScope DevOpsTools.AzureDevOps.Assessment -Parameters @{ ProjectId = $project.id } {
+                InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ ProjectId = $project.id } {
                     param($ProjectId)
                     Get-AzDevOpsProjectAcls -ProjectId $ProjectId -ErrorAction Stop
                 }
@@ -170,7 +170,7 @@ Describe "Functions: Common.Tests" -Tag 'Integration' {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             $project = Get-AzDevOpsProject -Project $env:ADO_PROJECT
             $projectDetails = Export-AzDevOpsProject -Project $project.name -PassThru
-            $ruleResult = $projectDetails | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.Assessment') -Culture en
+            $ruleResult = $projectDetails | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.PSRule') -Culture en
         }
 
         It " The output should be of type [PSCustomObject]" {

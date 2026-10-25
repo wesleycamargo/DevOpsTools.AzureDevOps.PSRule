@@ -62,7 +62,7 @@ The diagram combines supported paths. An individual pipeline does not necessaril
 
 ### Module loading and authentication
 
-The manifest and loader reside in `src/DevOpsTools.AzureDevOps.Assessment/`.
+The manifest and loader reside in `src/DevOpsTools.AzureDevOps.PSRule/`.
 The loader initializes module connection state and imports scripts from `Classes/` and `Functions/`.
 PSRule discovers the rule definitions under `rules/`.
 
@@ -230,6 +230,6 @@ Stakeholder review can resolve the operational gaps above and approve any future
 
 ### Source entry points
 
-- [Module loader](../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psm1), [connection](../src/DevOpsTools.AzureDevOps.Assessment/Classes/AzureDevOpsConnection.ps1), and [bindings](../src/DevOpsTools.AzureDevOps.Assessment/rules/Config.Rule.yaml).
+- [Module loader](../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psm1), [connection](../src/DevOpsTools.AzureDevOps.PSRule/Classes/AzureDevOpsConnection.ps1), and [bindings](../src/DevOpsTools.AzureDevOps.PSRule/rules/Config.Rule.yaml).
 - [Module publication workflow](../.github/workflows/publish-on-release.yml) and [weekly assessment pipeline](../pipelines/psrule-assessment.yml).
 - [Module CI](../.github/workflows/module-ci.yml), [Gallery publication](../.github/workflows/publish-on-release.yml), [wiki publication](../.github/workflows/wiki.yml), and [legacy Monitor workflow](../.github/workflows/psrule-monitor.yml).

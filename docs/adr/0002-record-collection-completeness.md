@@ -32,5 +32,5 @@ Legacy consumers can still evaluate incomplete inputs.
 ## References
 
 - [Completeness contract](../assessment-completeness.md).
-- [Completeness implementation](../../src/DevOpsTools.AzureDevOps.Assessment/Functions/AssessmentCompleteness.ps1).
+- [Completeness implementation](../../src/DevOpsTools.AzureDevOps.PSRule/Functions/AssessmentCompleteness.ps1).
 - [Weekly assessment](../../pipelines/psrule-assessment.yml).

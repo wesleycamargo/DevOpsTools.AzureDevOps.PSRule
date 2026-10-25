@@ -1,6 +1,6 @@
-using module ../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1
+using module ../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 # Live authentication against Azure DevOps. Service principal tests need ADO_CLIENT_ID,
@@ -9,7 +9,7 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
     Context " Connect-AzDevOps with a Personal Access Token" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should not be null" {
@@ -37,7 +37,7 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
     Context " Connect-AzDevOps with a Service Principal" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ClientId $env:ADO_CLIENT_ID -ClientSecret $env:ADO_CLIENT_SECRET -TenantId $env:ADO_TENANT_ID
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should not be null" {
@@ -65,9 +65,9 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
     Context " Connect-AzDevOps with a Service Principal and an expired token" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ClientId $env:ADO_CLIENT_ID -ClientSecret $env:ADO_CLIENT_SECRET -TenantId $env:ADO_TENANT_ID
-            InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection.TokenExpires = [System.DateTime]::MinValue }
+            InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection.TokenExpires = [System.DateTime]::MinValue }
             $projects = Get-AzDevOpsProject
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should not be null" {
@@ -98,7 +98,7 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
     Context " Connect-AzDevOps with a User Assigned Managed Identity" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ManagedIdentity
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should not be null" {
@@ -122,9 +122,9 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
     Context " Connect-AzDevOps with a User Assigned Managed Identity and an expired token" {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ManagedIdentity
-            InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection.TokenExpires = [System.DateTime]::MinValue }
+            InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection.TokenExpires = [System.DateTime]::MinValue }
             $projects = Get-AzDevOpsProject
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should not be null" {
@@ -148,7 +148,7 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
         BeforeAll {
             Remove-Item Env:\ADO_MSI_CLIENT_ID
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -ManagedIdentity
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should not be null" {
@@ -168,7 +168,7 @@ Describe "Functions: Authentication.Tests" -Tag 'Authentication' {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -PAT $env:ADO_PAT
             Disconnect-AzDevOps
-            $connection = InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection }
+            $connection = InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection }
         }
 
         It " The connection should be null" {

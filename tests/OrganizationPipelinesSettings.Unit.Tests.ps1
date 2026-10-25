@@ -1,16 +1,16 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe 'Read-AdoOrganizationPipelinesSettings with an explicit token' -Tag 'Unit' {
     BeforeEach {
-        InModuleScope DevOpsTools.AzureDevOps.Assessment {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
             Disconnect-AzDevOps
         }
     }
 
     It 'retrieves settings without module connection state' {
-        InModuleScope DevOpsTools.AzureDevOps.Assessment {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
             $payload = @{ dataProviders = @{ 'ms.vss-build-web.pipelines-org-settings-data-provider' = @{ statusBadgesArePrivate = $true; enableShellTasksArgsSanitizing = $true } } } | ConvertTo-Json -Depth 10
             Mock Invoke-WebRequest { [pscustomobject]@{ Content = $payload; RawContent = $payload } }
 
@@ -23,7 +23,7 @@ Describe 'Read-AdoOrganizationPipelinesSettings with an explicit token' -Tag 'Un
     }
 
     It 'reports an authentication response as a retrieval failure' {
-        InModuleScope DevOpsTools.AzureDevOps.Assessment {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
             Mock Invoke-WebRequest { [pscustomobject]@{ Content = '<html>Sign In</html>'; RawContent = 'Sign In' } }
 
             { Read-AdoOrganizationPipelinesSettings -Organization fixture-org -AccessToken 'Bearer expired-token' } | Should -Throw '*Failed to retrieve pipeline settings*'
@@ -33,5 +33,5 @@ Describe 'Read-AdoOrganizationPipelinesSettings with an explicit token' -Tag 'Un
 }
 
 AfterAll {
-    Remove-Module DevOpsTools.AzureDevOps.Assessment -Force
+    Remove-Module DevOpsTools.AzureDevOps.PSRule -Force
 }

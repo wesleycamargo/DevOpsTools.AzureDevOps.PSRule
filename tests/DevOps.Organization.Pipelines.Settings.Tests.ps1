@@ -1,6 +1,6 @@
 BeforeAll {
     $rootPath = Split-Path -Path $PSScriptRoot -Parent;
-    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1') -Force;
+    Import-Module -Name (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1') -Force;
 }
 
 Describe "Functions: DevOps.OrganizationPipelinesSettings" -Tag 'Integration' {
@@ -73,7 +73,7 @@ Describe "Functions: DevOps.OrganizationPipelinesSettings" -Tag 'Integration' {
         BeforeAll {
             Connect-AzDevOps -Organization $env:ADO_ORGANIZATION -AccessToken $env:ADO_ACCESS_TOKEN
             $settings = Export-AdoOrganizationPipelinesSettings -Organization $env:ADO_ORGANIZATION -AccessToken $env:ADO_ACCESS_TOKEN -PassThru
-            $ruleResult = $settings | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.Assessment') -Culture en
+            $ruleResult = $settings | Invoke-PSRule -Module @('DevOpsTools.AzureDevOps.PSRule') -Culture en
         }
 
         It " should return organization pipeline settings" {
@@ -104,5 +104,5 @@ Describe "Functions: DevOps.OrganizationPipelinesSettings" -Tag 'Integration' {
 
 AfterAll {
     Disconnect-AzDevOps
-    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force;
+    Remove-Module -Name DevOpsTools.AzureDevOps.PSRule -Force;
 }

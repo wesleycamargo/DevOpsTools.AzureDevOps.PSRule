@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 Describe 'Referenced organizational policies' -Tag 'Unit' {
     It 'does not enforce an unspecified <Name> policy' -ForEach @(
@@ -95,10 +95,10 @@ Describe 'Referenced organizational policies' -Tag 'Unit' {
             [pscustomobject]@{ ObjectType = 'Azure.DevOps.Organization.GeneralOverview'; ObjectName = 'missing' }
         )
         $option = New-PSRuleOption -Configuration @{ assessmentPolicies = @{ $rule = @{ Reference = 'schedule-v1'; Expected = 'UTC' } } }
-        $results = @($targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name $rule -Option $option -Outcome All -Culture en -ErrorAction Stop)
+        $results = @($targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $rule -Option $option -Outcome All -Culture en -ErrorAction Stop)
         ($results | Where-Object TargetName -Like '*/approved').Outcome | Should -Be 'Pass'
         ($results | Where-Object TargetName -Like '*/incorrect').Outcome | Should -Be 'Fail'
         ($results | Where-Object TargetName -Like '*/missing').Outcome | Should -Be 'None'
     }
 }
-AfterAll { Remove-Module DevOpsTools.AzureDevOps.Assessment -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.PSRule -Force }

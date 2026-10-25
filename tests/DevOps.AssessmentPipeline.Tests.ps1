@@ -1,6 +1,6 @@
 BeforeAll {
     Import-Module PSRule
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
     Add-Type -Path (Join-Path (Get-Module PSRule).ModuleBase 'YamlDotNet.dll')
     $deserializer = [YamlDotNet.Serialization.DeserializerBuilder]::new().Build()
     $pipeline = $deserializer.Deserialize([System.IO.StringReader]::new(

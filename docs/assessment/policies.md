@@ -36,7 +36,7 @@ $configuration = @{
     }
 }
 $option = New-PSRuleOption -Configuration $configuration
-$targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Option $option -Outcome All
+$targets | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Option $option -Outcome All
 ```
 
 Time-zone and geography policies accept Expected strings or arrays. Billing policies accept an explicit Expected boolean. SSH, guests, and OAuth use the collected `disallow...` field, so Expected=false permits the approved feature. Anonymous access uses `allowAnonymousAccess`, so Expected=true approves it. License-file checks apply only under a referenced licensing policy; Expected defaults to true. For permitted guest access, supply GuestAccessEvidence with Status=Complete, a reviewed Reference, and a Guests list of Descriptor values. The policy must list ApprovedGuestReviews and ApprovedGuests. Unapproved guests fail; absent governance evidence is Unknown. This enrichment must come from the organization's guest access review; the security-setting collector alone cannot establish guest governance.

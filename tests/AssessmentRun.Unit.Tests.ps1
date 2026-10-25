@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
     It 'rejects a projection with targets but no matching result provenance' {
@@ -20,9 +20,9 @@ Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
         }
         $sarifPath = "$TestDrive/raw.sarif"
         $rules = 'Azure.DevOps.Repos.Branch.HasBranchPolicy', 'Azure.DevOps.Repos.Branch.BranchPolicyIsEnabled', 'Azure.DevOps.Pipelines.Core.InheritedPermissions', 'Azure.DevOps.Organization.GeneralOverview.GeographySet'
-        $null = Assert-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module DevOpsTools.AzureDevOps.Assessment -Name $rules -Outcome All -Culture en -OutputPath $sarifPath -OutputFormat Sarif -ResultVariable raw -ErrorAction SilentlyContinue
+        $null = Assert-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Outcome All -Culture en -OutputPath $sarifPath -OutputFormat Sarif -ResultVariable raw -ErrorAction SilentlyContinue
         $before = Get-Content $sarifPath -Raw
-        $details = @(Invoke-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module DevOpsTools.AzureDevOps.Assessment -Name $rules -Outcome All -Culture en)
+        $details = @(Invoke-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Outcome All -Culture en)
         $report = Export-AzDevOpsAssessmentRun -Result $details -ExportPath $export.FullName -OutputPath "$TestDrive/assessment.json" -Organization fixture -SourceRevision synthetic-commit
         $report.Projects.Count | Should -Be 2
         $report.Projects[0].ScopeId | Should -Not -Be $report.Projects[1].ScopeId
@@ -44,4 +44,4 @@ Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
         $report.SourceRevision | Should -Be 'synthetic-commit'
     }
 }
-AfterAll { Remove-Module DevOpsTools.AzureDevOps.Assessment -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.PSRule -Force }

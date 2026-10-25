@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe 'Assessment evidence boundaries' -Tag Unit {
@@ -20,7 +20,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
                     settings = @{ minimumApproverCount = 2; buildDefinitionId = 1 }
                 })
             }
-            $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name "Azure.DevOps.Repos.DefaultBranchPolicy$Kind" -Culture en)
+            $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name "Azure.DevOps.Repos.DefaultBranchPolicy$Kind" -Culture en)
             $result[0].Outcome | Should -Be $Outcome
         }
 
@@ -36,7 +36,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
                 ObjectType = 'Azure.DevOps.Repo'; ObjectName = 'fixture.repo'
                 MainBranchPolicy = @([pscustomobject]@{ isEnabled = $true; isBlocking = $Blocking; type = @{ id = $TypeId }; settings = @{ allowSquash = $true } })
             }
-            $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name "Azure.DevOps.Repos.DefaultBranchPolicy$Kind" -Culture en)
+            $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name "Azure.DevOps.Repos.DefaultBranchPolicy$Kind" -Culture en)
             $result[0].Outcome | Should -Be $Outcome
         }
 
@@ -48,14 +48,14 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
                     @{ isEnabled = $false; isBlocking = $true; type = @{ id = 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' }; settings = @{ minimumApproverCount = 0 } }
                 )
             }
-            $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers -Culture en)
+            $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers -Culture en)
             $result[0].Outcome | Should -Be Pass
         }
     }
 
     Context 'Collection requests' {
         BeforeEach {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { [pscustomobject]@{ value = @() } }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @() } }
             Connect-AzDevOps -Organization fixture-org -PAT fixture-token
         }
 
@@ -66,15 +66,15 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
             @{ Name = 'crossed'; Scopes = @(@{ repositoryId = 'other'; refName = 'refs/heads/main'; matchKind = 'Exact' }, @{ repositoryId = 'repo'; refName = 'refs/heads/other'; matchKind = 'Exact' }); Count = 0 }
             @{ Name = 'case sensitive'; Scopes = @(@{ repositoryId = 'repo'; refName = 'refs/heads/Main'; matchKind = 'Exact' }); Count = 0 }
         ) {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { [pscustomobject]@{ value = @([pscustomobject]@{ settings = @{ scope = $Scopes } }) } }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @([pscustomobject]@{ settings = @{ scope = $Scopes } }) } }
             @(Get-AzDevOpsBranchPolicy -Project project -Repository repo -Branch refs/heads/main).Count | Should -Be $Count
         }
 
         It 'follows project continuation headers' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage {
                 [pscustomobject]@{ Body = [pscustomobject]@{ value = @([pscustomobject]@{ name = 'first' }) }; Headers = @{ 'x-ms-continuationtoken' = 'next page' } }
             } -ParameterFilter { $Uri -notmatch 'continuationToken=' }
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage {
                 [pscustomobject]@{ Body = [pscustomobject]@{ value = @([pscustomobject]@{ name = 'second' }) }; Headers = @{} }
             } -ParameterFilter { $Uri -match 'continuationToken=next%20page' }
             $projects = @(Get-AzDevOpsProject)
@@ -82,15 +82,15 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
         }
 
         It 'propagates a later project-page failure' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage {
                 [pscustomobject]@{ Body = [pscustomobject]@{ value = @([pscustomobject]@{ name = 'first' }) }; Headers = @{ 'x-ms-continuationtoken' = 'next' } }
             } -ParameterFilter { $Uri -notmatch 'continuationToken=' }
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage { throw 'page unavailable' } -ParameterFilter { $Uri -match 'continuationToken=' }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage { throw 'page unavailable' } -ParameterFilter { $Uri -match 'continuationToken=' }
             { Get-AzDevOpsProject } | Should -Throw
         }
 
         It 'does not turn a denied file request into evidence of absence' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { throw 'denied' }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { throw 'denied' }
             { Test-AzDevOpsFileExists -Project project -Repository repo -Path README.md } | Should -Throw
         }
 
@@ -102,7 +102,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
             @{ Status = 429; TypeName = 'ThrottledException'; Missing = $false }
             @{ Status = 503; TypeName = 'ServiceUnavailableException'; Missing = $false }
         ) {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod {
                 $response = [Net.Http.HttpResponseMessage]::new([Net.HttpStatusCode]$Status)
                 $exception = [Microsoft.PowerShell.Commands.HttpResponseException]::new('Synthetic request failure.', $response)
                 $record = [Management.Automation.ErrorRecord]::new($exception, 'SyntheticHttpFailure', 'InvalidOperation', $null)
@@ -117,38 +117,38 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
         }
 
         It 'returns true for an existing file' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { [pscustomobject]@{ path = '/README.md' } }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ path = '/README.md' } }
             Test-AzDevOpsFileExists -Project project -Repository repo -Path README.md | Should -BeTrue
         }
 
         It 'collects every pipeline page before retrieving details' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage {
                 [pscustomobject]@{ Body = [pscustomobject]@{ value = @([pscustomobject]@{ id = 1 }) }; Headers = @{ 'x-ms-continuationtoken' = 'next' } }
             } -ParameterFilter { $Uri -notmatch 'continuationToken=' }
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage {
                 [pscustomobject]@{ Body = [pscustomobject]@{ value = @([pscustomobject]@{ id = 2 }) }; Headers = @{} }
             } -ParameterFilter { $Uri -match 'continuationToken=' }
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { [pscustomobject]@{ id = [int]($Uri -replace '.*pipelines/(\d+).*', '$1') } }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ id = [int]($Uri -replace '.*pipelines/(\d+).*', '$1') } }
             @(Get-AzDevOpsPipelines -Project project).id | Should -Be @(1, 2)
         }
 
         It 'rejects repeated pagination tokens instead of looping or claiming completeness' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-AzDevOpsRestPage {
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-AzDevOpsRestPage {
                 [pscustomobject]@{ Body = [pscustomobject]@{ value = @() }; Headers = @{ 'x-ms-continuationtoken' = 'same' } }
             }
             { Get-AzDevOpsProject } | Should -Throw
         }
 
         It 'preserves the working connection after failed verification' {
-            Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { throw 'denied' }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { throw 'denied' }
             { Connect-AzDevOps -Organization wrong-org -PAT wrong-token } | Should -Throw
-            InModuleScope DevOpsTools.AzureDevOps.Assessment { $script:connection.Organization | Should -Be 'fixture-org' }
+            InModuleScope DevOpsTools.AzureDevOps.PSRule { $script:connection.Organization | Should -Be 'fixture-org' }
         }
     }
 
     It 'does not apply production environment rules to development' {
         $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'fixture.dev'; name = 'development'; checks = @() }
-        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name 'Azure.DevOps.Pipelines.Environments.Production*' -Culture en)
+        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name 'Azure.DevOps.Pipelines.Environments.Production*' -Culture en)
         $results.Count | Should -Be 0
     }
 
@@ -164,7 +164,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
         $option = New-PSRuleOption -Configuration @{ assessmentPolicies = @{
             'Azure.DevOps.ServiceConnections.ProductionHumanApproval' = @{ Reference = 'production-review-v1' }
         } }
-        $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name 'Azure.DevOps.ServiceConnections.Production*' -Option $option -Culture en)
+        $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name 'Azure.DevOps.ServiceConnections.Production*' -Option $option -Culture en)
         $result.Count | Should -Be $Count
         if ($Count) { @($result | Where-Object Outcome -NE $Outcome).Count | Should -Be 0 }
     }
@@ -174,7 +174,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
             ObjectType = 'Azure.DevOps.Tasks.VariableGroup'; ObjectName = 'fixture.checksum'
             variables = [pscustomobject]@{ checksum = [pscustomobject]@{ value = '0123456789abcdef0123456789abcdef' } }
         }
-        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name 'Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets' -Culture en)
+        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name 'Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets' -Culture en)
         $results.Count | Should -Be 1
         $results[0].Outcome | Should -Be 'Pass'
     }
@@ -184,7 +184,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
             ObjectType = 'Azure.DevOps.Tasks.VariableGroup'; ObjectName = 'fixture.pat'
             variables = [pscustomobject]@{ setting = [pscustomobject]@{ value = (('x' * 75) + 'AZDO' + ('x' * 5)) } }
         }
-        $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets -Culture en)
+        $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets -Culture en)
         $result[0].Outcome | Should -Be Fail
         ($result[0].Reason -join ' ') | Should -Not -Match 'xxx'
     }
@@ -199,7 +199,7 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
             variables = [pscustomobject]@{ setting = [pscustomobject]@{ value = 'password=syntheticOnly;' } }
             environments = @()
         }
-        $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name $Rule -Culture en)
+        $result = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $Rule -Culture en)
         $result.Count | Should -Be 1
         $result[0].Outcome | Should -Be Fail
         ($result[0].Reason -join ' ') | Should -Not -Match 'syntheticOnly'

@@ -66,7 +66,7 @@ steps:
 
         New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
         New-Item -Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY -ItemType Directory -Force | Out-Null
-        $moduleManifest = Join-Path $env:BUILD_SOURCESDIRECTORY 'src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1'
+        $moduleManifest = Join-Path $env:BUILD_SOURCESDIRECTORY 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1'
         Import-Module $moduleManifest -Force
 
         $tokenBody = @{
@@ -108,7 +108,7 @@ steps:
         $assessmentErrors = @()
         $null = Assert-PSRule `
             -InputPath $inputFiles `
-            -Module DevOpsTools.AzureDevOps.Assessment `
+            -Module DevOpsTools.AzureDevOps.PSRule `
             -Baseline Baseline.Default `
             -As Detail `
             -OutputPath $reportPath `
@@ -125,7 +125,7 @@ steps:
         # Re-evaluate the same immutable export for Unknown/NotApplicable projection.
         $assessmentResults = @(Invoke-PSRule `
             -InputPath $inputFiles `
-            -Module DevOpsTools.AzureDevOps.Assessment `
+            -Module DevOpsTools.AzureDevOps.PSRule `
             -Baseline Baseline.Default `
             -Outcome All `
             -ErrorAction Stop)

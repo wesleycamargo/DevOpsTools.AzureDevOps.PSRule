@@ -10,7 +10,7 @@ BeforeAll {
     # Setup tests paths
     # $rootPath = $PWD;
     $rootPath = Split-Path -Path $PSScriptRoot -Parent
-    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.Assessment')
+    $ourModule = (Join-Path -Path $rootPath -ChildPath 'src/DevOpsTools.AzureDevOps.PSRule')
 
     Import-Module -Name $ourModule -Force
     . "$PSScriptRoot/helpers/LiveRuleTestData.ps1"
@@ -21,16 +21,16 @@ BeforeAll {
 
     
     # Run rules with default token type
-    $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en
-    $noExtraLicenseBaselineResult = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en -Baseline Baseline.NoExtraLicense
+    $ruleResult = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.PSRule -Format Detect -Culture en
+    $noExtraLicenseBaselineResult = Invoke-PSRule -InputPath "$($outPath)/" -Module DevOpsTools.AzureDevOps.PSRule -Format Detect -Culture en -Baseline Baseline.NoExtraLicense
 
 
     # Run rules with ReadOnly token type
-    $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en
+    $ruleResultReadOnly = Invoke-PSRule -InputPath "$($outPathReadOnly)/" -Module DevOpsTools.AzureDevOps.PSRule -Format Detect -Culture en
 
 
     # Run rules with FineGrained token type
-    $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module DevOpsTools.AzureDevOps.Assessment -Format Detect -Culture en
+    $ruleResultFineGrained = Invoke-PSRule -InputPath "$($outPathFineGrained)/" -Module DevOpsTools.AzureDevOps.PSRule -Format Detect -Culture en
 }
 
 Describe "Azure.DevOps.Repos rules" -Tag 'Integration' {
@@ -504,5 +504,5 @@ Describe "Azure.DevOps.Repos rules" -Tag 'Integration' {
 }
 
 AfterAll {
-    Remove-Module -Name DevOpsTools.AzureDevOps.Assessment -Force
+    Remove-Module -Name DevOpsTools.AzureDevOps.PSRule -Force
 }

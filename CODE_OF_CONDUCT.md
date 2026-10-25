@@ -1,4 +1,4 @@
-# Code of Conduct - DevOpsTools.AzureDevOps.Assessment
+# Code of Conduct - DevOpsTools.AzureDevOps.PSRule
 
 ## Our Pledge
 

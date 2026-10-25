@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
     $proposal = Get-Content "$PSScriptRoot/../docs/assessment/proposed-rule-risk-policy.json" -Raw | ConvertFrom-Json
     $changes = Get-Content "$PSScriptRoot/../docs/assessment/proposed-rule-changes.json" -Raw | ConvertFrom-Json
 }
@@ -18,7 +18,7 @@ Describe 'Supplied assessment classifications' -Tag 'Unit' {
             if ($proposed.proposedReviewBaseline -in 'Security', 'Engineering', 'Governance') {
                 $rule.Domain | Should -Be $proposed.proposedReviewBaseline
             }
-            $help = Get-Content "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/en/$($rule.RuleId).md" -Raw
+            $help = Get-Content "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/en/$($rule.RuleId).md" -Raw
             $help | Should -Match ([regex]::Escape("Independent assessment risk: **$($rule.AssessmentSeverity)**"))
             $help | Should -Match ([regex]::Escape($catalog.SeverityPolicyVersion))
         }
@@ -40,8 +40,8 @@ Describe 'Supplied assessment classifications' -Tag 'Unit' {
     It 'does not interpret a severity-policy migration as a numerical security improvement' {
         $raw = @([pscustomobject]@{ RuleName = 'Azure.DevOps.Repos.Branch.HasBranchPolicy'; TargetType = 'Azure.DevOps.Repo.Branch'; TargetName = 'Azure.DevOps.Repo.Branch/fixture'; Outcome = 'Pass'; OutcomeReason = 'Processed'; Reason = @() })
         $current = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
-        Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Get-AzDevOpsAssessmentCatalog {
-            $old = Get-Content "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/Assessment/catalog.json" -Raw | ConvertFrom-Json
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsAssessmentCatalog {
+            $old = Get-Content "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/Assessment/catalog.json" -Raw | ConvertFrom-Json
             $old.SeverityPolicyVersion = '1.0.0'
             $old
         }
@@ -51,4 +51,4 @@ Describe 'Supplied assessment classifications' -Tag 'Unit' {
         $comparison.SecurityScoreDelta | Should -BeNullOrEmpty
     }
 }
-AfterAll { Remove-Module DevOpsTools.AzureDevOps.Assessment -Force }
+AfterAll { Remove-Module DevOpsTools.AzureDevOps.PSRule -Force }

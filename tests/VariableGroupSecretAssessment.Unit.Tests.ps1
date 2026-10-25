@@ -1,5 +1,5 @@
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe 'Variable group secret evidence' -Tag 'Unit' {
@@ -26,7 +26,7 @@ Describe 'Variable group secret evidence' -Tag 'Unit' {
             variables = [pscustomobject]@{ credential = [pscustomobject]@{ isSecret = $true; value = $null } }
         }
         $rules = 'Azure.DevOps.Tasks.VariableGroup.NoKeyVaultNoSecrets', 'Azure.DevOps.Tasks.VariableGroup.NoPlainTextSecrets'
-        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name $rules -Outcome All -Culture en -ErrorAction Stop)
+        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Outcome All -Culture en -ErrorAction Stop)
         $results.Count | Should -Be 2
         @($results | Where-Object Outcome -NE 'Pass').Count | Should -Be 0
     }
@@ -36,7 +36,7 @@ Describe 'Variable group secret evidence' -Tag 'Unit' {
             ObjectType = 'Azure.DevOps.Tasks.VariableGroup'
             ObjectName = 'fixture.unavailable'
         }
-        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name 'Azure.DevOps.Tasks.VariableGroup.No*Secrets' -Outcome All -Culture en -ErrorAction Stop)
+        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name 'Azure.DevOps.Tasks.VariableGroup.No*Secrets' -Outcome All -Culture en -ErrorAction Stop)
         $results.Count | Should -Be 2
         @($results | Where-Object Outcome -NE 'None').Count | Should -Be 0
         (Get-AzDevOpsVariableGroupSecretAssessment -TargetObject $target).ReasonCode | Should -Be 'VariablesUnavailable'
@@ -49,12 +49,12 @@ Describe 'Variable group secret evidence' -Tag 'Unit' {
             type = 'Vsts'
             variables = [pscustomobject]@{ credential = [pscustomobject]@{ value = 'Password=synthetic;' } }
         }
-        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name 'Azure.DevOps.Tasks.VariableGroup.No*Secrets' -Outcome All -Culture en -ErrorAction Stop)
+        $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name 'Azure.DevOps.Tasks.VariableGroup.No*Secrets' -Outcome All -Culture en -ErrorAction Stop)
         $results.Count | Should -Be 2
         @($results | Where-Object Outcome -NE 'Fail').Count | Should -Be 0
     }
 }
 
 AfterAll {
-    Remove-Module DevOpsTools.AzureDevOps.Assessment -Force
+    Remove-Module DevOpsTools.AzureDevOps.PSRule -Force
 }

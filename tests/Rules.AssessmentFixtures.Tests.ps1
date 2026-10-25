@@ -6,15 +6,15 @@ BeforeDiscovery {
 }
 
 BeforeAll {
-    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.Assessment/DevOpsTools.AzureDevOps.Assessment.psd1" -Force
+    Import-Module "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1" -Force
 }
 
 Describe 'Assessment with synthetic rule fixtures' -Tag 'Unit' {
     BeforeEach {
         Mock Invoke-RestMethod { throw 'Offline rule evaluation attempted a live API request.' }
         Mock Invoke-WebRequest { throw 'Offline rule evaluation attempted a live API request.' }
-        Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod { throw 'Offline rule evaluation attempted a live API request.' }
-        Mock -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-WebRequest { throw 'Offline rule evaluation attempted a live API request.' }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { throw 'Offline rule evaluation attempted a live API request.' }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-WebRequest { throw 'Offline rule evaluation attempted a live API request.' }
     }
 
     It 'evaluates passing, failing, missing-field and inapplicable <FixtureName> targets' -ForEach $fixtures {
@@ -25,7 +25,7 @@ Describe 'Assessment with synthetic rule fixtures' -Tag 'Unit' {
             $configuration = $fixture.Configuration | ConvertTo-Json -Depth 20 | ConvertFrom-Json -AsHashtable
         }
         $option = New-PSRuleOption -Configuration $configuration
-        $results = @($fixture.Cases.Target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.Assessment -Name $fixture.Rule -Option $option -Culture en)
+        $results = @($fixture.Cases.Target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $fixture.Rule -Option $option -Culture en)
         $results.Count | Should -Be @($fixture.Cases | Where-Object Outcome -NE 'None').Count
 
         foreach ($case in $fixture.Cases) {
@@ -41,7 +41,7 @@ Describe 'Assessment with synthetic rule fixtures' -Tag 'Unit' {
         }
         Should -Invoke Invoke-RestMethod -Times 0 -Exactly
         Should -Invoke Invoke-WebRequest -Times 0 -Exactly
-        Should -Invoke -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-RestMethod -Times 0 -Exactly
-        Should -Invoke -ModuleName DevOpsTools.AzureDevOps.Assessment Invoke-WebRequest -Times 0 -Exactly
+        Should -Invoke -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -Times 0 -Exactly
+        Should -Invoke -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-WebRequest -Times 0 -Exactly
     }
 }
