@@ -18,7 +18,6 @@ try {
     $versionPath = Join-Path $stagingPath "$moduleName/$version"
     New-Item -Path $versionPath -ItemType Directory -Force | Out-Null
     Copy-Item -Path (Join-Path $sourcePath '*') -Destination $versionPath -Recurse
-    Copy-Item -Path (Join-Path $repositoryPath 'LICENSE') -Destination $versionPath
     Test-ModuleManifest -Path (Join-Path $versionPath "$moduleName.psd1") | Out-Null
     Compress-Archive -Path (Join-Path $stagingPath $moduleName) -DestinationPath $archivePath -Force
     $checksumPath = "$archivePath.sha256"

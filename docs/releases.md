@@ -37,6 +37,8 @@ The `publish` input defaults to `false`. Enable it to publish the validated
 `DevOpsTools.AzureDevOps.Assessment` package to PowerShell Gallery using the
 repository secret `PS_GALLERY_KEY`. Publishing requires credentials authorized
 for the new package name. GitHub releases do not automatically publish to Gallery.
+The published source includes `LICENSE`; its manifest links to the public GPLv3
+text so recipients can read the terms without access to the private repository.
 The former Azure Pipelines publisher has been retired; live pipeline definitions
 and existing Azure Artifacts packages are managed separately.
 

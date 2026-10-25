@@ -5,6 +5,13 @@ BeforeAll {
 }
 
 Describe 'Assessment module distribution' -Tag Unit {
+    It 'includes the GPLv3 license in the source published to PowerShell Gallery' {
+        $modulePath = Join-Path $repositoryPath "src/$moduleName"
+        (Get-FileHash "$modulePath/LICENSE").Hash | Should -Be (Get-FileHash "$repositoryPath/LICENSE").Hash
+        $manifest = Import-PowerShellDataFile "$modulePath/$moduleName.psd1"
+        $manifest.PrivateData.PSData.LicenseUri | Should -Be 'https://www.gnu.org/licenses/gpl-3.0.html'
+    }
+
     It 'packages the renamed module for an isolated version-qualified import' {
         $outputPath = Join-Path $TestDrive 'release'
         $files = @(& "$repositoryPath/scripts/Build-Module.ps1" -OutputPath $outputPath)

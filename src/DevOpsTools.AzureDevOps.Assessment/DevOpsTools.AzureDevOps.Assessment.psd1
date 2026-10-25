@@ -108,7 +108,7 @@
             Tags                       = @('PSRule-rules', 'PSRule', 'AzureDevOps', 'Security')
 
             # A URL to the license for this module.
-            LicenseUri                 = 'https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/LICENSE'
+            LicenseUri                 = 'https://www.gnu.org/licenses/gpl-3.0.html'
 
             # A URL to the main website for this project.
             ProjectUri                 = 'https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment'
