@@ -5,10 +5,10 @@ After a release is published, download the module ZIP and its `.sha256` file fro
 The ZIP contains only the module, rule help, and license under
 `DevOpsTools.AzureDevOps.PSRule/<version>/`.
 
-For version 0.2.0, run these commands from the download directory in PowerShell 7:
+For version 0.2.1, run these commands from the download directory in PowerShell 7:
 
 ```powershell
-$archive = './DevOpsTools.AzureDevOps.PSRule.0.2.0.zip'
+$archive = './DevOpsTools.AzureDevOps.PSRule.0.2.1.zip'
 $expectedHash = (Get-Content "$archive.sha256").Split(' ')[0]
 if ((Get-FileHash $archive -Algorithm SHA256).Hash -ne $expectedHash) {
     throw 'Module archive checksum does not match.'
@@ -17,7 +17,7 @@ Install-Module PSRule -RequiredVersion 2.9.0 -Scope CurrentUser
 $moduleDirectory = ($env:PSModulePath -split [IO.Path]::PathSeparator)[0]
 New-Item -Path $moduleDirectory -ItemType Directory -Force | Out-Null
 Expand-Archive -Path $archive -DestinationPath $moduleDirectory -Force
-Import-Module DevOpsTools.AzureDevOps.PSRule -RequiredVersion 0.2.0 -Force
+Import-Module DevOpsTools.AzureDevOps.PSRule -RequiredVersion 0.2.1 -Force
 ```
 
 To build the same package from a checkout, run `./scripts/Build-Module.ps1`.
@@ -39,7 +39,7 @@ To publish a new version, update the module manifest version before merging to
 `0.2.0` package is not republished when this workflow is enabled.
 
 Manual execution remains available: supply an existing tag matching the manifest
-version, such as `v0.2.0`. The manual `publish` input defaults to `false` for
+version, such as `v0.2.1`. The manual `publish` input defaults to `false` for
 validation only; enable it to publish a version that is not already in Gallery.
 Both publication modes use the repository secret `PS_GALLERY_KEY`. Publishing
 requires credentials authorized for the package name. GitHub releases do not
