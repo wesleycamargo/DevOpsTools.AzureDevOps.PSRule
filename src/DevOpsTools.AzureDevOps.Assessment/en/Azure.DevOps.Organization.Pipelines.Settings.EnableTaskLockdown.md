@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Organization  
 severity: Moderate  
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Organization.Pipelines.Settings.EnableTaskLockdown.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Organization.Pipelines.Settings.EnableTaskLockdown.md
 ---
 
 # Azure.DevOps.Organization.Pipelines.Settings.EnableTaskLockdown

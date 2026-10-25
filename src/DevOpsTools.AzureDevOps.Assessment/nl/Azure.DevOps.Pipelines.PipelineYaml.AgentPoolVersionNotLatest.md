@@ -1,7 +1,7 @@
 ---
 category: Repository
 severity: Important
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest.md
 ---
 
 # Azure.DevOps.Pipelines.PipelineYaml.AgentPoolVersionNotLatest

@@ -1,7 +1,7 @@
 # GitHub module releases
 
 After a release is published, download the module ZIP and its `.sha256` file from
-[GitHub Releases](https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/releases).
+[GitHub Releases](https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/releases).
 The ZIP contains only the module, rule help, and license under
 `DevOpsTools.AzureDevOps.Assessment/<version>/`.
 
@@ -44,4 +44,7 @@ The new package starts at `0.1.0` with GUID
 `60742743-bfdd-46c1-bd7a-8dfab61de69e`, replacing the old package's `0.5.12`
 version sequence and GUID `bb42e16e-b0af-46be-9ac1-51e2f6bb6e8d`. Preserve the new
 GUID across subsequent versions. See [migration instructions](../README.md#migration-to-the-new-module-name)
-for consumer changes. The repository name and its release history are unchanged.
+for consumer changes. The private repository `wesleycamargo/DevOpsTools.AzureDevOps.Assessment`
+preserves the predecessor repository's commit history. Historical tags and release
+assets remain in [the predecessor repository](https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/releases);
+new releases belong to the new repository.

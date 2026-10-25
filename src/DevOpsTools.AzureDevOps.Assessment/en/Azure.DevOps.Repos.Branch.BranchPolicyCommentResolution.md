@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Repos
 severity: Important
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.Branch.BranchPolicyCommentResolution.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Repos.Branch.BranchPolicyCommentResolution.md
 ---
 
 # Azure.DevOps.Repos.Branch.BranchPolicyCommentResolution

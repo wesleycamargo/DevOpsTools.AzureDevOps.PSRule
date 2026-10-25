@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Organization
 severity: Information
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Organization.Security.Policies.Debug.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Organization.Security.Policies.Debug.md
 ---
 
 # Azure.DevOps.Organization.Security.Policies.Debug

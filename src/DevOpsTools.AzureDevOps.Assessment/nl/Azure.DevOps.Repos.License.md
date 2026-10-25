@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Repos
 severity: Informational
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.Repos.License.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.Repos.License.md
 ---
 
 # Azure.DevOps.Repos.License

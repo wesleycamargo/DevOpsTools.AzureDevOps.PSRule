@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Pipelines
 severity: Critical
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets.md
 ---
 
 # Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets

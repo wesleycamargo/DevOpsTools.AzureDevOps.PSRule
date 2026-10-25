@@ -1,7 +1,7 @@
 ---
 category: Repository
 severity: Severe
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.ServiceConnections.ProductionBranchLimit.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.ServiceConnections.ProductionBranchLimit.md
 ---
 
 # Azure.DevOps.ServiceConnections.ProductionBranchLimit

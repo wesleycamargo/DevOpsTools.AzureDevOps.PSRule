@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Service Connections
 severity: Critical
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.ServiceConnections.ClassicAzure.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/nl/Azure.DevOps.ServiceConnections.ClassicAzure.md
 ---
 
 # Azure.DevOps.ServiceConnections.ClassicAzure

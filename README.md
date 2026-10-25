@@ -2,8 +2,8 @@
 
 [![PowerShell Gallery Version (excluding pre-releases)](https://img.shields.io/powershellgallery/v/DevOpsTools.AzureDevOps.Assessment?logo=powershell&link=https%3A%2F%2Fwww.powershellgallery.com%2Fpackages%2FDevOpsTools.AzureDevOps.Assessment)](https://www.powershellgallery.com/packages/DevOpsTools.AzureDevOps.Assessment)
 [![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/DevOpsTools.AzureDevOps.Assessment?logo=powershell&link=https%3A%2F%2Fwww.powershellgallery.com%2Fpackages%2FDevOpsTools.AzureDevOps.Assessment)](https://www.powershellgallery.com/packages/DevOpsTools.AzureDevOps.Assessment)
-[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/cloudyspells/PSRule.Rules.AzureDevOps/module-ci.yml?label=Pester%20Unit%20Tests)](https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/actions/workflows/module-ci.yml)
-[![codecov](https://codecov.io/gh/cloudyspells/PSRule.Rules.AzureDevOps/graph/badge.svg?token=SULG2MXS9U)](https://codecov.io/gh/cloudyspells/PSRule.Rules.AzureDevOps)
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/module-ci.yml?label=Pester%20Unit%20Tests)](https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/actions/workflows/module-ci.yml)
+[![codecov](https://codecov.io/gh/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/graph/badge.svg)](https://codecov.io/gh/wesleycamargo/DevOpsTools.AzureDevOps.Assessment)
 
 ## PSRule Module for Azure DevOps
 
@@ -19,7 +19,7 @@ This module is actively developed since August 2023. Although a lot of testing h
 performed and is built in to the development cycle, up to now little feedback has come
 back from the community yet. Any input on the direction of the module and included rules
 is very much appreciated. Please consider opening an
-[issue](https://github.com/cloudyspells/PSRule.Rules.AzureDevOps/issues)
+[issue](https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/issues)
 with your ideas, encountered problems in using the module or other contributions. Any
 feedback is highly appreciated.
 
@@ -42,7 +42,10 @@ to Azure Monitor.
 
 `DevOpsTools.AzureDevOps.Assessment` starts at version **0.1.0**, with module GUID
 `60742743-bfdd-46c1-bd7a-8dfab61de69e`. It replaces the package name
-`PSRule.Rules.AzureDevOps`; the GitHub repository keeps its existing name.
+`PSRule.Rules.AzureDevOps`. Development now lives in the private repository
+`wesleycamargo/DevOpsTools.AzureDevOps.Assessment`, preserving the Git commit
+history of [the predecessor repository](https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps).
+The 2026-10-25 migration preserves the GPLv3 license and original author credits.
 The new version sequence does not reset assessment policy or report schema versions.
 
 Install the new package separately once published; updating the old package does

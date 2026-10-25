@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Pipelines
 severity: Severe
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Groups.ProjectAdmins.MaxMembers.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Groups.ProjectAdmins.MaxMembers.md
 ---
 
 # Azure.DevOps.Groups.ProjectAdmins.MinMembers

@@ -1,7 +1,7 @@
 ---
 category: Microsoft Azure DevOps Projects
 severity: Severe
-online version: https://github.com/wesleycamargo/PSRule.Rules.AzureDevOps/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Project.MainServiceConnectionAcl.ProjectValidUsers.md
+online version: https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.Assessment/blob/main/src/DevOpsTools.AzureDevOps.Assessment/en/Azure.DevOps.Project.MainServiceConnectionAcl.ProjectValidUsers.md
 ---
 
 # Azure.DevOps.Project.MainServiceConnectionAcl.ProjectValidUsers
