@@ -1,3 +1,14 @@
+## [0.2.1]
+
+### Fixed
+
+- Organization collection retains sanitized permission, endpoint and response-shape failure reasons; invalid setting types cannot become boolean compliance evidence.
+- Repository Advanced Security collection uses the documented enablement API while preserving `Ghas` fields and token-profile restrictions. Project pipeline/retention settings use stable API versions and repository pipeline permissions use an explicit version.
+
+### Changed
+
+- Publish new manifest versions automatically from `main` after offline validation; skip versions already available in PowerShell Gallery.
+
 ## [0.2.0]
 
 ### Changed
@@ -25,9 +36,6 @@
 - Logging messages now provide clearer and more structured feedback during execution.
 
 ### Fixed
-
-- Organization collection retains sanitized permission, endpoint and response-shape failure reasons; invalid setting types cannot become boolean compliance evidence.
-- Repository Advanced Security collection uses the documented enablement API while preserving `Ghas` fields and token-profile restrictions. Project pipeline/retention settings use stable API versions and repository pipeline permissions use an explicit version.
 
 - Assessment pipeline export discovery now includes nested project files and retains both raw SARIF and versioned per-project reports. Policy or denominator changes invalidate numerical history comparisons.
 
