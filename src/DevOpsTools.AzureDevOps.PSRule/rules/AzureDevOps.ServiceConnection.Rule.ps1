@@ -44,17 +44,12 @@ Rule 'Azure.DevOps.ServiceConnections.Scope' `
     -Ref 'ADO-SC-004' `
     -Type 'Azure.DevOps.ServiceConnection' `
     -Tag @{ release = 'GA'} `
-    -If { $TargetObject.data.scopeLevel -eq 'Subscription' -and $TargetObject.type -eq 'azurerm' } `
+    -If { $TargetObject.type -eq 'azurerm' -and (Get-AzDevOpsServiceConnectionScopeAssessment -TargetObject $TargetObject -Policy $Configuration.serviceConnectionScopePolicies.'Azure.DevOps.ServiceConnections.Scope').Outcome -ne 'Unknown' } `
     -Level Information {
-        # Description 'Service connection should have a scope that is not an entire subscription.'
-        Reason 'The service connection is scoped to a subscription.'
-        Recommend 'Confine the scope of the service connection to a resource group or resource.'
-        # Links 'https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#scope-service-connections'
-        AllOf {
-            $Assert.HasField($TargetObject, "data.scopeLevel", $true)
-            $Assert.HasField($TargetObject, "authorization.parameters.scope", $true)
-            $Assert.Contains($TargetObject, "authorization.parameters.scope", "resourcegroups")
-        }
+        $assessment = Get-AzDevOpsServiceConnectionScopeAssessment -TargetObject $TargetObject -Policy $Configuration.serviceConnectionScopePolicies.'Azure.DevOps.ServiceConnections.Scope'
+        Reason $assessment.ReasonCode
+        Recommend 'Review complete Azure RBAC assignments for the service identity against the approved cloud access policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: service connections should should use Workload Idenity Federation
