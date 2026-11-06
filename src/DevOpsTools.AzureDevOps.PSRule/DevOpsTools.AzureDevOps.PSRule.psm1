@@ -82,6 +82,9 @@ function Export-AzDevOpsRuleData {
         [switch]$Strict
     )
 
+    if ($null -eq $script:connection) {
+        throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
+    }
     Assert-AzDevOpsCompletenessReportPath -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath
     $report = [ordered]@{ SchemaVersion = 1; Organization = $script:connection.Organization; Status = 'Complete'; Projects = @() }
     Invoke-AzDevOpsProjectExport -Organization $Organization -OrganizationId $OrganizationId -Project $Project -OutputPath $OutputPath -PassThru:$PassThru -Report $report
@@ -139,6 +142,11 @@ function Invoke-AzDevOpsOrganizationExport {
     param ([string]$OrganizationId, [string]$OutputPath, [switch]$PassThru, [System.Collections.IDictionary]$Report)
 
     if (-not $OrganizationId) { $OrganizationId = $script:connection.OrganizationId }
+    $validOrganizationId = [guid]::Empty
+    if (-not [guid]::TryParse([string]$OrganizationId, [ref]$validOrganizationId) -or $validOrganizationId -eq [guid]::Empty) {
+        throw 'OrganizationId must be a valid GUID. Reconnect using Connect-AzDevOps -OrganizationId or allow connectionData discovery.'
+    }
+    $OrganizationId = $validOrganizationId.ToString()
     $exportCommands = @(
         @{ Name = 'Export-AdoOrganizationPipelinesSettings'; Params = @{} },
         @{ Name = 'Export-AdoOrganizationGeneralOverview'; Params = @{} },
@@ -188,7 +196,7 @@ function Invoke-AzDevOpsCollectors {
             if (-not $OrganizationScope -or $script:collectionStatus.Status -ne 'Unavailable' -or -not $requestFailure) {
                 Set-AzDevOpsCollectionStatus -Status Failed -ReasonCode CollectorFailed
             }
-            Write-Error "[$($export.Name)]: Collection failed." -ErrorAction Continue
+            Write-Error "[$($export.Name)]: Collection failed. $($_.Exception.Message)" -ErrorAction Continue
         }
         finally {
             $script:collectionStatus = $previousStatus
@@ -273,7 +281,7 @@ Function Export-AzDevOpsOrganizationRuleData {
     catch {
         $report.ProjectDiscovery.Status = 'Failed'
         $report.ProjectDiscovery.ReasonCodes = @('ProjectDiscoveryFailed')
-        Write-Error '[Get-AzDevOpsProject]: Project discovery failed.' -ErrorAction Continue
+        Write-Error "[Get-AzDevOpsProject]: Project discovery failed. $($_.Exception.Message)" -ErrorAction Continue
     }
     finally {
         $script:collectionStatus = $previousStatus
@@ -298,7 +306,7 @@ Function Export-AzDevOpsOrganizationRuleData {
                 Status = 'Unavailable'
                 Collectors = @([ordered]@{ Command = 'Export-AzDevOpsRuleData'; Status = 'Failed'; ReasonCodes = @('ProjectExportFailed') })
             }
-            Write-Error '[Export-AzDevOpsRuleData]: Project export failed.' -ErrorAction Continue
+            Write-Error "[Export-AzDevOpsRuleData]: Project export failed. $($_.Exception.Message)" -ErrorAction Continue
         }
     }
     try {
@@ -310,7 +318,7 @@ Function Export-AzDevOpsOrganizationRuleData {
             Status = 'Unavailable'
             Collectors = @([ordered]@{ Command = 'Export-AzDevOpsOrganizationRuleData'; Status = 'Failed'; ReasonCodes = @('OrganizationExportFailed') })
         }
-        Write-Error 'Organization collection failed.' -ErrorAction Continue
+        Write-Error "Organization collection failed. $($_.Exception.Message)" -ErrorAction Continue
     }
     Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
 }
