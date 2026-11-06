@@ -17,6 +17,7 @@ Describe 'Azure service connection cloud RBAC scope' -Tag Unit {
                 Status = 'Complete'
                 TargetName = 'fixture.connection'
                 PrincipalId = 'synthetic-principal'
+                IdentityVerified = $true
                 Reference = 'cloud-rbac-export-v1'
                 InheritedAssignmentsIncluded = $true
                 RoleDefinitionsComplete = $true
