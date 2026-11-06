@@ -130,19 +130,11 @@ Rule 'Azure.DevOps.ServiceConnections.InheritedPermissions' `
 Rule 'Azure.DevOps.ServiceConnections.ProjectValidUsers' `
     -Ref 'ADO-SC-010' `
     -Type 'Azure.DevOps.ServiceConnection' `
+    -If { (Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.ServiceConnections.ProjectValidUsers').Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
-        # Description 'Service connections should not have direct permissions for Project Valid Users.'
-        Reason 'The service connection has direct permissions for Project Valid Users.'
-        Recommend 'Do not grant direct permissions for Project Valid Users for the service connection.'
-        AllOf {
-            # Loop through all the propeties of the first ACL
-            $TargetObject.Acls[0].acesDictionary.psobject.Properties.GetEnumerator() | ForEach-Object {
-                # Assert the property name does not end with -0-0-0-0-3 wich is the Project Valid Users group SID
-                AnyOf {
-                    $Assert.NotMatch($_.Value, "descriptor", "-0-0-0-0-3")
-                    $Assert.HasFieldValue($_.Value, "allow", 16)
-                }
-            }
-        }
+        $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.ServiceConnections.ProjectValidUsers'
+        Reason $assessment.ReasonCode
+        Recommend 'Review unauthorized sensitive Project Valid Users grants using a documented namespace-specific permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
