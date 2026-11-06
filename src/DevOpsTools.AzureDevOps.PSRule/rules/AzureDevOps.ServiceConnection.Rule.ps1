@@ -4,8 +4,7 @@
 Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
     -Ref 'ADO-SC-001' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -With 'IsProduction' `
-    -If { (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
+    -If { (Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration) -and (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
         $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject
@@ -18,8 +17,7 @@ Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
 Rule 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' `
     -Ref 'ADO-SC-002' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -With 'IsProduction' `
-    -If { (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
+    -If { (Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration) -and (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
     -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
         $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval'
@@ -80,14 +78,13 @@ Rule 'Azure.DevOps.ServiceConnections.WorkloadIdentityFederation' `
 Rule 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' `
     -Ref 'ADO-SC-006' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -With 'IsProduction' `
+    -If { (Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration) -and (Get-AzDevOpsProductionBranchAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA'} `
     -Level Warning {
-        # Description 'Production service connection should be limited to specific branches.'
-        Reason 'The service connection is not limited to specific branches.'
-        Recommend 'Limit the service connection to specific branches.'
-        $Assert.HasField($TargetObject, "Checks[?@settings.displayName == 'Branch control'].settings.inputs.allowedBranches", $true)
-        $Assert.HasFieldValue($TargetObject, "Checks[?@settings.displayName == 'Branch control'].settings.inputs.allowedBranches")
+        $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $TargetObject
+        Reason $assessment.ReasonCode
+        Recommend 'Configure an enabled branch-control check with restricted allowed branches.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 
 # Synopsis: Service Connection should not be of the classic azure type
