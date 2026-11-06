@@ -70,6 +70,13 @@ function ConvertTo-AzDevOpsAssessment {
             } elseif ($rule.RuleId -like '*.ProjectValidUsers') {
                 $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.projectValidUsersPolicies.($rule.RuleId)
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+            } elseif ($rule.RuleId -eq 'Azure.DevOps.ServiceConnections.Scope') {
+                if ($target.type -eq 'azurerm') {
+                    $assessment = Get-AzDevOpsServiceConnectionScopeAssessment -TargetObject $target -Policy $Configuration.serviceConnectionScopePolicies.'Azure.DevOps.ServiceConnections.Scope'
+                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+                } else {
+                    $outcome = 'NotApplicable'
+                }
             } elseif ($rule.RiskGroup -eq 'VariableGroup.SecretExposure') {
                 $assessment = Get-AzDevOpsVariableGroupSecretAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
