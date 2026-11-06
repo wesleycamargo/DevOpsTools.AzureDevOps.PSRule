@@ -24,8 +24,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyIsEnabled' `
         Reason 'The default branch does not have its branch policy enabled.'
         Recommend 'Protect your main branch with a branch policy.'
         # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#secure-azure-repos
-        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled } | Select-Object -First 1), "isEnabled", $true)
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled } | Select-Object -First 1), "isEnabled", $true)
+        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled -eq $true -and $_.isBlocking -eq $true } | Select-Object -First 1), "isEnabled", $true)
+        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled -eq $true -and $_.isBlocking -eq $true } | Select-Object -First 1), "isEnabled", $true)
 }
 
 
