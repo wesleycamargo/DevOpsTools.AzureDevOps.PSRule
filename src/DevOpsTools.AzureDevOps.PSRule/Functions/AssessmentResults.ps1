@@ -67,6 +67,9 @@ function ConvertTo-AzDevOpsAssessment {
                 } else {
                     $outcome = 'NotApplicable'
                 }
+            } elseif ($rule.RuleId -like '*.ProjectValidUsers') {
+                $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.projectValidUsersPolicies.($rule.RuleId)
+                $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
             } elseif ($rule.RiskGroup -eq 'VariableGroup.SecretExposure') {
                 $assessment = Get-AzDevOpsVariableGroupSecretAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
