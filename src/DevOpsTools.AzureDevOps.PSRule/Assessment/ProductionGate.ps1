@@ -14,6 +14,11 @@ function Get-AzDevOpsProductionGateAssessment {
     $incomplete = $false
     foreach ($check in $active) {
         if (-not $check.type.name -or $null -eq $check.settings) { $incomplete = $true; continue }
+        if ($check.type.name -eq 'Branch control' -or $check.settings.displayName -eq 'Branch control') {
+            $branchAssessment = Get-AzDevOpsProductionBranchAssessment -TargetObject @{ Checks = @($check) }
+            if ($branchAssessment.Outcome -eq 'Unknown') { $incomplete = $true; continue }
+            if ($branchAssessment.Outcome -eq 'Fail') { continue }
+        }
         if ($check.type.name -eq 'Approval') {
             if ($null -eq $check.settings.approvers) { $incomplete = $true; continue }
             if (@($check.settings.approvers).Count -eq 0) { continue }
