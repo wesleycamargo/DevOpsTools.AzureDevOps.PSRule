@@ -70,19 +70,11 @@ Rule 'Azure.DevOps.Pipelines.Environments.InheritedPermissions' `
 Rule 'Azure.DevOps.Pipelines.Environments.ProjectValidUsers' `
     -Ref 'ADO-E-006' `
     -Type 'Azure.DevOps.Pipelines.Environment' `
+    -If { (Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Environments.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.Pipelines.Environments.ProjectValidUsers').Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
-        # Description 'Environments should not have direct permissions for Project Valid Users.'
-        Reason 'The environment has direct permissions for Project Valid Users.'
-        Recommend 'Do not grant direct permissions for Project Valid Users for the environment.'        
-        AllOf {
-            # Loop through all the propeties of the first ACL
-            $TargetObject.Acls[0].acesDictionary.psobject.Properties.GetEnumerator() | ForEach-Object {
-                # Assert the property name does not end with -0-0-0-0-3 wich is the Project Valid Users group SID
-                AnyOf {
-                    $Assert.NotMatch($_.Value, "descriptor", "-0-0-0-0-3")
-                    $Assert.HasFieldValue($_.Value, "allow", 1)
-                }
-            }
-        }
+        $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Environments.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.Pipelines.Environments.ProjectValidUsers'
+        Reason $assessment.ReasonCode
+        Recommend 'Review unauthorized sensitive Project Valid Users grants using a documented namespace-specific permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
