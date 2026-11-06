@@ -29,3 +29,7 @@ Consider disabling self approval for the environment.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Error remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+Explicit productionReleaseEnvironments mappings identify production stages in classic release definitions; without one, only delimited production/prod/prd/live stage names are selected.

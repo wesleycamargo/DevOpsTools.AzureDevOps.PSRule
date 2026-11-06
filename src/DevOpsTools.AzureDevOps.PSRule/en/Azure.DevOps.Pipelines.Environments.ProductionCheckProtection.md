@@ -12,7 +12,7 @@ Production resources should have a configured protection gate.
 
 ## DESCRIPTION
 
-This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+Production scope can be explicitly configured by exact ObjectName, overriding the name fallback. Name matching recognizes delimited production/prod/prd/live only (not main/master).
 
 An enabled configured protection check satisfies this diagnostic, including an automated check. Human approval is a separate policy. Empty checks fail; disabled checks fail; unavailable or incomplete check collection is Unknown and not evaluated by PSRule. This verifies gate configuration, not successful execution of a deployment. Raw findings remain distinct; only the same target's common missing or disabled gate is correlated in assessment scoring.
 
@@ -25,3 +25,7 @@ Configure an enabled protection check and retain deployment execution evidence.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+Explicit productionTargets mappings select exact environment or service connection ObjectName values. An active Branch control must restrict allowed branches; a wildcard or disabled check does not prove protection. Checks configured in Azure DevOps do not prove execution.
