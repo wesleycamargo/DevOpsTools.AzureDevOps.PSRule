@@ -121,10 +121,23 @@
 
         $candidate.OrganizationId = $OrganizationId
 
-        # Verify connection with a simple API call
+        # Verify credentials before attempting organization identity discovery.
         $uri = "https://dev.azure.com/$Organization/_apis/projects?api-version=7.0"
-        $verification = Invoke-RestMethod -Uri $uri -Method Get -Headers $candidate.GetHeader()
+        $verification = Invoke-RestMethod -Uri $uri -Method Get -Headers $candidate.GetHeader() -ErrorAction Stop
         if ($verification -is [string]) { throw 'Authentication failed.' }
+
+        # Billing requires the organization GUID. Resolve it automatically when
+        # callers connect with only the organization name (including OAuth).
+        if ([string]::IsNullOrWhiteSpace($candidate.OrganizationId)) {
+            $identityUri = "https://dev.azure.com/$Organization/_apis/connectionData?api-version=7.1-preview"
+            $identity = Invoke-RestMethod -Uri $identityUri -Method Get -Headers $candidate.GetHeader() -ErrorAction Stop
+            $parsedId = [guid]::Empty
+            if (-not [guid]::TryParse([string]$identity.instanceId, [ref]$parsedId) -or $parsedId -eq [guid]::Empty) {
+                throw 'Azure DevOps connectionData did not return a valid organization GUID.'
+            }
+            $candidate.OrganizationId = $parsedId.ToString()
+        }
+
         $script:connection = $candidate
         Write-Verbose "Successfully connected to Azure DevOps organization: $Organization"
     }
