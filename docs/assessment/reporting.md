@@ -1,6 +1,6 @@
 # Assessment reporting and migration
 
-`Assessment/catalog.json` contains 117 uniquely identified historical documented controls, plus explicit dispositions for two supplemental runtime rules. Rule-set version is `2026.10.21.2`; severity-policy version is `1.1.0`. All 117 classifications now match the user-supplied `proposed-rule-risk-policy.json`; its original draft and the 42-rule backlog are preserved in this directory as provenance. The draft itself is not loaded at runtime. Legacy help severity and PSRule levels are preserved separately.
+`Assessment/catalog.json` contains 117 uniquely identified historical documented controls, plus explicit dispositions for two supplemental runtime rules. Rule-set version is `2026.11.06.1`; severity-policy version is `1.1.0`. All 117 classifications now match the user-supplied `proposed-rule-risk-policy.json`; its original draft and the 42-rule backlog are preserved in this directory as provenance. The draft itself is not loaded at runtime. Legacy help severity and PSRule levels are preserved separately.
 
 Version 1.1.0 fills 74 previously unclassified ratings, adopts 17 supplied domain assignments, and changes the plaintext-secret replacement from Medium to Critical. Its deprecated alias retains the proposed Medium rating; same-target correlation uses the maximum applicable weight once. These are policy migrations, not evidence that security posture improved. `ApplicabilityGuidance` preserves the proposal's evidence caveats; a classification does not prove actual exploitability.
 
@@ -64,3 +64,7 @@ The assessment pipeline now includes a trailing directory separator when passing
 Add Reference to each migrated policy. The historical GHAS defaults remain present in legacy baseline files for configuration compatibility, but they do not implicitly activate the new licensed-feature policy. Unconfigured optional controls are NotApplicable. Administrator count keys retain their existing names. Record the administrative/recovery policy reference in the configuration so the history configuration hash changes when the operating model changes.
 
 PSRule 2.9 assertion output omits precondition results from `ResultVariable`, even with `-Outcome All`. The pipeline retains its SARIF assertion pass and evaluates the same immutable export with `Invoke-PSRule -Outcome All` for the assessment projection. This preserves Unknown permission evidence and NotApplicable optional policies in the JSON report.
+
+## November 2026 evidence reliability update
+
+The same rule IDs now require blocking branch policies, use exact production inventories where provided, and distinguish configured gates from incomplete evidence. The ProjectValidUsers diagnostics require referenced namespace-specific masks for evaluated direct sensitive grants. ServiceConnections.Scope requires externally reviewed Azure RBAC identity and role/scope evidence; missing inputs produce Unknown instead of a misleading pass/fail. No four-grade risk classifications or PSRule levels changed. These evidence changes invalidate score comparisons across the rule-set version boundary; review the documented configuration in policies.md.
