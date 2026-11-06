@@ -60,6 +60,13 @@ function ConvertTo-AzDevOpsAssessment {
             } elseif ($rule.RuleId -like '*.ProductionCheckProtection') {
                 $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+            } elseif ($rule.RuleId -like '*.ProductionBranchLimit') {
+                if (Test-AzDevOpsProductionTarget -TargetObject $target -Configuration $Configuration) {
+                    $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $target
+                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+                } else {
+                    $outcome = 'NotApplicable'
+                }
             } elseif ($rule.RiskGroup -eq 'VariableGroup.SecretExposure') {
                 $assessment = Get-AzDevOpsVariableGroupSecretAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
