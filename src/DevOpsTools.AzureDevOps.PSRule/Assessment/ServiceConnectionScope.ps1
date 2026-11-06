@@ -12,7 +12,8 @@ function Get-AzDevOpsServiceConnectionScopeAssessment {
     if ($null -eq $evidence -or $evidence.Status -ne 'Complete' -or
         $evidence.InheritedAssignmentsIncluded -ne $true -or
         $evidence.RoleDefinitionsComplete -ne $true -or
-        -not $evidence.Reference -or
+        -not $evidence.Reference -or -not $evidence.PrincipalId -or
+        $evidence.IdentityVerified -ne $true -or
         [string]$evidence.TargetName -cne [string]$TargetObject.ObjectName -or
         $null -eq $evidence.RoleAssignments) {
         return $unknown
