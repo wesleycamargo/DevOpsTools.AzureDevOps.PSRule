@@ -37,3 +37,7 @@ tot een smalle scope.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Information remain compatibility metadata; they are not the four-grade assessment scale.
+
+## BEWIJS (regelset 2026.11.06.1)
+
+Deze regel vereist serviceConnectionScopePolicies en extern gecontroleerd CloudRbacEvidence, inclusief identiteit en geërfde Azure RBAC-toewijzingen. Een DevOps-scope-instelling bewijst geen beperkte rechten; ontbrekend bewijs wordt Unknown.

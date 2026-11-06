@@ -5,17 +5,6 @@ metadata:
   name: IsProduction
 spec:
   if:
-    anyOf:
-    - field: 'name'
-      contains:
-      - 'production'
-      - 'prod'
-      - 'prd'
-      - 'live'
-      - 'master'
-      - 'main'
-      caseSensitive: false
-    - field: 'name'
-      match: 'prod|prd|live|master|main'
-      caseSensitive: false
-
+    field: 'name'
+    match: '(^|[._ -])(production|prod|prd|live)($|[._ -])'
+    caseSensitive: false

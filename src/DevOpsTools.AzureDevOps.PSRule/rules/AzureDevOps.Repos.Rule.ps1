@@ -24,8 +24,8 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyIsEnabled' `
         Reason 'The default branch does not have its branch policy enabled.'
         Recommend 'Protect your main branch with a branch policy.'
         # Links: https://learn.microsoft.com/en-us/azure/devops/organizations/security/security-best-practices?view=azure-devops#secure-azure-repos
-        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled } | Select-Object -First 1), "isEnabled", $true)
-        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled } | Select-Object -First 1), "isEnabled", $true)
+        $Assert.HasField(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled -eq $true -and $_.isBlocking -eq $true } | Select-Object -First 1), "isEnabled", $true)
+        $Assert.HasFieldValue(($TargetObject.MainBranchPolicy | Where-Object { $_.isEnabled -eq $true -and $_.isBlocking -eq $true } | Select-Object -First 1), "isEnabled", $true)
 }
 
 
@@ -196,22 +196,12 @@ Rule 'Azure.DevOps.Repos.DefaultBranchPolicyRequireBuild' `
 Rule 'Azure.DevOps.Repos.ProjectValidUsers' `
     -Ref 'ADO-RP-014' `
     -Type 'Azure.DevOps.Repo' `
-    -If { $null -ne $TargetObject.Acls } `
+    -If { (Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.Repos.ProjectValidUsers').Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
-        # Description 'Repos should not have direct permissions for Project Valid Users.'
-        Reason 'The repository has direct permissions for Project Valid Users.'
-        Recommend 'Do not grant direct permissions for Project Valid Users for the repository.'
-        AllOf {
-            # Loop through all the properties of the first ACL
-            $TargetObject.Acls.acesDictionary.psobject.Properties.GetEnumerator() | ForEach-Object {
-                # Assert the property name does not end with -0-0-0-0-3 wich is the Project Valid Users group SID
-                # or else does not have allow set to something different than 1
-                AnyOf {
-                    $Assert.NotMatch($_.Value, "descriptor", "-0-0-0-0-3")
-                    $Assert.HasFieldValue($_.Value, "allow", 2)
-                }
-            }
-        }
+        $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Repos.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.Repos.ProjectValidUsers'
+        Reason $assessment.ReasonCode
+        Recommend 'Review unauthorized sensitive Project Valid Users grants using a documented namespace-specific permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }
 

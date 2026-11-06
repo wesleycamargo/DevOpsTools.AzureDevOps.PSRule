@@ -36,3 +36,7 @@ production.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Information remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+This rule requires a referenced serviceConnectionScopePolicies entry and externally reviewed CloudRbacEvidence, including matching principal identity and inherited assignments. Azure DevOps scopeLevel alone cannot prove least privilege. Missing policy or cloud evidence results in Unknown.

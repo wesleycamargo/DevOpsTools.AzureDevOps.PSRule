@@ -69,3 +69,68 @@ GHAS scanning, push-time protection, and human-review policies may list `Approve
 These explicit lists partition 116 documented controls. The deprecated NoKeyVaultNoSecrets alias is omitted; its replacement NoPlainTextSecrets remains. Unlike the initial 110-control prototype described in the plan, the six corrected effective-permission controls are included in SecurityReview and retain their historical IDs. Existing Default, NoExtraLicense, and PublicProject names remain supported. Default now skips unconfigured optional controls; this is a deliberate denominator change and requires a history annotation.
 
 The runtime debug rule is diagnostic-only and excluded from review baselines and risk scoring. Branch.CommitRecent is an engineering supplement outside the historical 117-entry list. It retains its existing ID and help; neither supplemental rule receives an invented business-risk rating.
+
+
+## Evidence hardening in rule-set 2026.11.06.1
+
+These checks remain reusable by the general security and governance assessments and future compliance profiles. Existing rule IDs, PSRule levels and assessment risk severities are unchanged.
+
+### Production scope
+
+The name fallback matches delimited production, prod, prd or live tokens. Main, master, product and liveness do not imply a production environment. Explicitly listed ObjectName values override the name fallback for the specified target type. Use this for systems with custom naming:
+
+    $configuration.productionTargets = @{
+        'Azure.DevOps.Pipelines.Environment' = @('org.project.production-environment')
+        'Azure.DevOps.ServiceConnection' = @('org.project.production-connection')
+    }
+    $configuration.productionReleaseEnvironments = @{
+        'org.project.release-definition' = @('Production Stage')
+    }
+
+A production branch rule passes only when an active Branch control check has a restricted refs/heads/... value. Absent/disabled checks fail; incomplete check settings are Unknown. A configured check does not prove it executed or passed during a deployment; collect runtime evidence separately.
+
+### Project Valid Users permissions
+
+The twelve ProjectValidUsers rules no longer compare an ACL allow mask against a hard-coded number. They require a reviewed security-namespace-specific policy with Reference, SensitiveMask, and optional ApprovedMask (default zero), keyed by the full RuleId:
+
+    $configuration.projectValidUsersPolicies = @{
+        'Azure.DevOps.Repos.ProjectValidUsers' = @{
+            Reference = 'approved-repository-privileges-v1'
+            SensitiveMask = $reviewedRepositorySensitiveMask
+            ApprovedMask = $reviewedProjectValidUsersAllowedMask
+        }
+    }
+
+These rules check direct sensitive group grants, accounting for explicit deny. They do not establish complete effective privileges. Use the existing InheritedPermissions controls with complete ACL, identity and bypass evidence for that. Missing policy or incomplete ACL evidence is Unknown. Do not copy numeric permission masks between Azure DevOps security namespaces.
+
+### Service connections and Azure RBAC
+
+A service connection configured at subscription level does not necessarily have subscription-wide Azure RBAC. A resource-group configuration does not prove the identity is least privileged either. Scope now evaluates exact approved cloud RBAC role/scope pairs:
+
+    $configuration.serviceConnectionScopePolicies = @{
+        'Azure.DevOps.ServiceConnections.Scope' = @{
+            Reference = 'reviewed-cloud-access-policy-v1'
+            ApprovedAssignments = @(
+                @{ Scope = '/subscriptions/example/resourceGroups/approved'; RoleDefinitionId = 'approved-role-id' }
+            )
+        }
+    }
+
+Externally enriched target evidence must follow this synthetic example:
+
+    $connection.CloudRbacEvidence = @{
+        Status = 'Complete'; Reference = 'azure-rbac-export-and-review-v1'
+        TargetName = $connection.ObjectName
+        PrincipalId = $reviewedPrincipalId; IdentityVerified = $true
+        InheritedAssignmentsIncluded = $true
+        RoleDefinitionsComplete = $true
+        RoleAssignments = @(
+            @{ Scope = '/subscriptions/example/resourceGroups/approved'; RoleDefinitionId = 'approved-role-id' }
+        )
+    }
+
+The Azure DevOps collector does not retrieve or verify Azure-side RBAC. Evidence must be collected separately and its identity, provenance, inherited assignments and role coverage reviewed. Missing cloud evidence is Unknown, not proof of least privilege. The check covers declared Azure RBAC assignments only, not data-plane permissions or deployment execution.
+
+### Historical comparison
+
+This changes evidence semantics, not risk ratings. RuleSetVersion is now 2026.11.06.1; SeverityPolicyVersion remains 1.1.0. Do not treat changed denominators or newly unknown findings as improvements. Keep raw results and annotate the migration.
