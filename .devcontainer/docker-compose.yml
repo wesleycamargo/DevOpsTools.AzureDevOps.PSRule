@@ -1,0 +1,42 @@
+services:
+  devcontainer:
+    # Pull the prebuilt image (CI builds it from this directory's Dockerfile
+    # and publishes it as ai-hermes-devbox-image). No local build step --
+    # for an extra local layer, swap this for a `build:` block pointing at a
+    # Dockerfile that does `FROM` this public image. Registry login is not required.
+    image: ghcr.io/wesleycamargo/devcontainer-template/ai-hermes-devbox-image@sha256:520757f0754865308bd4af62ff8c66581ff566008184bacae2a7451d7445dd42
+    init: true
+    # No `command:` override. The image prepares user data and defaults to
+    # `sleep infinity` as hermes, keeping the development shell available.
+    #
+    # No host port bindings: several devcontainers can start without collisions.
+    # VS Code forwards the Webapp locally.
+    environment:
+      # Gateway/Webapp starts by default; dashboard is opt-in.
+      # Set HERMES_AUTOSTART_SERVICES=0 for the development shell only.
+      HERMES_AUTOSTART_SERVICES: "${HERMES_AUTOSTART_SERVICES:-1}"
+      HERMES_AUTOSTART_DASHBOARD: "${HERMES_AUTOSTART_DASHBOARD:-0}"
+    # Optional dashboard (9119) and Webapp (9120) default to container loopback and
+    # are not published. VS Code forwards both locally; image users can opt
+    # into remote Webapp access separately (see ../README.md).
+    volumes:
+      # Docker creates the named volumes on demand and initializes them from
+      # the image. Settings/history survive rebuilds; Codex auth comes from
+      # the host file mounted below.
+      - claude-data:/home/hermes/.claude
+      - codex-data:/home/hermes/.codex
+      # Authenticate once with Codex CLI on the host. Only its credential file
+      # is shared; Codex configuration and history remain project-local.
+      - type: bind
+        source: ${DEVBOX_HOST_HOME:-${HOME:-/home/vscode}}/.codex/auth.json
+        target: /home/hermes/.codex/auth.json
+        bind:
+          create_host_path: false
+      # Persist Hermes configuration, sessions, plugins and dependency state.
+      # Source code and the prepared runtime remain in the image at /opt/hermes.
+      - hermes-data:/home/hermes/.hermes
+
+volumes:
+  claude-data:
+  codex-data:
+  hermes-data:

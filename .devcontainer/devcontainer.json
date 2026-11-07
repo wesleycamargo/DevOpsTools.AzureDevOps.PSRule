@@ -1,0 +1,47 @@
+{
+  "name": "AI Hermes Devbox",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached"
+  ],
+  "shutdownAction": "stopCompose",
+  "remoteUser": "hermes",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": "true",
+      "username": "hermes",
+      "upgradePackages": "false",
+      "nonFreePackages": "true"
+    },
+    "ghcr.io/rchaganti/vsc-devcontainer-features/azurebicep:1": {
+      "version": "latest"
+    }
+  },
+  "forwardPorts": [9119, 9120],
+  "portsAttributes": {
+    "9120": {
+      "label": "Hermes Webapp",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "remote.localPortHost": "localhost",
+        "terminal.integrated.defaultProfile.linux": "pwsh",
+        "terminal.integrated.profiles.linux": {
+          "pwsh": {
+            "path": "pwsh"
+          }
+        },
+        "terminal.integrated.fontFamily": "MesloLGM Nerd Font"
+      },
+      "extensions": [
+        "ms-vscode.powershell",
+        "anthropic.claude-code"
+      ]
+    }
+  }
+}

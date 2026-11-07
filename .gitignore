@@ -1,5 +1,7 @@
 /tools/private/*.ps1
 tests/out*
+/output/
+/outputs/
 coverage.xml
 myenv.ps1
 .report/
@@ -12,6 +14,7 @@ myenv.ps1
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
+!.vscode/Invoke-Assessment.ps1
 !.vscode/extensions.json
 !.vscode/PSScriptAnalyzerSettings.psd1
 *.code-workspace
