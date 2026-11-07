@@ -95,7 +95,7 @@ function Read-AdoOrganizationGeneralBillingSettings {
         return $settings
     }
     catch {
-        Write-Error "Failed to retrieve billing settings: $_"
+        Write-Error (Get-AzDevOpsSanitizedErrorMessage)
     }
 }
 

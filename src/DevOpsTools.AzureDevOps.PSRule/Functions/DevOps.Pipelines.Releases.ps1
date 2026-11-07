@@ -35,7 +35,7 @@ Function Get-AzDevOpsReleaseDefinitions {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
@@ -104,7 +104,7 @@ Function Get-AzDevOpsReleaseDefinitionAcls {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return $response.value
@@ -165,7 +165,7 @@ Function Export-AzDevOpsReleaseDefinitions {
                 $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
             }
             catch {
-                throw $_.Exception.Message
+                throw (Get-AzDevOpsSanitizedErrorMessage)
             }
             $definitionName = $response.name
             # Add an ObjectType of Azure.DevOps.Pipelines.Releases.Definition to the response

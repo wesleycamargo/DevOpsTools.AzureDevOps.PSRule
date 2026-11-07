@@ -36,7 +36,7 @@ function Get-AzDevOpsPipelines {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     # walk through all pipelines and get the pipeline details
     $pipelines = @()
@@ -111,7 +111,7 @@ function Get-AzDevOpsPipelineAcls {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         return $response.value
@@ -181,7 +181,7 @@ function Get-AzDevOpsPipelineYaml {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Write-Verbose "YAML definition located in repository id: $($response.configuration.repository.id)"
         $RepositoryId = $response.configuration.repository.id

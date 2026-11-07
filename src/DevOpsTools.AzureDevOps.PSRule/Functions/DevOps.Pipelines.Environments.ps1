@@ -42,7 +42,7 @@ function Get-AzDevOpsEnvironments {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
         $environments = $response.value
@@ -106,7 +106,7 @@ function Get-AzDevOpsEnvironmentChecks {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         $checks = $response.value
@@ -173,7 +173,7 @@ function Get-AzDevOpsEnvironmentAcls {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         $acls = @($response.value)

@@ -142,7 +142,7 @@
         Write-Verbose "Successfully connected to Azure DevOps organization: $Organization"
     }
     catch {
-        throw "Failed to connect to Azure DevOps: $($_.Exception.Message)"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 }
 
@@ -271,7 +271,7 @@ function Get-AzDevOpsProjectAcls {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     return $acls
 }
@@ -335,7 +335,7 @@ function Export-AzDevOpsProject {
         } | ConvertTo-Json -Depth 100
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     if($PassThru) {
         Write-Output $response

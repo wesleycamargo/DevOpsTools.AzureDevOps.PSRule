@@ -32,10 +32,9 @@ function Get-AzDevOpsServiceConnections {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 
-    $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return $response.value
 }
@@ -85,7 +84,7 @@ function Get-AzDevOpsServiceConnectionChecks {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return $response.value
@@ -133,7 +132,7 @@ function Get-AzDevOpsServiceConnectionAcls {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return @($response.value)

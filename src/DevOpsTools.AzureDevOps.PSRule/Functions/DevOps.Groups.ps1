@@ -24,20 +24,18 @@ Function Get-AzDevOpsGroups {
     if($null -eq $script:connection) {
         throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
     }
-    # Get project id
     try {
         $projectResult = Get-AzDevOpsProject -Project $Project
+        $header = $script:connection.GetHeader()
+        $Organization = $script:connection.Organization
+        $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/descriptors/$($projectResult.id)?api-version=7.2-preview.1"
+        $scopeDescriptor = (Invoke-RestMethod -Uri $uri -Method Get -Headers $header).value
+        $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/groups?scopeDescriptor=$scopeDescriptor&api-version=7.2-preview.1"
+        $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
     }
     catch {
-        throw "Failed to get project details from Azure DevOps"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
-    $header = $script:connection.GetHeader()
-    $Organization = $script:connection.Organization
-    # Set the scope descriptor REST API endpoint
-    $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/descriptors/$($projectResult.id)?api-version=7.2-preview.1"
-    $scopeDescriptor = (Invoke-RestMethod -Uri $uri -Method Get -Headers $header).value
-    $uri = "https://vssps.dev.azure.com/$($Organization)/_apis/graph/groups?scopeDescriptor=$scopeDescriptor&api-version=7.2-preview.1"
-    $response = Invoke-AzDevOpsPagedRequest -Uri $uri -Headers $header
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return $response.value
 }
@@ -71,42 +69,36 @@ Function Get-AzDevOpsGroupDetails {
     if($null -eq $script:connection) {
         throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
     }
-    $header = $script:connection.GetHeader()
-    $result = $Group
-
-    # Get detail for which group this group is a member of
-    $memberShipUri = $Group._links.memberships.href
     try {
+        $header = $script:connection.GetHeader()
+        $result = $Group
+
+        $memberShipUri = $Group._links.memberships.href
         $membershipResult = (Invoke-RestMethod -Uri $memberShipUri -Method Get -Headers $header).value
-        if($membershipResult -is [string] -or $null -eq $membershipResult) {
-            throw "Authentication failed or organization not found"
+        if ($membershipResult -is [string] -or $null -eq $membershipResult) {
+            throw 'Group membership data was unavailable.'
         }
+
+        $memberships = @()
+        foreach ($item in $membershipResult) {
+            $itemUri = $item._links.container.href
+            $memberships += Invoke-RestMethod -Uri $itemUri -Method Get -Headers $header
+        }
+        $result | Add-Member -MemberType NoteProperty -Name MemberOf -Value $memberships -Force
+
+        $memberUri = "$($Group._links.memberships.href)?direction=down&api-version=7.2-preview.1"
+        $memberResult = (Invoke-RestMethod -Uri $memberUri -Method Get -Headers $header).value
+        $members = @()
+        foreach ($item in $memberResult) {
+            $itemUri = $item._links.member.href
+            $members += Invoke-RestMethod -Uri $itemUri -Method Get -Headers $header
+        }
+        $result | Add-Member -MemberType NoteProperty -Name Members -Value $members -Force
+        return $result
     }
     catch {
-        throw "Failed to get group memberOf details from Azure DevOps"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
-    # Get the self information for each membership
-    $memberships = @()
-    foreach($item in $membershipResult) {
-        $itemUri = $item._links.container.href
-        $itemResult = (Invoke-RestMethod -Uri $itemUri -Method Get -Headers $header)
-        $memberships += $itemResult
-    }
-    $result | Add-Member -MemberType NoteProperty -Name MemberOf -Value $memberships -Force
-
-    # Get all members of this group
-    $memberUri = "$($Group._links.memberships.href)?direction=down&api-version=7.2-preview.1"
-    $memberResult = (Invoke-RestMethod -Uri $memberUri -Method Get -Headers $header).value
-    
-    # Get the self information for each member
-    $members = @()
-    foreach($item in $memberResult) {
-        $itemUri = $item._links.member.href
-        $itemResult = (Invoke-RestMethod -Uri $itemUri -Method Get -Headers $header)
-        $members += $itemResult
-    }
-    $result | Add-Member -MemberType NoteProperty -Name Members -Value $members -Force
-    return $result
 }
 Export-ModuleMember -Function Get-AzDevOpsGroupDetails
 

@@ -126,7 +126,7 @@ function Read-AdoOrganizationPipelinesSettings {
         return $settings
     }
     catch {
-        throw "Failed to retrieve pipeline settings: $($_.Exception.Message)"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 }
 
@@ -210,7 +210,7 @@ function Export-AdoOrganizationPipelinesSettings {
         }
     }
     catch {
-        throw "Failed to get Organization pipeline settings from Azure DevOps:  [$($_.Exception.Message)]"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     
     # Process settings into exportable format

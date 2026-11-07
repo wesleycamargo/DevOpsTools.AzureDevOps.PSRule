@@ -35,7 +35,7 @@ Function Get-AzDevOpsRepos {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
@@ -87,7 +87,7 @@ Function Get-AzDevOpsBranches {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     try {
         $statsResponse = Invoke-RestMethod -Uri $statsUri -Method Get -Headers $header
@@ -164,7 +164,7 @@ Function Get-AzDevOpsBranchPolicy {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     $branchPolicy = @($response.value | Where-Object {
@@ -222,7 +222,7 @@ Function Get-AzDevOpsRepositoryPipelinePermissions {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     return $response
 }
@@ -279,7 +279,7 @@ Function Get-AzDevOpsRepositoryAcls {
             $thisRepoPerms = $response.value
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         return $thisRepoPerms
     }
@@ -338,7 +338,7 @@ function Test-AzDevOpsFileExists {
         if ($_.Exception.Response.StatusCode -eq 404 -and $_.ErrorDetails.Message -match 'GitItemNotFoundException|GitRepositoryEmptyException') {
             return $false
         }
-        throw
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     if ($response -is [string] -and $response -match '(?is)<(!doctype\s+html|html)\b') {
         throw 'Authentication failed while checking repository file evidence.'
@@ -396,7 +396,7 @@ Function Get-AzDevOpsRepositoryGhas {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         $codeSecurity = $response.codeSecurityFeatures.codeSecurityEnabled
         $secretProtection = $response.secretProtectionFeatures.secretProtectionEnabled

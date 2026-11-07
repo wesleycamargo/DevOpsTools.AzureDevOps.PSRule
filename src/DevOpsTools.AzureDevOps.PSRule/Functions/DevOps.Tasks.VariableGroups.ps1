@@ -34,7 +34,7 @@ Function Get-AzDevOpsVariableGroups {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
@@ -83,7 +83,7 @@ function Get-AzDevOpsVariableGroupAcls {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return @($response.value)

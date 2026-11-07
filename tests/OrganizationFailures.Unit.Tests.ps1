@@ -54,6 +54,19 @@ Describe 'Organization API failure boundaries' -Tag Unit {
         }
     }
 
+    It 'redacts direct security-policy collector diagnostics' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Mock Invoke-WebRequest { throw 'Bearer direct-collector-secret' }
+
+            $diagnostics = @(& {
+                try { Read-AdoOrganizationSecurityPolicies -Organization fixture-org -AccessToken fixture-token -ErrorAction Stop }
+                catch { $_ }
+            } 2>&1)
+
+            ($diagnostics | Out-String) | Should -Not -Match 'Bearer|direct-collector-secret'
+        }
+    }
+
     It 'does not convert an invalid security policy value into compliant evidence' {
         InModuleScope DevOpsTools.AzureDevOps.PSRule {
             Mock Invoke-WebRequest {
@@ -73,7 +86,7 @@ Describe 'Organization API failure boundaries' -Tag Unit {
     ) {
         InModuleScope DevOpsTools.AzureDevOps.PSRule -Parameters @{ PriorStatus = $PriorStatus } {
             Mock Invoke-RestMethod { [pscustomobject]@{ value = @() } }
-            Connect-AzDevOps -Organization fixture-org -PAT fixture-token
+            Connect-AzDevOps -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -PAT fixture-token
             Mock Export-AdoOrganizationGeneralOverview {
                 Set-AzDevOpsCollectionStatus -Status $PriorStatus -ReasonCode MissingRequiredData
                 throw 'Unexpected collector failure.'

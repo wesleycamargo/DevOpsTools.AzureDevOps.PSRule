@@ -38,13 +38,21 @@ Get-ChildItem -Path "$PSScriptRoot/*.Rule.ps1" | ForEach-Object {
     Project name for Azure DevOps
 
     .PARAMETER OutputPath
-    Output path for JSON files
+    Target directory for collected files. Defaults to outputs/targets under the current
+    directory, cleaned before each file export. An explicit OutputPath is used exactly
+    as supplied and is never automatically cleaned.
+
+    .PARAMETER KeepResults
+    Preserve a dated run under outputs/yyyy-MM-dd-HH-mm instead of cleaning current results.
+    Defaults to false. Applies only when OutputPath is omitted; PassThru creates no files.
 
     .PARAMETER PassThru
     Return the exported project as objects to the pipeline instead of writing to a file
 
     .PARAMETER CompletenessReportPath
-    Write collection status to a JSON file outside OutputPath.
+    Override the collection status JSON path, which must be outside OutputPath.
+    File exports default to collection-status.json in the parent of the target directory.
+    PassThru does not write a report unless this parameter is supplied.
 
     .PARAMETER Strict
     Attempt every collector, then fail if any required coverage is incomplete.
@@ -67,13 +75,17 @@ function Export-AzDevOpsRuleData {
         [string]
         $Project,
 
-        [Parameter(Mandatory)]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [string]
         $OutputPath,
 
         [Parameter(ParameterSetName = 'PassThru')]
         [switch]
         $PassThru,
+
+        [Parameter()]
+        [switch]$KeepResults,
 
         [Parameter()]
         [string]$CompletenessReportPath,
@@ -85,11 +97,19 @@ function Export-AzDevOpsRuleData {
     if ($null -eq $script:connection) {
         throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
     }
-    Assert-AzDevOpsCompletenessReportPath -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath
-    $report = [ordered]@{ SchemaVersion = 1; Organization = $script:connection.Organization; Status = 'Complete'; Projects = @() }
-    Invoke-AzDevOpsProjectExport -Organization $Organization -OrganizationId $OrganizationId -Project $Project -OutputPath $OutputPath -PassThru:$PassThru -Report $report
-    Invoke-AzDevOpsOrganizationExport -OrganizationId $OrganizationId -OutputPath $OutputPath -PassThru:$PassThru -Report $report
-    Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
+    $paths = Resolve-AzDevOpsAssessmentExportPaths -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath -PassThru:$PassThru -KeepResults:$KeepResults
+    $OutputPath = $paths.OutputPath
+    $CompletenessReportPath = $paths.CompletenessReportPath
+    $runLock = $paths.RunLock
+    try {
+        $report = [ordered]@{ SchemaVersion = 1; Organization = $script:connection.Organization; Status = 'Complete'; Projects = @() }
+        Invoke-AzDevOpsProjectExport -Organization $Organization -OrganizationId $OrganizationId -Project $Project -OutputPath $OutputPath -PassThru:$PassThru -Report $report
+        Invoke-AzDevOpsOrganizationExport -OrganizationId $OrganizationId -OutputPath $OutputPath -PassThru:$PassThru -Report $report
+        Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
+    }
+    finally {
+        Release-AzDevOpsAssessmentRunLock -RunLock $runLock
+    }
 }
 
 function Invoke-AzDevOpsProjectExport {
@@ -196,7 +216,7 @@ function Invoke-AzDevOpsCollectors {
             if (-not $OrganizationScope -or $script:collectionStatus.Status -ne 'Unavailable' -or -not $requestFailure) {
                 Set-AzDevOpsCollectionStatus -Status Failed -ReasonCode CollectorFailed
             }
-            Write-Error "[$($export.Name)]: Collection failed. $($_.Exception.Message)" -ErrorAction Continue
+            Write-Error "[$($export.Name)]: Collection failed. Inspect the collection-status report for collector details." -ErrorAction Continue
         }
         finally {
             $script:collectionStatus = $previousStatus
@@ -225,7 +245,13 @@ Export-ModuleMember -Function Export-AzDevOpsRuleData -Alias Export-AzDevOpsProj
     Export rule data for all projects in the DevOps organization using Azure DevOps Rest API and this modules functions for analysis by PSRule
 
     .PARAMETER OutputPath
-    Output path for JSON files
+    Target directory for collected files. Defaults to outputs/targets under the current
+    directory, cleaned before each file export. An explicit OutputPath is used exactly
+    as supplied and is never automatically cleaned.
+
+    .PARAMETER KeepResults
+    Preserve a dated run under outputs/yyyy-MM-dd-HH-mm instead of cleaning current results.
+    Defaults to false. Applies only when OutputPath is omitted; PassThru creates no files.
 
     .PARAMETER Organization
     Azure DevOps Organization Name. URL Format is not required.
@@ -234,7 +260,8 @@ Export-ModuleMember -Function Export-AzDevOpsRuleData -Alias Export-AzDevOpsProj
     Azure DevOps Organization ID, in guid format.
 
     .PARAMETER CompletenessReportPath
-    Write collection status for every project to a JSON file outside OutputPath.
+    Override the collection status JSON path, which must be outside OutputPath.
+    Defaults to collection-status.json in the parent of the target directory.
 
     .PARAMETER Strict
     Attempt every project and collector, then fail if coverage is incomplete.
@@ -249,9 +276,13 @@ Function Export-AzDevOpsOrganizationRuleData {
         [string] $Organization,
         [Parameter(Mandatory)]
         [string] $OrganizationId,
-        [Parameter(Mandatory)]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [string]
         $OutputPath,
+        [Parameter()]
+        [switch]$KeepResults,
+
         [Parameter()]
         [string]$CompletenessReportPath,
         [Parameter()]
@@ -260,67 +291,75 @@ Function Export-AzDevOpsOrganizationRuleData {
     if ($null -eq $script:connection) {
         throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
     }
-    Assert-AzDevOpsCompletenessReportPath -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath
-    $report = [ordered]@{
-        SchemaVersion = 1
-        Organization = $script:connection.Organization
-        Status = 'Complete'
-        ProjectDiscovery = [ordered]@{ Command = 'Get-AzDevOpsProject'; Status = 'Completed'; ReasonCodes = @() }
-        Projects = @()
-    }
-    $projects = @()
-    $previousStatus = $script:collectionStatus
-    $script:collectionStatus = $report.ProjectDiscovery
+    $paths = Resolve-AzDevOpsAssessmentExportPaths -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath -KeepResults:$KeepResults
+    $OutputPath = $paths.OutputPath
+    $CompletenessReportPath = $paths.CompletenessReportPath
+    $runLock = $paths.RunLock
     try {
-        $projects = @(Get-AzDevOpsProject -ErrorAction Stop)
-        if ($projects.Count -eq 0 -and $report.ProjectDiscovery.Status -eq 'Completed') {
-            $report.ProjectDiscovery.Status = 'Empty'
-            $report.ProjectDiscovery.ReasonCodes = @('EmptyCollection')
+        $report = [ordered]@{
+            SchemaVersion = 1
+            Organization = $script:connection.Organization
+            Status = 'Complete'
+            ProjectDiscovery = [ordered]@{ Command = 'Get-AzDevOpsProject'; Status = 'Completed'; ReasonCodes = @() }
+            Projects = @()
         }
-    }
-    catch {
-        $report.ProjectDiscovery.Status = 'Failed'
-        $report.ProjectDiscovery.ReasonCodes = @('ProjectDiscoveryFailed')
-        Write-Error "[Get-AzDevOpsProject]: Project discovery failed. $($_.Exception.Message)" -ErrorAction Continue
-    }
-    finally {
-        $script:collectionStatus = $previousStatus
-    }
-    foreach ($project in $projects) {
-        if ([string]::IsNullOrWhiteSpace($project.name)) {
-            $report.ProjectDiscovery.Status = 'Partial'
-            $report.ProjectDiscovery.ReasonCodes = @('MissingRequiredData')
-            continue
-        }
-        # Create a subfolder for each project
-        $subPath = Join-Path -Path $OutputPath -ChildPath $project.name
+        $projects = @()
+        $previousStatus = $script:collectionStatus
+        $script:collectionStatus = $report.ProjectDiscovery
         try {
-            if (-not(Test-Path -LiteralPath $subPath)) {
-                New-Item -Path $subPath -ItemType Directory -ErrorAction Stop | Out-Null
+            $projects = @(Get-AzDevOpsProject -ErrorAction Stop)
+            if ($projects.Count -eq 0 -and $report.ProjectDiscovery.Status -eq 'Completed') {
+                $report.ProjectDiscovery.Status = 'Empty'
+                $report.ProjectDiscovery.ReasonCodes = @('EmptyCollection')
             }
-            Invoke-AzDevOpsProjectExport -Organization $Organization -OrganizationId $OrganizationId -Project $project.name -OutputPath $subPath -Report $report
         }
         catch {
-            $report.Projects += [ordered]@{
-                Project = $project.name
-                Status = 'Unavailable'
-                Collectors = @([ordered]@{ Command = 'Export-AzDevOpsRuleData'; Status = 'Failed'; ReasonCodes = @('ProjectExportFailed') })
+            $report.ProjectDiscovery.Status = 'Failed'
+            $report.ProjectDiscovery.ReasonCodes = @('ProjectDiscoveryFailed')
+            Write-Error "[Get-AzDevOpsProject]: Project discovery failed. Inspect the collection-status report for collector details." -ErrorAction Continue
+        }
+        finally {
+            $script:collectionStatus = $previousStatus
+        }
+        foreach ($project in $projects) {
+            if ([string]::IsNullOrWhiteSpace($project.name)) {
+                $report.ProjectDiscovery.Status = 'Partial'
+                $report.ProjectDiscovery.ReasonCodes = @('MissingRequiredData')
+                continue
             }
-            Write-Error "[Export-AzDevOpsRuleData]: Project export failed. $($_.Exception.Message)" -ErrorAction Continue
+            # Create a subfolder for each project
+            $subPath = Join-Path -Path $OutputPath -ChildPath $project.name
+            try {
+                if (-not(Test-Path -LiteralPath $subPath)) {
+                    New-Item -Path $subPath -ItemType Directory -ErrorAction Stop | Out-Null
+                }
+                Invoke-AzDevOpsProjectExport -Organization $Organization -OrganizationId $OrganizationId -Project $project.name -OutputPath $subPath -Report $report
+            }
+            catch {
+                $report.Projects += [ordered]@{
+                    Project = $project.name
+                    Status = 'Unavailable'
+                    Collectors = @([ordered]@{ Command = 'Export-AzDevOpsRuleData'; Status = 'Failed'; ReasonCodes = @('ProjectExportFailed') })
+                }
+                Write-Error "[Export-AzDevOpsRuleData]: Project export failed. Inspect the collection-status report for collector details." -ErrorAction Continue
+            }
         }
-    }
-    try {
-        if (-not (Test-Path -LiteralPath $OutputPath)) { New-Item -Path $OutputPath -ItemType Directory -ErrorAction Stop | Out-Null }
-        Invoke-AzDevOpsOrganizationExport -OrganizationId $OrganizationId -OutputPath $OutputPath -Report $report
-    }
-    catch {
-        $report.OrganizationCollection = [ordered]@{
-            Status = 'Unavailable'
-            Collectors = @([ordered]@{ Command = 'Export-AzDevOpsOrganizationRuleData'; Status = 'Failed'; ReasonCodes = @('OrganizationExportFailed') })
+        try {
+            if (-not (Test-Path -LiteralPath $OutputPath)) { New-Item -Path $OutputPath -ItemType Directory -ErrorAction Stop | Out-Null }
+            Invoke-AzDevOpsOrganizationExport -OrganizationId $OrganizationId -OutputPath $OutputPath -Report $report
         }
-        Write-Error "Organization collection failed. $($_.Exception.Message)" -ErrorAction Continue
+        catch {
+            $report.OrganizationCollection = [ordered]@{
+                Status = 'Unavailable'
+                Collectors = @([ordered]@{ Command = 'Export-AzDevOpsOrganizationRuleData'; Status = 'Failed'; ReasonCodes = @('OrganizationExportFailed') })
+            }
+            Write-Error "Organization collection failed. Inspect the collection-status report for collector details." -ErrorAction Continue
+        }
+        Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
     }
-    Complete-AzDevOpsAssessmentExport -Report $report -CompletenessReportPath $CompletenessReportPath -Strict:$Strict
+    finally {
+        Release-AzDevOpsAssessmentRunLock -RunLock $runLock
+    }
 }
 Export-ModuleMember -Function Export-AzDevOpsOrganizationRuleData
 # End of Function Export-AzDevOpsOrganizationRuleData

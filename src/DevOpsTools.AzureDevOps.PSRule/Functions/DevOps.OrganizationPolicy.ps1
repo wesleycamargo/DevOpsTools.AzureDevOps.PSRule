@@ -32,7 +32,7 @@ Function Get-AzDevOpsOrganizationPolicy {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     return $policies
 }
