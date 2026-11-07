@@ -6,6 +6,23 @@ BeforeAll {
     }
 }
 Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
+    It 'versions the corrected review evidence semantics separately from severity policy' {
+        $catalog = Get-AzDevOpsAssessmentCatalog
+        $catalog.RuleSetVersion | Should -Be '2026.11.07.1'
+        $catalog.SeverityPolicyVersion | Should -Be '1.1.0'
+        $raw = @(New-FixtureResult 'Azure.DevOps.Repos.Branch.HasBranchPolicy' 'Azure.DevOps.Repo.Branch')
+        $current = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsAssessmentCatalog {
+            $old = Get-Content "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/Assessment/catalog.json" -Raw | ConvertFrom-Json
+            $old.RuleSetVersion = '2026.11.06.1'
+            $old
+        }
+        $previous = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
+        $comparison = Compare-AzDevOpsAssessment $previous $current
+        $comparison.Comparable | Should -BeFalse
+        $comparison.SecurityScoreDelta | Should -BeNullOrEmpty
+    }
+
     It 'projects skipped nonproduction controls as NotApplicable for <Type>' -ForEach @(
         @{ Type = 'Azure.DevOps.Pipelines.Environment'; Prefix = 'Azure.DevOps.Pipelines.Environments' }
         @{ Type = 'Azure.DevOps.ServiceConnection'; Prefix = 'Azure.DevOps.ServiceConnections' }

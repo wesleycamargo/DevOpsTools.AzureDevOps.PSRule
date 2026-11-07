@@ -147,4 +147,4 @@ The Azure DevOps collector does not retrieve or verify Azure-side RBAC. Evidence
 
 ### Historical comparison
 
-This changes evidence semantics, not risk ratings. RuleSetVersion is now 2026.11.06.1; SeverityPolicyVersion remains 1.1.0. Do not treat changed denominators or newly unknown findings as improvements. Keep raw results and annotate the migration.
+RuleSetVersion 2026.11.07.1 corrects production allowlist evaluation, skipped production applicability, and verified application-to-service-principal RBAC identity mapping. SeverityPolicyVersion remains 1.1.0. Older evidence without IdentityMapping is Unknown until re-enriched. These are evidence-semantics changes, not risk-rating changes. Do not treat changed denominators or newly unknown findings as security improvements. Keep raw results, annotate the migration, and do not compare numerical scores across rule-set versions.
