@@ -64,6 +64,78 @@ Describe 'Explicit production target classification' -Tag 'Unit' {
 }
 
 Describe 'Production branch restriction evidence' -Tag 'Unit' {
+    It 'rejects unrestricted entries mixed with named branches on <Type>' -ForEach @(
+        @{ Type = 'Azure.DevOps.Pipelines.Environment'; Prefix = 'Azure.DevOps.Pipelines.Environments' }
+        @{ Type = 'Azure.DevOps.ServiceConnection'; Prefix = 'Azure.DevOps.ServiceConnections' }
+    ) {
+        foreach ($branches in @(
+            'refs/heads/main,refs/heads/*',
+            'refs/heads/*,refs/heads/main',
+            ' refs/heads/main ; refs/heads/* ',
+            'refs/heads/main,*',
+            'refs/heads/main,refs/heads/**',
+            'refs/heads/main,main'
+        )) {
+            $target = [pscustomobject]@{
+                ObjectType = $Type
+                ObjectName = 'fixture.production'
+                name = 'production'
+                Checks = @(@{
+                    isDisabled = $false
+                    type = @{ name = 'Branch control' }
+                    settings = @{ inputs = @{ allowedBranches = $branches } }
+                })
+            }
+            $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule `
+                -Name "$Prefix.ProductionBranchLimit" -Culture en -ErrorAction Stop)
+            $raw.Count | Should -Be 1
+            $raw[0].Outcome | Should -Be 'Fail' -Because "the union '$branches' is not a restricted allowlist"
+            (Get-AzDevOpsProductionGateAssessment -TargetObject $target).Outcome | Should -Be 'Fail'
+        }
+    }
+
+    It 'preserves restricted lists, arrays, disabled gates and independent checks' {
+        $check = @{
+            isDisabled = $false
+            type = @{ name = 'Branch control' }
+            settings = @{ inputs = @{ allowedBranches = 'refs/heads/main' } }
+        }
+        $target = [pscustomobject]@{
+            ObjectType = 'Azure.DevOps.Pipelines.Environment'
+            ObjectName = 'fixture.production'
+            name = 'production'
+            Checks = @($check)
+        }
+        $rule = 'Azure.DevOps.Pipelines.Environments.ProductionBranchLimit'
+        foreach ($scenario in @(
+            @{ Branches = 'refs/heads/main,refs/heads/release'; Expected = 'Pass' }
+            @{ Branches = 'refs/heads/releases/*'; Expected = 'Pass' }
+            @{ Branches = @('refs/heads/main', 'refs/heads/release'); Expected = 'Pass' }
+            @{ Branches = @('refs/heads/main', 'refs/heads/*'); Expected = 'Fail' }
+            @{ Branches = ''; Expected = 'Fail' }
+            @{ Branches = '  ; , '; Expected = 'Fail' }
+        )) {
+            $check.settings.inputs.allowedBranches = $scenario.Branches
+            $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule `
+                -Name $rule -Culture en -ErrorAction Stop)
+            $raw.Count | Should -Be 1
+            $raw[0].Outcome | Should -Be $scenario.Expected
+        }
+        $check.settings.inputs.allowedBranches = 'refs/heads/main'
+        $check.isDisabled = $true
+        $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $rule -Culture en)
+        $raw[0].Outcome | Should -Be 'Fail'
+
+        $check.isDisabled = $false
+        $target.Checks += @{
+            isDisabled = $false
+            type = @{ name = 'Branch control' }
+            settings = @{ inputs = @{ allowedBranches = 'refs/heads/*' } }
+        }
+        $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name $rule -Culture en)
+        $raw[0].Outcome | Should -Be 'Pass'
+    }
+
     It 'checks the actual active branch-control gate on <Type>' -ForEach @(
         @{ Type = 'Azure.DevOps.Pipelines.Environment'; Rule = 'Azure.DevOps.Pipelines.Environments.ProductionBranchLimit' }
         @{ Type = 'Azure.DevOps.ServiceConnection'; Rule = 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' }

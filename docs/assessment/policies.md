@@ -87,7 +87,7 @@ The name fallback matches delimited production, prod, prd or live tokens. Main, 
         'org.project.release-definition' = @('Production Stage')
     }
 
-A production branch rule passes only when an active Branch control check has a restricted refs/heads/... value. Absent/disabled checks fail; incomplete check settings are Unknown. A configured check does not prove it executed or passed during a deployment; collect runtime evidence separately.
+A production branch rule passes only when an active Branch control check has a nonempty restricted allowlist of fully qualified refs/heads/... entries. Every entry in that check must be restricted: refs/heads/main,refs/heads/* and refs/heads/main,* fail because the wildcard admits every branch. Bounded patterns such as refs/heads/releases/* remain supported. A separate active restricting check can still establish restriction. Absent/disabled checks fail; incomplete check settings are Unknown. A configured check does not prove it executed or passed during a deployment; collect runtime evidence separately.
 
 ### Project Valid Users permissions
 

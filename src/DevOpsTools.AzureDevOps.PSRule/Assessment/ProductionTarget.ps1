@@ -66,7 +66,10 @@ function Get-AzDevOpsProductionBranchAssessment {
         if ($null -eq $allowed) { $incomplete = $true; continue }
         $names = @($allowed | ForEach-Object { [string]$_ -split '[,;]' } |
             ForEach-Object { $_.Trim() } | Where-Object { $_ })
-        if (@($names | Where-Object { $_ -cmatch '^refs/heads/(?!\*$)[^,;\s]+$' }).Count -gt 0) {
+        $unrestrictedOrInvalid = @($names | Where-Object {
+            $_ -cnotmatch '^refs/heads/(?!\*+$)[^,;\s]+$'
+        })
+        if ($names.Count -gt 0 -and $unrestrictedOrInvalid.Count -eq 0) {
             return [pscustomobject]@{ Outcome = 'Pass'; ReasonCode = 'RestrictedProductionBranches' }
         }
     }
