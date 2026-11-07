@@ -16,8 +16,15 @@ function Initialize-AzDevOpsAssessmentRunDirectory {
 
     $RunDirectory = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($RunDirectory)
     # Hold this process-wide reservation until the caller finishes writing the run.
-    $hash = [Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($RunDirectory))
-    $mutex = [Threading.Mutex]::new($false, "AzDevOpsAssessmentRun-$([Convert]::ToHexString($hash))")
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = $algorithm.ComputeHash([Text.Encoding]::UTF8.GetBytes($RunDirectory))
+        $hashName = [BitConverter]::ToString($hash).Replace('-', '')
+    }
+    finally {
+        $algorithm.Dispose()
+    }
+    $mutex = [Threading.Mutex]::new($false, "AzDevOpsAssessmentRun-$hashName")
     $lockAcquired = $false
     try {
         try {
