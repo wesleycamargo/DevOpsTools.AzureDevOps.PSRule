@@ -20,3 +20,4 @@ myenv.ps1
 *.code-workspace
 
 .agents/
+testresults.xml
