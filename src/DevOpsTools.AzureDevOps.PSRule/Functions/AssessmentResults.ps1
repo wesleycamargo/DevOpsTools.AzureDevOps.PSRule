@@ -51,6 +51,9 @@ function ConvertTo-AzDevOpsAssessment {
         } elseif ($outcome -eq 'None') {
             if ($null -eq $target) {
                 $outcome = 'Unknown'; $reason = 'OriginalTargetUnavailable'
+            } elseif ($rule.RuleId -match '\.(ProductionCheckProtection|ProductionHumanApproval|ProductionBranchLimit)$' -and
+                -not (Test-AzDevOpsProductionTarget -TargetObject $target -Configuration $Configuration)) {
+                $outcome = 'NotApplicable'; $reason = 'NonProductionTarget'
             } elseif ($rule.Applicability -in @('Policy', 'DefaultPolicy')) {
                 $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.assessmentPolicies.($rule.RuleId)
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
@@ -61,12 +64,8 @@ function ConvertTo-AzDevOpsAssessment {
                 $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
             } elseif ($rule.RuleId -like '*.ProductionBranchLimit') {
-                if (Test-AzDevOpsProductionTarget -TargetObject $target -Configuration $Configuration) {
-                    $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $target
-                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
-                } else {
-                    $outcome = 'NotApplicable'
-                }
+                $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $target
+                $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
             } elseif ($rule.RuleId -like '*.ProjectValidUsers') {
                 $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.projectValidUsersPolicies.($rule.RuleId)
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode

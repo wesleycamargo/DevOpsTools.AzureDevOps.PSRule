@@ -77,6 +77,8 @@ These checks remain reusable by the general security and governance assessments 
 
 ### Production scope
 
+Skipped production protection, human-approval, and branch-limit diagnostics are NotApplicable for targets outside the configured production scope. The same productionTargets configuration must be passed to both PSRule and ConvertTo-AzDevOpsAssessment. Production targets with missing required evidence remain Unknown; raw engine errors and missing original targets also remain Unknown. An optional human-approval policy remains NotApplicable when it is not required.
+
 The name fallback matches delimited production, prod, prd or live tokens. Main, master, product and liveness do not imply a production environment. Explicitly listed ObjectName values override the name fallback for the specified target type. Use this for systems with custom naming:
 
     $configuration.productionTargets = @{
