@@ -1,6 +1,11 @@
 # Run on manual trigger and every day at 6:00 AM UTC
 on:
   workflow_dispatch:
+    inputs:
+      KeepResults:
+        description: Retain timestamped assessment results
+        type: boolean
+        default: false
   schedule:
     - cron: '0 6 * * *'
 
@@ -24,16 +29,32 @@ jobs:
           Import-Module PSRule
           Import-Module PSRule.Monitor
           Import-Module ./src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1 -Force
-          Connect-AzDevOps -Organization ${{ secrets.ADO_ORGANIZATION }} -PAT ${{ secrets.ADO_PAT }}
-          New-Item -Path ./data -ItemType Directory -Force
-          Export-AzDevOpsOrganizationRuleData -OutputPath ./data
-          $result = Invoke-PSRule -InputPath ./data/ `
-            -Module "DevOpsTools.AzureDevOps.PSRule","PSRule.Monitor" `
-            -Format Detect -Culture en
-          $result |  Send-PSRuleMonitorRecord -WorkspaceId $Env:PSRULE_CONFIGURATION_MONITOR_WORKSPACE_ID `
-            -SharedKey $Env:PSRULE_CONFIGURATION_MONITOR_WORKSPACE_KEY -LogName RjbTest
+          $organization = '${{ secrets.ADO_ORGANIZATION }}'
+          $organizationId = [guid]::Empty
+          if (-not [guid]::TryParse('${{ secrets.ADO_ORGANIZATION_ID }}', [ref]$organizationId) -or $organizationId -eq [guid]::Empty) {
+            throw 'ADO_ORGANIZATION_ID must be a valid, non-empty organization GUID.'
+          }
+          Connect-AzDevOps -Organization $organization -OrganizationId $organizationId.ToString() -PAT ${{ secrets.ADO_PAT }}
+          . ./src/DevOpsTools.AzureDevOps.PSRule/Functions/AssessmentOutput.ps1
+          $keepResults = $env:KEEP_RESULTS -eq 'true'
+          $paths = Get-AzDevOpsAssessmentRunPaths -OutputRoot (Join-Path $PWD 'outputs') -KeepResults:$keepResults
+          $runDirectory = $paths.RunDirectory
+          $outputPath = $paths.OutputPath
+          $runLock = Initialize-AzDevOpsAssessmentRunDirectory -RunDirectory $runDirectory -KeepResults:$keepResults
+          try {
+            Export-AzDevOpsOrganizationRuleData -Organization $organization -OrganizationId $organizationId.ToString() -OutputPath $outputPath -CompletenessReportPath $paths.CompletenessReportPath
+            $result = Invoke-PSRule -InputPath $outputPath `
+              -Module "DevOpsTools.AzureDevOps.PSRule","PSRule.Monitor" `
+              -Format Detect -Culture en
+            $result |  Send-PSRuleMonitorRecord -WorkspaceId $Env:PSRULE_CONFIGURATION_MONITOR_WORKSPACE_ID `
+              -SharedKey $Env:PSRULE_CONFIGURATION_MONITOR_WORKSPACE_KEY -LogName RjbTest
+          }
+          finally {
+            Release-AzDevOpsAssessmentRunLock -RunLock $runLock
+          }
         shell: pwsh
         env:
+          KEEP_RESULTS: ${{ inputs.KeepResults || false }}
           PSRULE_CONFIGURATION_MONITOR_WORKSPACE_ID: ${{ secrets.PSRULE_CONFIGURATION_MONITOR_WORKSPACE_ID }}
           PSRULE_CONFIGURATION_MONITOR_WORKSPACE_KEY: ${{ secrets.PSRULE_CONFIGURATION_MONITOR_WORKSPACE_KEY }}
           PSRULE_CONVENTION_INCLUDE: "Monitor.LogAnalytics.Import"

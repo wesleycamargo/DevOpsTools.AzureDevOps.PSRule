@@ -15,6 +15,8 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $savedEnvironment = @{}
         $runPath = Join-Path $TestDrive ([guid]::NewGuid().ToString())
         $environment = @{
+            KEEP_RESULTS = 'false'
+            TZ = 'Etc/GMT-2'
             AGENT_TEMPDIRECTORY = Join-Path $runPath 'agent-temp'
             BUILD_ARTIFACTSTAGINGDIRECTORY = Join-Path $runPath 'artifacts'
             BUILD_SOURCEVERSION = 'synthetic-commit'
@@ -29,6 +31,8 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
             $savedEnvironment[$name] = [Environment]::GetEnvironmentVariable($name)
             [Environment]::SetEnvironmentVariable($name, $environment[$name])
         }
+        [TimeZoneInfo]::ClearCachedData()
+        Mock Get-Date { [datetime]::new(2026, 11, 7, 14, 5, 42, [DateTimeKind]::Local) }
         $script:collectionStatus = 'Complete'
         $script:exportPaths = @()
         $results = @([pscustomobject]@{ RuleName = 'fixture'; Outcome = 'Pass' })
@@ -71,18 +75,26 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         foreach ($name in $savedEnvironment.Keys) {
             [Environment]::SetEnvironmentVariable($name, $savedEnvironment[$name])
         }
+        [TimeZoneInfo]::ClearCachedData()
     }
 
     It 'assesses complete exports and publishes only separate reports' {
+        $retentionParameter = @($pipeline['parameters'] | Where-Object { $_['name'] -eq 'KeepResults' })[0]
+        $retentionParameter['type'] | Should -Be 'boolean'
+        $retentionParameter['default'] | Should -Be 'false'
+        $assessment['env']['KEEP_RESULTS'] | Should -Be '${{ parameters.KeepResults }}'
         & $assessmentScript
 
         Should -Invoke Assert-PSRule -Times 1 -Exactly -ParameterFilter { @($InputPath).Count -eq 2 -and @($InputPath | Where-Object { $_ -like '*fixture-project*fixture.prj.ado.json' }).Count -eq 1 -and $Outcome -eq 'All' }
         Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter { $SourceRevision -eq 'synthetic-commit' -and $Organization -eq 'fixture-org' }
-        (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
-        Test-Path (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif') | Should -BeTrue
-        $script:exportPaths[0].StartsWith($env:AGENT_TEMPDIRECTORY) | Should -BeTrue
+        $outputDirectory = @(Get-Item -LiteralPath (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs'))
+        $outputDirectory.Count | Should -Be 1
+        $outputDirectory[0].FullName | Should -Be (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs')
+        (Get-Content (Join-Path $outputDirectory[0].FullName 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
+        Test-Path (Join-Path $outputDirectory[0].FullName 'psrule-results.sarif') | Should -BeTrue
+        $script:exportPaths[0] | Should -Be (Join-Path $outputDirectory[0].FullName 'targets')
         $publish['inputs']['PathtoPublish'] | Should -Be '$(Build.ArtifactStagingDirectory)'
-        @((Get-ChildItem $env:BUILD_ARTIFACTSTAGINGDIRECTORY).Name) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif')
+        @((Get-ChildItem $outputDirectory[0].FullName).Name | Sort-Object) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif', 'targets')
     }
 
     It 'projects detailed precondition outcomes rather than the assertion result subset' {
@@ -100,11 +112,15 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
     }
 
     It 'stops before collection when organization identity is unavailable' {
+        $previous = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/collection-status.json'
+        New-Item (Split-Path $previous -Parent) -ItemType Directory -Force | Out-Null
+        'previous-evidence' | Set-Content $previous
         Mock Invoke-RestMethod { [pscustomobject]@{} } -ParameterFilter { $Uri -eq 'https://dev.azure.com/fixture-org/_apis/connectionData' }
 
         { & $assessmentScript } | Should -Throw '*did not return an organization identity*'
 
         Should -Invoke Export-AzDevOpsOrganizationRuleData -Times 0 -Exactly
+        (Get-Content $previous -Raw).Trim() | Should -Be 'previous-evidence'
     }
 
     It 'stops incomplete assessment while allowing partial pipeline success and retaining its report' {
@@ -113,8 +129,10 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         { & $assessmentScript } | Should -Throw '*collection is incomplete*'
 
         Should -Invoke Assert-PSRule -Times 0 -Exactly
-        (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Partial'
-        Test-Path (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif') | Should -BeFalse
+        $outputDirectory = @(Get-Item -LiteralPath (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs'))
+        $outputDirectory.Count | Should -Be 1
+        (Get-Content (Join-Path $outputDirectory[0].FullName 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Partial'
+        Test-Path (Join-Path $outputDirectory[0].FullName 'psrule-results.sarif') | Should -BeFalse
         $assessment['continueOnError'] | Should -BeTrue
         $publish['condition'] | Should -Be 'always()'
     }
@@ -125,7 +143,9 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         { & $assessmentScript } | Should -Throw '*rule assertion failure*'
 
         Should -Invoke Assert-PSRule -Times 1 -Exactly
-        (Get-Content (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
+        $outputDirectory = @(Get-Item -LiteralPath (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs'))
+        $outputDirectory.Count | Should -Be 1
+        (Get-Content (Join-Path $outputDirectory[0].FullName 'collection-status.json') -Raw | ConvertFrom-Json).Status | Should -Be 'Complete'
         $assessment['continueOnError'] | Should -BeTrue
         $publish['condition'] | Should -Be 'always()'
     }
@@ -135,14 +155,38 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         { & $assessmentScript } | Should -Throw '*zero rule results*'
     }
 
-    It 'uses fresh exports when the same agent runs again' {
+    It 'rejects a same-minute repeated retained run without deleting assessment evidence' {
+        $env:KEEP_RESULTS = 'true'
         & $assessmentScript
-        '{}' | Set-Content (Join-Path $script:exportPaths[0] 'stale.prj.ado.json')
+        $expectedRun = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/2026-11-07-14-05'
+        $stalePath = Join-Path $script:exportPaths[0] 'stale.prj.ado.json'
+        'stale-evidence' | Set-Content $stalePath
+        $statusPath = Join-Path (Split-Path $script:exportPaths[0] -Parent) 'collection-status.json'
+        $statusBefore = Get-Content $statusPath -Raw
 
+        { & $assessmentScript } | Should -Throw '*already exists*'
+
+        $script:exportPaths | Should -Be @(Join-Path $expectedRun 'targets')
+        Get-Content $stalePath -Raw | Should -Be "stale-evidence`n"
+        Get-Content $statusPath -Raw | Should -Be $statusBefore
+        Should -Invoke Export-AzDevOpsOrganizationRuleData -Times 1 -Exactly
+        Should -Invoke Assert-PSRule -Times 1 -Exactly
+        Should -Invoke Invoke-PSRule -Times 1 -Exactly
+        Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly
+    }
+    It 'replaces current evidence on repeated default runs without evaluating stale targets' {
         & $assessmentScript
-
-        $script:exportPaths.Count | Should -Be 2
-        $script:exportPaths[0] | Should -Not -Be $script:exportPaths[1]
+        $stale = Join-Path $script:exportPaths[0] 'stale.ado.json'
+        '{}' | Set-Content $stale
+        & $assessmentScript
+        Test-Path $stale | Should -BeFalse
+        $script:exportPaths | Should -Be @((Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/targets'), (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/targets'))
         Should -Invoke Assert-PSRule -Times 2 -Exactly
     }
+
+
+    It 'scopes the assessment output lock in a finally block' {
+        $assessment['inputs']['script'] | Should -Match '(?s)\$runLock\s*=\s*Initialize-AzDevOpsAssessmentRunDirectory.*finally\s*\{.*Release-AzDevOpsAssessmentRunLock\s+-RunLock\s+\$runLock'
+    }
+
 }
