@@ -121,15 +121,27 @@ A service connection configured at subscription level does not necessarily have 
 Externally enriched target evidence must follow this synthetic example:
 
     $connection.CloudRbacEvidence = @{
-        Status = 'Complete'; Reference = 'azure-rbac-export-and-review-v1'
+        Status = 'Complete'; Reference = 'azure-rbac-export-and-review-v2'
         TargetName = $connection.ObjectName
-        PrincipalId = $reviewedPrincipalId; IdentityVerified = $true
+        PrincipalId = $reviewedServicePrincipalObjectId
+        IdentityVerified = $true
+        IdentityMapping = @{
+            ApplicationId = $reviewedApplicationId
+            PrincipalId = $reviewedServicePrincipalObjectId
+            TenantId = $reviewedTenantId
+            Verified = $true
+            Reference = 'reviewed-tenant-service-principal-lookup-v1'
+        }
         InheritedAssignmentsIncluded = $true
         RoleDefinitionsComplete = $true
         RoleAssignments = @(
             @{ Scope = '/subscriptions/example/resourceGroups/approved'; RoleDefinitionId = 'approved-role-id' }
         )
     }
+
+The reviewed application ID must match authorization.parameters.serviceprincipalid, and the reviewed tenant ID must match authorization.parameters.tenantid. PrincipalId is the tenant-local service-principal object ID used for Azure RBAC, not the application/client ID. IdentityMapping must record the application-to-object mapping from a lookup in that tenant, with a nonempty evidence Reference and the boolean Verified set to true only after review. The top-level PrincipalId must match the mapping's PrincipalId. All identity IDs must be nonempty GUIDs. Matching display names or copying the application ID into PrincipalId is not verification.
+
+Older evidence without IdentityMapping is intentionally Unknown until re-enriched. Missing endpoint application/tenant IDs, unsupported identity shapes, unverified mappings, and mismatches are Unknown; this evaluator does not silently perform a directory lookup. Evidence must describe all declared RBAC assignments for the mapped principal, including inherited assignments. Neither a verification flag nor this offline evaluation independently authenticates the external evidence source.
 
 The Azure DevOps collector does not retrieve or verify Azure-side RBAC. Evidence must be collected separately and its identity, provenance, inherited assignments and role coverage reviewed. Missing cloud evidence is Unknown, not proof of least privilege. The check covers declared Azure RBAC assignments only, not data-plane permissions or deployment execution.
 

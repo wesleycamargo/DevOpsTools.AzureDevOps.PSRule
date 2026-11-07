@@ -13,13 +13,31 @@ function Get-AzDevOpsServiceConnectionScopeAssessment {
         $evidence.InheritedAssignmentsIncluded -ne $true -or
         $evidence.RoleDefinitionsComplete -ne $true -or
         -not $evidence.Reference -or -not $evidence.PrincipalId -or
-        $evidence.IdentityVerified -ne $true -or
+        ($evidence.IdentityVerified -isnot [bool] -or $evidence.IdentityVerified -ne $true) -or
         [string]$evidence.TargetName -cne [string]$TargetObject.ObjectName -or
         $null -eq $evidence.RoleAssignments) {
         return $unknown
     }
-    $principal = $TargetObject.authorization.parameters.serviceprincipalid
-    if ($principal -and [string]$evidence.PrincipalId -ine [string]$principal) {
+    $applicationId = [string]$TargetObject.authorization.parameters.serviceprincipalid
+    $tenantId = [string]$TargetObject.authorization.parameters.tenantid
+    $mapping = $evidence.IdentityMapping
+    if ($null -eq $mapping -or $mapping.Verified -isnot [bool] -or
+        $mapping.Verified -ne $true -or
+        [string]::IsNullOrWhiteSpace([string]$mapping.Reference)) {
+        return $unknown
+    }
+    foreach ($identity in @(
+        $applicationId, $tenantId, [string]$evidence.PrincipalId,
+        [string]$mapping.ApplicationId, [string]$mapping.PrincipalId, [string]$mapping.TenantId
+    )) {
+        $parsedIdentity = [guid]::Empty
+        if (-not [guid]::TryParse($identity, [ref]$parsedIdentity) -or $parsedIdentity -eq [guid]::Empty) {
+            return $unknown
+        }
+    }
+    if ([string]$mapping.ApplicationId -ine $applicationId -or
+        [string]$mapping.PrincipalId -ine [string]$evidence.PrincipalId -or
+        [string]$mapping.TenantId -ine $tenantId) {
         return $unknown
     }
     $allowed = @($Policy.ApprovedAssignments)
