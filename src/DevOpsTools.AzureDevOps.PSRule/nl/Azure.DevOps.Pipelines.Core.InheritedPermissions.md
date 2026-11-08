@@ -12,7 +12,7 @@ Effectieve gevoelige rechten moeten zijn toegestaan door organisatiebeleid.
 
 ## DESCRIPTION
 
-De historische regel-ID blijft behouden. Overerving op zichzelf veroorzaakt geen fout meer. De regel beoordeelt de ACL-hiërarchie, geneste groepen, expliciete toestemmingen en weigeringen en beheerderstoegang in `PermissionEvidence`. Configureer `effectivePermissionPolicies` voor het doeltype `Azure.DevOps.Pipeline`. Ontbrekend beleid, ontbrekende ACLs, onvolledige groepsgegevens of ontbrekende beheerdergegevens leiden tot Unknown en worden niet door PSRule beoordeeld. Dit is nooit een geslaagde controle. Beperkte overgeërfde leestoegang is toegestaan; ongeautoriseerde gevoelige rechten falen.
+De historische regel-ID blijft behouden. Overerving op zichzelf veroorzaakt geen fout meer. De regel beoordeelt alleen directe allow- en deny-items voor de exact verzamelde ACL-scope; effectieve rechten worden niet geclaimd. Configureer `effectivePermissionPolicies` voor het doeltype `Azure.DevOps.Pipeline`. Ontbrekend beleid of onvolledig ACL-bewijs voor de exacte scope leiden tot Unknown en worden niet door PSRule beoordeeld. Dit is nooit een geslaagde controle. Beperkte overgeërfde leestoegang is toegestaan; ongeautoriseerde gevoelige rechten falen.
 
 ## RECOMMENDATION
 
