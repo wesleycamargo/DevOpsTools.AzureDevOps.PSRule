@@ -66,7 +66,6 @@ steps:
 
   - task: AzureCLI@3
     displayName: Export and assess Azure DevOps organization
-    continueOnError: true
     inputs:
       connectionType: azureRM
       azureSubscription: ${{ parameters.azureResourceManagerServiceConnection }}
@@ -118,14 +117,23 @@ steps:
             throw 'The organization export produced no JSON input files.'
         }
 
-        Assert-PSRule `
-            -InputPath $inputFiles `
-            -Module DevOpsTools.AzureDevOps.PSRule `
-            -Baseline Baseline.Default `
-            -As Detail `
-            -OutputPath $reportPath `
-            -OutputFormat Sarif `
-            -Outcome All
+        try {
+            Assert-PSRule `
+                -InputPath $inputFiles `
+                -Module DevOpsTools.AzureDevOps.PSRule `
+                -Baseline Baseline.Default `
+                -OutputPath $reportPath `
+                -OutputFormat Sarif `
+                -Outcome All
+        }
+        catch {
+            if ($_.FullyQualifiedErrorId -eq 'PSRule.Fail,Assert-PSRule') {
+                Write-Warning 'Assessment completed with noncompliant findings. See the published SARIF report for details.'
+            }
+            else {
+                throw
+            }
+        }
     env:
       SYSTEM_COLLECTIONURI: $(System.CollectionUri)
 

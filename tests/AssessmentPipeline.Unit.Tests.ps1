@@ -21,4 +21,13 @@ Describe 'Azure DevOps assessment pipeline authentication' -Tag 'Unit' {
         $pipeline | Should -Match '\$moduleRef = if \(\$env:MODULE_REF\)'
         $pipeline | Should -Match 'git clone --depth 1 --branch \$moduleRef'
     }
+
+    It 'publishes assessment findings without treating them as collector failures' {
+        $pipeline = Get-Content -LiteralPath $script:pipelinePath -Raw
+
+        $pipeline | Should -Not -Match '(?m)^\s*continueOnError:\s*true\s*$'
+        $pipeline | Should -Not -Match '-As\s+Detail'
+        $pipeline | Should -Match 'if \(\$_.FullyQualifiedErrorId -eq ''PSRule\.Fail,Assert-PSRule''\)'
+        $pipeline | Should -Match '(?m)^\s*throw\s*$'
+    }
 }
