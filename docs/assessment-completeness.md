@@ -1,10 +1,28 @@
 # Assessment collection completeness
 
-Use `-CompletenessReportPath` on `Export-AzDevOpsRuleData` or
-`Export-AzDevOpsOrganizationRuleData` to write a separate JSON report of collection
-outcomes. Keep the report outside `OutputPath`; the commands reject a report path
-inside that directory so PSRule only receives assessment targets. The report's
-parent directory must already exist.
+File exports from `Export-AzDevOpsRuleData` and
+`Export-AzDevOpsOrganizationRuleData` automatically write collection outcomes:
+
+```text
+outputs/
+├── collection-status.json
+└── targets/
+    └── collected JSON and YAML files
+```
+
+By default the current run is cleaned and reused in `outputs/`. Add `-KeepResults`
+to preserve a dated run in `outputs/yyyy-MM-dd-HH-mm/` (local time). Retained
+same-minute collisions stop without overwriting. Cleanup removes current targets
+and generated reports only, preserving retained history and unrelated files.
+`-KeepResults:$false` is the default. Evaluate only `targets/` with PSRule.
+
+An explicit `-OutputPath` remains the exact target directory and is never automatically
+cleaned; `-KeepResults` has no effect on this override. Its default report
+is `collection-status.json` in the target directory's parent; use a separate parent
+per run or an explicit report path to preserve earlier reports. Use
+`-CompletenessReportPath` to override the status location. Reports must stay outside
+`OutputPath`; nested reports are rejected to keep them out of assessment inputs.
+The parent of an explicitly supplied report path must already exist.
 
 Use `-Strict` to attempt all collectors, retain available targets, and then throw
 if any required collection is incomplete. Organization exports attempt every
@@ -15,7 +33,8 @@ Report-writing failures terminate the command as well.
 Without `-Strict`, exporter failures continue to produce errors and warnings while
 other exporters run; incomplete coverage also produces a summary warning.
 Aggregate failure messages identify the command without copying exception text.
-Without `-CompletenessReportPath`, no report file is created.
+`-PassThru` creates no target directory or default report; an explicit
+`-CompletenessReportPath` still writes a report in that mode.
 Neither option adds status objects to the success stream, including `-PassThru`.
 
 ## Pipeline example
@@ -28,25 +47,30 @@ error stops rule evaluation and fails the task; publish the report with an
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$runDirectory = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY ([guid]::NewGuid().ToString())
-$targetDirectory = Join-Path $runDirectory 'targets'
-New-Item -Path $targetDirectory -ItemType Directory -Force | Out-Null
-$completenessPath = Join-Path $runDirectory 'collection-status.json'
+. (Join-Path $env:BUILD_SOURCESDIRECTORY 'src/DevOpsTools.AzureDevOps.PSRule/Functions/AssessmentOutput.ps1')
+$layout = Get-AzDevOpsAssessmentRunPaths -OutputRoot (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs')
+$targetDirectory = $layout.OutputPath
+$completenessPath = $layout.CompletenessReportPath
+$runLock = Initialize-AzDevOpsAssessmentRunDirectory -RunDirectory $layout.RunDirectory
+try {
+    Export-AzDevOpsOrganizationRuleData `
+        -Organization $env:ADO_ORGANIZATION `
+        -OrganizationId $env:ADO_ORGANIZATION_ID `
+        -OutputPath $targetDirectory `
+        -CompletenessReportPath $completenessPath `
+        -Strict
 
-Export-AzDevOpsOrganizationRuleData `
-    -Organization $env:ADO_ORGANIZATION `
-    -OrganizationId $env:ADO_ORGANIZATION_ID `
-    -OutputPath $targetDirectory `
-    -CompletenessReportPath $completenessPath `
-    -Strict
-
-$inputFiles = @(Get-ChildItem $targetDirectory -File -Recurse -Filter '*.json' | Select-Object -ExpandProperty FullName)
-Assert-PSRule -InputPath $inputFiles -Module DevOpsTools.AzureDevOps.PSRule
+    $inputFiles = @(Get-ChildItem $targetDirectory -File -Recurse -Filter '*.json' | Select-Object -ExpandProperty FullName)
+    Assert-PSRule -InputPath $inputFiles -Module DevOpsTools.AzureDevOps.PSRule
+}
+finally {
+    Release-AzDevOpsAssessmentRunLock -RunLock $runLock
+}
 ```
 
 For one project, use the same options with
 `Export-AzDevOpsRuleData -Project <project>`. `-Strict` can also be used without a
-report path when only a terminating completion check is needed.
+report path; file exports still write the default collection report.
 
 ## Report contract
 

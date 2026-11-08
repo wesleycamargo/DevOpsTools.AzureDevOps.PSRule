@@ -86,6 +86,39 @@ Install-Module -Name DevOpsTools.AzureDevOps.PSRule -Scope CurrentUser
 
 For the version published from this repository, use the [GitHub release installation instructions](docs/releases.md).
 
+### Assessment output
+
+By default, both aggregate exporters clean and reuse `outputs/`:
+
+```text
+outputs/
+├── collection-status.json
+└── targets/
+    └── collected JSON and YAML files
+```
+
+```powershell
+Export-AzDevOpsRuleData -Project 'MyProject'                    # reuse current results
+Export-AzDevOpsRuleData -Project 'MyProject' -KeepResults       # preserve a dated run
+Export-AzDevOpsRuleData -Project 'MyProject' -KeepResults:$false
+```
+
+`-KeepResults` writes to `outputs/yyyy-MM-dd-HH-mm/`, using local time. An existing
+same-minute retained directory is rejected rather than overwritten. Default cleanup
+removes only current targets and generated reports; retained dated runs and unrelated
+files survive. Legacy `output/` data is not moved or deleted.
+
+Organization exports use the same flag and layout, with project subdirectories in
+`targets/`. Evaluate only `targets/` with PSRule, not the parent containing reports.
+The local `.vscode/Invoke-Assessment.ps1` runner also accepts `-KeepResults`.
+
+Explicit `-OutputPath` remains the exact target directory, without automatic cleanup
+or timestamping. `-KeepResults` has no effect on that override. Its status report
+defaults to `collection-status.json` in the target directory's parent; override this
+with `-CompletenessReportPath` (outside targets, with an existing parent).
+`-PassThru` does not clean or create files unless a report is explicitly requested.
+Incomplete strict exports still write status and retain available current targets.
+
 ### PAT Token
 
 Once you have both modules installed, you can connect to your

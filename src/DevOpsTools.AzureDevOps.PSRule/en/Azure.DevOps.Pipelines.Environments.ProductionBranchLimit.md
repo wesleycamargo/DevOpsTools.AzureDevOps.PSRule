@@ -12,7 +12,7 @@ A production environment should be limited to the branches it can be used in.
 
 ## DESCRIPTION
 
-This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+Production scope can be explicitly configured by exact ObjectName, overriding the name fallback. Name matching recognizes delimited production/prod/prd/live only (not main/master).
 
 A production environment should be limited to the branches it can be used in. This ensures
 the environment is not used in a non-production branch. This rule checks if the
@@ -31,3 +31,7 @@ Consider limiting the environment to a production branch.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+Explicit productionTargets mappings select exact environment or service connection ObjectName values. An active Branch control must restrict allowed branches; a wildcard or disabled check does not prove protection. Checks configured in Azure DevOps do not prove execution.

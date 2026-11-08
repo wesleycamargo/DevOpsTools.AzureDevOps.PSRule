@@ -33,7 +33,7 @@ Function Get-AzDevOpsPipelinesSettings {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     return $pipelinesSettings
 }

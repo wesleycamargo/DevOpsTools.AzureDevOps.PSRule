@@ -6,6 +6,119 @@ BeforeAll {
     }
 }
 Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
+    It 'versions the corrected review evidence semantics separately from severity policy' {
+        $catalog = Get-AzDevOpsAssessmentCatalog
+        $catalog.RuleSetVersion | Should -Be '2026.11.08.1'
+        $catalog.SeverityPolicyVersion | Should -Be '1.1.0'
+        $raw = @(New-FixtureResult 'Azure.DevOps.Repos.Branch.HasBranchPolicy' 'Azure.DevOps.Repo.Branch')
+        $current = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsAssessmentCatalog {
+            $old = Get-Content "$PSScriptRoot/../src/DevOpsTools.AzureDevOps.PSRule/Assessment/catalog.json" -Raw | ConvertFrom-Json
+            $old.RuleSetVersion = '2026.11.06.1'
+            $old
+        }
+        $previous = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
+        $comparison = Compare-AzDevOpsAssessment $previous $current
+        $comparison.Comparable | Should -BeFalse
+        $comparison.SecurityScoreDelta | Should -BeNullOrEmpty
+    }
+
+    It 'projects skipped nonproduction controls as NotApplicable for <Type>' -ForEach @(
+        @{ Type = 'Azure.DevOps.Pipelines.Environment'; Prefix = 'Azure.DevOps.Pipelines.Environments' }
+        @{ Type = 'Azure.DevOps.ServiceConnection'; Prefix = 'Azure.DevOps.ServiceConnections' }
+    ) {
+        foreach ($scenario in @(
+            @{ Name = 'development'; Explicit = $false }
+            @{ Name = 'production'; Explicit = $true }
+        )) {
+            $target = [pscustomobject]@{
+                ObjectType = $Type; ObjectName = 'fixture.target'; name = $scenario.Name
+                Checks = $null
+            }
+            $configuration = @{
+                assessmentPolicies = @{
+                    "$Prefix.ProductionHumanApproval" = @{ Reference = 'required-human-review-v1' }
+                }
+            }
+            $configuration.productionTargets = @{ $Type = @() }
+            $rules = @(
+                "$Prefix.ProductionCheckProtection"
+                "$Prefix.ProductionHumanApproval"
+                "$Prefix.ProductionBranchLimit"
+            )
+            $option = New-PSRuleOption -Configuration $configuration
+            $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule `
+                -Name $rules -Option $option -Outcome All -Culture en -ErrorAction Stop)
+            $raw.Count | Should -Be 3
+            @($raw | Where-Object Outcome -NE 'None').Count | Should -Be 0
+            $before = $raw | ConvertTo-Json -Depth 30
+            $report = ConvertTo-AzDevOpsAssessment -Result $raw -TargetObject @($target) `
+                -ScopeId 'fixture/project' -Configuration $configuration
+            $report.Findings.Count | Should -Be 3
+            @($report.Findings | Where-Object Outcome -NE 'NotApplicable').Count | Should -Be 0
+            @($report.Findings | Where-Object ReasonCode -NE 'NonProductionTarget').Count | Should -Be 0
+            $report.Summary.UnknownSecurityObjectives | Should -Be 0
+            $report.Summary.NotApplicableObjectives | Should -Be 3
+            $report.Summary.KnownFailedSecurityWeight | Should -Be 0
+            $report.Summary.SecurityScore | Should -BeNullOrEmpty
+            ($raw | ConvertTo-Json -Depth 30) | Should -Be $before
+        }
+    }
+
+    It 'keeps missing production evidence Unknown and optional human approval NotApplicable' -ForEach @(
+        @{ Type = 'Azure.DevOps.Pipelines.Environment'; Prefix = 'Azure.DevOps.Pipelines.Environments' }
+        @{ Type = 'Azure.DevOps.ServiceConnection'; Prefix = 'Azure.DevOps.ServiceConnections' }
+    ) {
+        $target = [pscustomobject]@{
+            ObjectType = $Type; ObjectName = 'fixture.custom'; name = 'development'; Checks = $null
+        }
+        $configuration = @{
+            productionTargets = @{ $Type = @('fixture.custom') }
+            assessmentPolicies = @{
+                "$Prefix.ProductionHumanApproval" = @{ Reference = 'required-human-review-v1' }
+            }
+        }
+        $rules = @("$Prefix.ProductionCheckProtection", "$Prefix.ProductionHumanApproval", "$Prefix.ProductionBranchLimit")
+        $option = New-PSRuleOption -Configuration $configuration
+        $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule `
+            -Name $rules -Option $option -Outcome All -Culture en -ErrorAction Stop)
+        $report = ConvertTo-AzDevOpsAssessment $raw @($target) 'fixture/project' -Configuration $configuration
+        $report.Findings.Count | Should -Be 3
+        @($report.Findings | Where-Object Outcome -NE 'Unknown').Count | Should -Be 0
+        $report.Summary.UnknownSecurityObjectives | Should -Be 3
+        $report.Summary.SecurityScore | Should -BeNullOrEmpty
+
+        $configuration.assessmentPolicies.Clear()
+        $option = New-PSRuleOption -Configuration $configuration
+        $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule `
+            -Name $rules -Option $option -Outcome All -Culture en -ErrorAction Stop)
+        $report = ConvertTo-AzDevOpsAssessment $raw @($target) 'fixture/project' -Configuration $configuration
+        ($report.Findings | Where-Object RuleId -EQ "$Prefix.ProductionHumanApproval").Outcome | Should -Be 'NotApplicable'
+        @($report.Findings | Where-Object Outcome -EQ 'Unknown').Count | Should -Be 2
+    }
+
+    It 'does not hide errors, missing targets, or unexecuted production diagnostics' {
+        $type = 'Azure.DevOps.Pipelines.Environment'
+        $rule = 'Azure.DevOps.Pipelines.Environments.ProductionCheckProtection'
+        $target = [pscustomobject]@{
+            ObjectType = $type; ObjectName = 'fixture'; name = 'development'; Checks = @()
+        }
+        foreach ($reason in 'Error', 'Inconclusive') {
+            $raw = New-FixtureResult $rule $type 'fixture' 'None'
+            $raw.OutcomeReason = $reason
+            (ConvertTo-AzDevOpsAssessment @($raw) @($target) 'fixture/project').Findings[0].Outcome | Should -Be 'Unknown'
+        }
+        $raw = New-FixtureResult $rule $type 'fixture' 'None'
+        $report = ConvertTo-AzDevOpsAssessment @($raw) @() 'fixture/project'
+        $report.Findings[0].Outcome | Should -Be 'Unknown'
+        $report.Findings[0].ReasonCode | Should -Be 'OriginalTargetUnavailable'
+
+        $target.name = 'production'; $target | Add-Member -MemberType NoteProperty -Name isProduction -Value $true
+        $report = ConvertTo-AzDevOpsAssessment @($raw) @($target) 'fixture/project'
+        $report.Findings[0].Outcome | Should -Be 'Unknown'
+        $report.Findings[0].ReasonCode | Should -Be 'RawDiagnosticNotEvaluated'
+    }
+
     It 'maps all 117 documented IDs uniquely and records supplemental runtime rules explicitly' {
         $catalog = Get-AzDevOpsAssessmentCatalog
         $catalog.Rules.Count | Should -Be 117

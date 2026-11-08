@@ -31,3 +31,7 @@ Overweeg om de environment te beperken tot een productiebranch.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+## BEWIJS (regelset 2026.11.06.1)
+
+Productie kan expliciet met productionTargets of productionReleaseEnvironments worden geselecteerd. Zonder lijst worden alleen herkenbare prod/prd/production/live-namen gebruikt; main en master tellen niet mee. Een branchcontrole moet actief zijn en toegestane branches beperken. Een ingestelde check bewijst niet dat deze tijdens een deployment succesvol is uitgevoerd.

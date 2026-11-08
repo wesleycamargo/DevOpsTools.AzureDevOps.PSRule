@@ -102,6 +102,60 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         (Get-Content -Raw $reportPath) | Should -Not -Match 'Bearer|fixture-secret'
     }
 
+    It 'keeps credentials out of organization export diagnostics' {
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsProject { throw 'Bearer project-discovery-secret' }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Export-AdoOrganizationSecurityPolicies { throw 'Bearer organization-export-secret' }
+
+        $diagnostics = @(Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -OutputPath $outputPath -CompletenessReportPath $reportPath 2>&1 3>$null)
+
+        ($diagnostics | Out-String) | Should -Not -Match 'Bearer|project-discovery-secret|organization-export-secret'
+    }
+
+    It 'keeps credentials out of failed project export diagnostics' {
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsProject { @([pscustomobject]@{ name = 'fixture-project' }) }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Export-AzDevOpsProject { throw 'Bearer project-export-secret' }
+
+        $diagnostics = @(Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -OutputPath $outputPath -CompletenessReportPath $reportPath 2>&1 3>$null)
+
+        ($diagnostics | Out-String) | Should -Not -Match 'Bearer|project-export-secret'
+    }
+
+    It 'requests service connections once per direct collection' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Mock Invoke-RestMethod { [pscustomobject]@{ value = @() } }
+
+            Get-AzDevOpsServiceConnections -Project fixture-project | Should -BeNullOrEmpty
+
+            Should -Invoke Invoke-RestMethod -Times 1 -Exactly -ParameterFilter { $Uri -like '*serviceendpoint/endpoints*' }
+        }
+    }
+
+    It 'redacts direct service-connection and group collector diagnostics' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Mock Invoke-RestMethod { throw 'Bearer direct-collector-secret' }
+            Mock Get-AzDevOpsProject { [pscustomobject]@{ id = 'project-id' } }
+
+            $serviceDiagnostics = @(& {
+                try { Get-AzDevOpsServiceConnections -Project fixture-project -ErrorAction Stop }
+                catch { $_ }
+            } 2>&1)
+            $groupDiagnostics = @(& {
+                try { Get-AzDevOpsGroups -Project fixture-project -ErrorAction Stop }
+                catch { $_ }
+            } 2>&1)
+            $groupDetailDiagnostics = @(& {
+                try {
+                    Get-AzDevOpsGroupDetails -Group ([pscustomobject]@{
+                        _links = @{ memberships = @{ href = 'https://dev.azure.com/fixture-org/_apis/graph/memberships' } }
+                    }) -ErrorAction Stop
+                }
+                catch { $_ }
+            } 2>&1)
+
+            ($serviceDiagnostics + $groupDiagnostics + $groupDetailDiagnostics | Out-String) | Should -Not -Match 'Bearer|direct-collector-secret'
+        }
+    }
+
     It 'reports unavailable coverage when every collector fails' {
         foreach ($command in $exportCommands) { Mock -ModuleName DevOpsTools.AzureDevOps.PSRule $command { throw 'failed' } }
 
@@ -120,6 +174,9 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         $result.Count | Should -Be 0
         (Get-Content -Raw (Join-Path $outputPath 'fixture.ado.json') | ConvertFrom-Json).ObjectName | Should -Be 'file-target'
         Test-Path $reportPath | Should -BeFalse
+        $defaultReportPath = Join-Path (Split-Path $outputPath -Parent) 'collection-status.json'
+        (Get-Content -Raw $defaultReportPath | ConvertFrom-Json).Status | Should -Be 'Complete'
+        Test-Path (Join-Path $outputPath 'collection-status.json') | Should -BeFalse
     }
 
     It 'rejects a completeness report inside the target directory before exporting' {
@@ -175,7 +232,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Export-AdoOrganizationSecurityPolicies { throw 'denied' }
         { Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId org-id -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath -ErrorAction SilentlyContinue 3>$null } | Should -Throw '*collection is incomplete*'
         $report = Get-Content $reportPath -Raw | ConvertFrom-Json
-        $report.OrganizationCollection.Status | Should -Be Partial
+        $report.OrganizationCollection.Status | Should -Be Unavailable
         $report.Status | Should -Be Partial
     }
 
@@ -258,7 +315,7 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
         }
 
         It 'reports permission-unavailable environments and rejects them in strict mode' {
-            Connect-AzDevOps -Organization fixture-org -PAT fixture-secret -TokenType ReadOnly
+            Connect-AzDevOps -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -PAT fixture-secret -TokenType ReadOnly
 
             { Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -Strict -CompletenessReportPath $reportPath 3>$null } | Should -Throw '*collection is incomplete*'
 
@@ -286,6 +343,12 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
                 [pscustomobject]@{ id = 1; name = 'fixture-pipeline'; folder = '\'; _links = @{ web = @{ href = 'https://dev.azure.com/org/project/_build' } }; configuration = @{ type = 'yaml'; repository = @{ type = 'azureReposGit' } } }
             }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsPipelineYaml { "trigger: none`nsteps: []" }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/securitynamespaces/*' } {
+                [pscustomobject]@{ value = @([pscustomobject]@{ namespaceId = ([uri]$Uri).AbsolutePath.Split('/')[-1] }) }
+            }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/accesscontrollists/*' } {
+                [pscustomobject]@{ count = 0; value = @() }
+            }
 
             $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -CompletenessReportPath $reportPath -Strict)
 
@@ -293,6 +356,9 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             $yaml.Count | Should -Be 1
             $yaml[0] | Should -Match 'ObjectType: Azure.DevOps.Pipelines.PipelineYaml'
             @($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Pipeline').Count | Should -Be 1
+            $pipeline = $targets | Where-Object ObjectType -EQ 'Azure.DevOps.Pipeline'
+            $pipeline.PermissionEvidence.Status | Should -Be 'Complete'
+            $pipeline.PermissionEvidence.ScopeComplete | Should -BeTrue
         }
 
         It 'treats a repository without a default branch as collected data' {
@@ -302,15 +368,24 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepositoryGhas { @{ isEnabled = $false } }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepositoryPipelinePermissions { @{} }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepositoryAcls { @{} }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/securitynamespaces/*' } {
+                [pscustomobject]@{ value = @([pscustomobject]@{ namespaceId = ([uri]$Uri).AbsolutePath.Split('/')[-1] }) }
+            }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/accesscontrollists/*' } {
+                [pscustomobject]@{ count = 0; value = @() }
+            }
 
             $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -Strict -CompletenessReportPath $reportPath)
 
             @($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Repo').Count | Should -Be 1
+            $repo = $targets | Where-Object ObjectType -EQ 'Azure.DevOps.Repo'
+            $repo.PermissionEvidence.Status | Should -Be 'Complete'
+            $repo.PermissionEvidence.ScopeComplete | Should -BeTrue
             (Get-Content -Raw $reportPath | ConvertFrom-Json).Status | Should -Be 'Complete'
         }
 
         It 'reports omitted repository enrichment as partial rather than complete' {
-            Connect-AzDevOps -Organization fixture-org -PAT fixture-secret -TokenType ReadOnly
+            Connect-AzDevOps -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111' -PAT fixture-secret -TokenType ReadOnly
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepos { [pscustomobject]@{ id = 'repo-id'; name = 'fixture-repo'; defaultBranch = $null; project = @{ id = 'project-id' } } }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Test-AzDevOpsFileExists { $false }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsBranches { @() }

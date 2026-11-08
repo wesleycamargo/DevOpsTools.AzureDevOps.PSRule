@@ -82,7 +82,7 @@ function Read-AdoOrganizationGeneralOverview {
         return $settings
     }
     catch {
-        throw "Failed to retrieve organization overview: $($_.Exception.Message)"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 }
 
@@ -162,7 +162,7 @@ function Export-AdoOrganizationGeneralOverview {
         }
     }
     catch {
-        throw "Failed to get Organization general overview settings from Azure DevOps: $($_.Exception.Message)"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 
     # Process settings into exportable format

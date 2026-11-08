@@ -12,7 +12,7 @@ Effective sensitive permissions must be authorized by organizational policy.
 
 ## DESCRIPTION
 
-The historical rule ID is retained, but inheritance alone is no longer a failure. The rule evaluates the ordered ACL path, nested group membership, explicit allow and deny, and administrative bypass in `PermissionEvidence`. Configure `effectivePermissionPolicies` for target type `Azure.DevOps.Pipelines.Releases.Definition` with a policy reference, security namespace, sensitive permission mask, and allowed descriptor-to-mask map. Missing policy, ACL ancestry, identity resolution, or administrator evidence is Unknown in assessment output and not evaluated by PSRule. It never becomes a pass. Read-only inherited access is allowed; unauthorized sensitive rights fail.
+The historical rule ID is retained, but inheritance alone is no longer a failure. The rule evaluates only direct allow and deny entries for the exact collected ACL scope; it does not claim to verify effective permissions. Configure `effectivePermissionPolicies` for target type `Azure.DevOps.Pipelines.Releases.Definition` with a policy reference, security namespace, sensitive permission mask, and allowed descriptor-to-mask map. Missing policy or incomplete exact-scope ACL evidence is Unknown in assessment output and not evaluated by PSRule. It never becomes a pass. Read-only inherited access is allowed; unauthorized sensitive rights fail.
 
 ## RECOMMENDATION
 

@@ -5,6 +5,9 @@ BeforeAll {
 Describe 'Supported repository security evidence' -Tag Unit {
     BeforeEach {
         Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @() } }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod {
+            [pscustomobject]@{ instanceId = '11111111-1111-1111-1111-111111111111' }
+        } -ParameterFilter { $Uri -like '*/_apis/connectionData?*' }
         Connect-AzDevOps -Organization fixture-org -PAT fixture-token
     }
 
@@ -55,7 +58,8 @@ Describe 'Supported repository security evidence' -Tag Unit {
 
     It 'does not fall back to portal evidence when the security API rejects access' {
         Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { throw 'Security evidence unavailable.' } -ParameterFilter { $Uri -like 'https://advsec.dev.azure.com/*' }
-        { Get-AzDevOpsRepositoryGhas -ProjectId project -RepositoryId repo } | Should -Throw 'Security evidence unavailable.'
+        { Get-AzDevOpsRepositoryGhas -ProjectId project -RepositoryId repo } | Should -Throw 'Azure DevOps operation failed. Details were omitted to protect credentials.'
+        Should -Invoke -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -Exactly -Times 1 -ParameterFilter { $Uri -like 'https://advsec.dev.azure.com/*' }
         Should -Invoke -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -Exactly -Times 0 -ParameterFilter { $Uri -like '*HierarchyQuery*' }
     }
 

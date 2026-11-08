@@ -35,7 +35,7 @@ Function Get-AzDevOpsRepos {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return @($response.value)
@@ -87,7 +87,7 @@ Function Get-AzDevOpsBranches {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     try {
         $statsResponse = Invoke-RestMethod -Uri $statsUri -Method Get -Headers $header
@@ -164,7 +164,7 @@ Function Get-AzDevOpsBranchPolicy {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     $branchPolicy = @($response.value | Where-Object {
@@ -222,7 +222,7 @@ Function Get-AzDevOpsRepositoryPipelinePermissions {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     return $response
 }
@@ -268,7 +268,7 @@ Function Get-AzDevOpsRepositoryAcls {
         return $null
     } else {
         $header = $script:connection.GetHeader()
-        $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/{1}/{2}" -f $Organization, $ProjectId, $RepositoryId
+        $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/$script:AzureDevOpsGitRepositoriesSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/{1}/{2}" -f $Organization, $ProjectId, $RepositoryId
         try {
             $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header -ContentType "application/json"
             # If the response is a string and not an object, throw an exception for authentication failure or project not found
@@ -279,7 +279,7 @@ Function Get-AzDevOpsRepositoryAcls {
             $thisRepoPerms = $response.value
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         return $thisRepoPerms
     }
@@ -338,7 +338,7 @@ function Test-AzDevOpsFileExists {
         if ($_.Exception.Response.StatusCode -eq 404 -and $_.ErrorDetails.Message -match 'GitItemNotFoundException|GitRepositoryEmptyException') {
             return $false
         }
-        throw
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     if ($response -is [string] -and $response -match '(?is)<(!doctype\s+html|html)\b') {
         throw 'Authentication failed while checking repository file evidence.'
@@ -396,7 +396,7 @@ Function Get-AzDevOpsRepositoryGhas {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         $codeSecurity = $response.codeSecurityFeatures.codeSecurityEnabled
         $secretProtection = $response.secretProtectionFeatures.secretProtectionEnabled
@@ -528,6 +528,7 @@ function Export-AzDevOpsReposAndBranchPolicies {
             if ($TokenType -ne "ReadOnly") {
                 $repoAcls = Get-AzDevOpsRepositoryAcls -ProjectId $repo.project.id -RepositoryId $repoId
                 $repo | Add-Member -MemberType NoteProperty -Name Acls -Value $repoAcls
+                $repo | Add-Member -MemberType NoteProperty -Name PermissionEvidence -Value (Get-AzDevOpsPermissionEvidence -NamespaceId $script:AzureDevOpsGitRepositoriesSecurityNamespaceId -Token "repoV2/$($repo.project.id)/$repoId")
             } else {
                 Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
             }

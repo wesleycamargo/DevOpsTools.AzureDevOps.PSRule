@@ -127,8 +127,8 @@ function Read-AdoOrganizationSecurityPolicies {
         return $settings
     }
     catch {
-        Write-Error "Failed to retrieve or parse organization policy data: $($_.Exception.Message)"
-        throw
+        Write-Error (Get-AzDevOpsSanitizedErrorMessage)
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 }
 
@@ -209,8 +209,8 @@ function Export-AdoOrganizationSecurityPolicies {
         }
     }
     catch {
-        Write-Error "Failed to get organization security policy settings: $($_.Exception.Message)"
-        throw
+        Write-Error (Get-AzDevOpsSanitizedErrorMessage)
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 
     # Create settings object with metadata

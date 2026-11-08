@@ -56,6 +56,9 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
     Context 'Collection requests' {
         BeforeEach {
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @() } }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod {
+                [pscustomobject]@{ instanceId = '11111111-1111-1111-1111-111111111111' }
+            } -ParameterFilter { $Uri -like '*/_apis/connectionData?*' }
             Connect-AzDevOps -Organization fixture-org -PAT fixture-token
         }
 
@@ -147,20 +150,20 @@ Describe 'Assessment evidence boundaries' -Tag Unit {
     }
 
     It 'does not apply production environment rules to development' {
-        $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'fixture.dev'; name = 'development'; checks = @() }
+        $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'fixture.dev'; name = 'development'; isProduction = $false; checks = @() }
         $results = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name 'Azure.DevOps.Pipelines.Environments.Production*' -Culture en)
         $results.Count | Should -Be 0
     }
 
     It 'evaluates production service-connection controls for <Scenario>' -ForEach @(
-        @{ Scenario = 'development'; Name = 'development'; Protected = $false; Count = 0; Outcome = 'None' }
-        @{ Scenario = 'unprotected production'; Name = 'production'; Protected = $false; Count = 3; Outcome = 'Fail' }
-        @{ Scenario = 'protected production'; Name = 'production'; Protected = $true; Count = 3; Outcome = 'Pass' }
+        @{ Scenario = 'development'; Name = 'development'; IsProduction = $false; Protected = $false; Count = 0; Outcome = 'None' }
+        @{ Scenario = 'unprotected production'; Name = 'production'; IsProduction = $true; Protected = $false; Count = 3; Outcome = 'Fail' }
+        @{ Scenario = 'protected production'; Name = 'production'; IsProduction = $true; Protected = $true; Count = 3; Outcome = 'Pass' }
     ) {
         $checks = if ($Protected) {
             @(@{ type = @{ name = 'Approval' }; settings = @{ approvers = @(@{ id = 'fixture-reviewer' }) } }, @{ type = @{ name = 'Branch control' }; settings = @{ displayName = 'Branch control'; inputs = @{ allowedBranches = 'refs/heads/main' } } })
         } else { @() }
-        $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = "fixture.$Name"; name = $Name; Checks = @($checks) }
+        $target = [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = "fixture.$Name"; name = $Name; isProduction = $IsProduction; Checks = @($checks) }
         $option = New-PSRuleOption -Configuration @{ assessmentPolicies = @{
             'Azure.DevOps.ServiceConnections.ProductionHumanApproval' = @{ Reference = 'production-review-v1' }
         } }

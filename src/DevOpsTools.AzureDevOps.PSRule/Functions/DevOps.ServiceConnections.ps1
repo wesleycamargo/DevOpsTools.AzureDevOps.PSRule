@@ -32,10 +32,9 @@ function Get-AzDevOpsServiceConnections {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 
-    $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
     return $response.value
 }
@@ -85,7 +84,7 @@ function Get-AzDevOpsServiceConnectionChecks {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return $response.value
@@ -124,7 +123,7 @@ function Get-AzDevOpsServiceConnectionAcls {
     }
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
-    $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/49b48001-ca20-4adc-8111-5b60c903a50c?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/{1}/{2}" -f $Organization, $ProjectId, $ServiceConnectionId
+    $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/$script:AzureDevOpsServiceEndpointsSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/{1}/{2}" -f $Organization, $ProjectId, $ServiceConnectionId
     try {
         $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
         # If the response is not an object but a string, the authentication failed
@@ -133,7 +132,7 @@ function Get-AzDevOpsServiceConnectionAcls {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
     return @($response.value)
@@ -197,6 +196,7 @@ function Export-AzDevOpsServiceConnections {
         # Get acls for service connection
         $serviceConnectionAcls = @(Get-AzDevOpsServiceConnectionAcls -ProjectId $serviceConnection.serviceEndpointProjectReferences[0].projectReference.id -ServiceConnectionId $serviceConnection.id)
         $serviceConnection | Add-Member -MemberType NoteProperty -Name Acls -Value $serviceConnectionAcls
+        $serviceConnection | Add-Member -MemberType NoteProperty -Name PermissionEvidence -Value (Get-AzDevOpsPermissionEvidence -NamespaceId $script:AzureDevOpsServiceEndpointsSecurityNamespaceId -Token "endpoints/$($serviceConnection.serviceEndpointProjectReferences[0].projectReference.id)/$($serviceConnection.id)")
 
         # Set id field to a JSON object with originalId, project and organization
         $serviceConnection.id = @{

@@ -37,3 +37,12 @@ wordt gevolgd.
 - [Create a branch policy](https://docs.microsoft.com/nl-nl/azure/devops/repos/git/branch-policies?view=azure-devops)
 - [Branch policies](https://docs.microsoft.com/nl-nl/azure/devops/repos/git/branch-policies-overview?view=azure-devops)
 - [Azure DevOps Security best practices](https://learn.microsoft.com/nl-nl/azure/devops/organizations/security/security-best-practices?view=azure-devops#secure-azure-repos)
+
+## BEWIJS
+
+Een toepasselijke branch policy moet zowel ingeschakeld (`isEnabled = true`)
+als blokkerend (`isBlocking = true`) zijn. Het policytype en de relevante
+instellingen moeten ook aan deze regel voldoen. Alleen de aanwezigheid van
+beleid is niet voldoende: uitgeschakeld of uitsluitend adviserend beleid
+biedt geen afdwingbare branchbescherming. Een adviserende policy telt daarom
+niet als verplichte bescherming.

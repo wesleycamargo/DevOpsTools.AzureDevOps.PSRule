@@ -2,14 +2,14 @@
 Rule 'Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval' `
     -Ref 'ADO-RD-001' `
     -Type 'Azure.DevOps.Pipelines.Releases.Definition' `
-    -If { $null -ne ($TargetObject.environments | Where-Object { $_.name -imatch "prd|prod|live|master|main"}) } `
+    -If { @(Get-AzDevOpsProductionReleaseEnvironments -TargetObject $TargetObject -Configuration $Configuration).Count -gt 0 } `
     -Tag @{ release = 'GA'} `
     -Level Error {
         # Description 'Release pipeline production environments should be protected by approval.'
         Reason 'The release pipeline contains a production environment that is not protected by approval.'
         Recommend 'Consider adding approval to the production environment.'
         # Links 'https://docs.microsoft.com/en-us/azure/devops/pipelines/release/approvals/?view=azure-devops'
-        $prodEnvironments = $TargetObject.environments | Where-Object { $_.name -imatch "prd|prod|live|master|main"}
+        $prodEnvironments = @(Get-AzDevOpsProductionReleaseEnvironments -TargetObject $TargetObject -Configuration $Configuration)
         $prodEnvironments | ForEach-Object {
             $Assert.HasField($_, "preDeployApprovals", $true)
             $Assert.HasField($_.preDeployApprovals, "approvals[0].approver", $true)
@@ -22,14 +22,14 @@ Rule 'Azure.DevOps.Pipelines.Releases.Definition.ProductionApproval' `
 Rule 'Azure.DevOps.Pipelines.Releases.Definition.SelfApproval' `
     -Ref 'ADO-RD-002' `
     -Type 'Azure.DevOps.Pipelines.Releases.Definition' `
-    -If { $null -ne ($TargetObject.environments | Where-Object { $_.name -imatch "prd|prod|live|master|main"}) } `
+    -If { @(Get-AzDevOpsProductionReleaseEnvironments -TargetObject $TargetObject -Configuration $Configuration).Count -gt 0 } `
     -Tag @{ release = 'GA'} `
     -Level Error {
         # Description 'Users should not be able to approve their own release.'
         Reason 'The release pipeline contains a production where users can approve their own releases.'
         Recommend 'Consider not allowing user to approve their own work to the production environment.'
         # Links 'https://docs.microsoft.com/en-us/azure/devops/pipelines/release/approvals/?view=azure-devops'
-        $prodEnvironments = $TargetObject.environments | Where-Object { $_.name -imatch "prd|prod|live|master|main"}
+        $prodEnvironments = @(Get-AzDevOpsProductionReleaseEnvironments -TargetObject $TargetObject -Configuration $Configuration)
         $prodEnvironments | ForEach-Object {
             $Assert.HasField($_, "preDeployApprovals", $true)
             $Assert.HasField($_.preDeployApprovals, "approvalOptions.releaseCreatorCanBeApprover", $true)
@@ -177,20 +177,11 @@ Rule 'Azure.DevOps.Pipelines.Releases.Definition.NoPlainTextSecrets' `
 Rule 'Azure.DevOps.Pipelines.Releases.Definition.ProjectValidUsers' `
     -Ref 'ADO-RD-005' `
     -Type 'Azure.DevOps.Pipelines.Releases.Definition' `
-    -If { $null -ne $TargetObject.Acls } `
+    -If { (Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Releases.Definition.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.Pipelines.Releases.Definition.ProjectValidUsers').Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
-        # Description 'Release definitions should not have direct permissions for Project Valid Users.'
-        Reason 'The release definition has direct permissions for Project Valid Users.'
-        Recommend 'Do not grant direct permissions for Project Valid Users for the release definition.'        
-        AllOf {
-            # Loop through all the propeties of the first ACL
-            $TargetObject.Acls.acesDictionary.psobject.Properties.GetEnumerator() | ForEach-Object {
-                # Assert the property name does not end with -0-0-0-0-3 wich is the Project Valid Users group SID
-                AnyOf {
-                    $Assert.NotMatch($_.Value, "descriptor", "-0-0-0-0-3")
-                    $Assert.HasFieldValue($_.Value, "allow", 1)
-                }
-            }
-        }
+        $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.Pipelines.Releases.Definition.ProjectValidUsers' -Policy $Configuration.projectValidUsersPolicies.'Azure.DevOps.Pipelines.Releases.Definition.ProjectValidUsers'
+        Reason $assessment.ReasonCode
+        Recommend 'Review unauthorized sensitive Project Valid Users grants using a documented namespace-specific permission policy.'
+        $Assert.HasFieldValue($assessment, 'Outcome', 'Pass')
 }

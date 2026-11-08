@@ -36,7 +36,7 @@ function Get-AzDevOpsPipelines {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     # walk through all pipelines and get the pipeline details
     $pipelines = @()
@@ -95,7 +95,7 @@ function Get-AzDevOpsPipelineAcls {
         return $null
     } else {
         $header = $script:connection.GetHeader()
-        $uri = "https://dev.azure.com/$Organization/_apis/accesscontrollists/33344d9c-fc72-4d6f-aba5-fa317101a7e9?includeExtendedInfo=true&api-version=7.2-preview.1&token=$($ProjectId)/$($PipelineId)"
+        $uri = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsBuildSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=$($ProjectId)/$($PipelineId)"
         Write-Verbose "Getting pipeline ACLs from $uri"
         Write-Verbose "PROJECTID: $ProjectId"
         try {
@@ -111,7 +111,7 @@ function Get-AzDevOpsPipelineAcls {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         return $response.value
@@ -181,7 +181,7 @@ function Get-AzDevOpsPipelineYaml {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Write-Verbose "YAML definition located in repository id: $($response.configuration.repository.id)"
         $RepositoryId = $response.configuration.repository.id
@@ -354,6 +354,7 @@ function Export-AzDevOpsPipelines {
                 $Folder = $Folder.Trim('/')
             }
             $pipeline | Add-Member -MemberType NoteProperty -Name Acls -Value (Get-AzDevOpsPipelineAcls -ProjectId $ProjectId -PipelineId $pipelineId -Folder $Folder)
+            $pipeline | Add-Member -MemberType NoteProperty -Name PermissionEvidence -Value (Get-AzDevOpsPermissionEvidence -NamespaceId $script:AzureDevOpsBuildSecurityNamespaceId -Token "$ProjectId/$pipelineId")
         } else {
             Set-AzDevOpsCollectionStatus -Status Partial -ReasonCode PermissionDenied
             Write-Verbose "Token Type is set to ReadOnly, no pipeline ACLs will be returned"

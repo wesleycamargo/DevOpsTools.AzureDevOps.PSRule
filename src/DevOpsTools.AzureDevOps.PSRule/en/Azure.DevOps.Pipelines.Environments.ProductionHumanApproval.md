@@ -12,7 +12,7 @@ The target should satisfy its applicable organizational policy.
 
 ## DESCRIPTION
 
-This production-only rule uses the `IsProduction` name selector. Development resources are skipped. Name matching is a convention; configure names or suppressions to match your production inventory.
+Production scope can be explicitly configured by exact ObjectName, overriding the name fallback. Name matching recognizes delimited production/prod/prd/live only (not main/master).
 
 This control follows `assessmentPolicies['Azure.DevOps.Pipelines.Environments.ProductionHumanApproval']`. Each explicit policy needs a Reference. A referenced policy makes human review required for the selected Targets. A configured enabled Approval check with approvers satisfies it. ApprovedEquivalentControls can reference approved effective automated review when policy allows it. Missing optional policy is Not applicable; missing evidence for an applicable policy is Unknown. PSRule represents both as not evaluated (`None` with `-Outcome All`); the assessment projection distinguishes them.
 
@@ -25,3 +25,7 @@ Configure and apply the referenced policy. See [policy configuration](../../../d
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+Explicit productionTargets mappings select exact environment or service connection ObjectName values. An active Branch control must restrict allowed branches; a wildcard or disabled check does not prove protection. Checks configured in Azure DevOps do not prove execution.

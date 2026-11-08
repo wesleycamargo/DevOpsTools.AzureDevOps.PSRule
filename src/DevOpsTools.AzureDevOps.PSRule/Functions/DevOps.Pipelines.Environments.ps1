@@ -42,7 +42,7 @@ function Get-AzDevOpsEnvironments {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value'
         $environments = $response.value
@@ -106,7 +106,7 @@ function Get-AzDevOpsEnvironmentChecks {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         $checks = $response.value
@@ -163,7 +163,7 @@ function Get-AzDevOpsEnvironmentAcls {
         $header = $script:connection.GetHeader()
         $Organization = $script:connection.Organization
         Write-Verbose "Getting environment ACLs for environment $Environment"
-        $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/83d4c2e6-e57d-4d6e-892b-b87222b7ad20?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/{1}/{2}" -f $Organization, $ProjectId, $EnvironmentId
+        $uri = "https://dev.azure.com/{0}/_apis/accesscontrollists/$script:AzureDevOpsEnvironmentSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/{1}/{2}" -f $Organization, $ProjectId, $EnvironmentId
         Write-Verbose "URI: $uri"
         try {
             $response = Invoke-RestMethod -Uri $uri -Method Get -Headers $header
@@ -173,7 +173,7 @@ function Get-AzDevOpsEnvironmentAcls {
             }
         }
         catch {
-            throw $_.Exception.Message
+            throw (Get-AzDevOpsSanitizedErrorMessage)
         }
         Set-AzDevOpsMissingCollectionData -Data $response -RequiredProperties 'value' -Partial
         $acls = @($response.value)
@@ -241,6 +241,7 @@ function Export-AzDevOpsEnvironmentChecks {
                 $environment | Add-Member -MemberType NoteProperty -Name checks -Value $checks
                 $acls = @(Get-AzDevOpsEnvironmentAcls -ProjectId $environment.project.id -EnvironmentId $environment.id)
                 $environment | Add-Member -MemberType NoteProperty -Name Acls -Value $acls
+                $environment | Add-Member -MemberType NoteProperty -Name PermissionEvidence -Value (Get-AzDevOpsPermissionEvidence -NamespaceId $script:AzureDevOpsEnvironmentSecurityNamespaceId -Token "Environments/$($environment.project.id)/$($environment.id)")
                 # Set the id property to a hash table with the original id, organization and project name
                 $environment.id = @{
                     originalId = $environment.id

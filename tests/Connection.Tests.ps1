@@ -58,10 +58,36 @@ Describe 'Connect-AzDevOps authentication modes' -Tag 'Unit' {
         }
     }
 
+    It 'discovers the organization GUID for OAuth when only the name is supplied' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Mock Invoke-RestMethod { [pscustomobject]@{ instanceId = '5e433049-1396-4a9d-80b2-33dc2f1e98af' } } -ParameterFilter { $Uri -like '*_apis/connectionData?api-version=7.1-preview' }
+            Connect-AzDevOps -Organization test-org -AccessToken 'header.payload.signature'
+            $script:connection.OrganizationId | Should -Be '5e433049-1396-4a9d-80b2-33dc2f1e98af'
+            Assert-MockCalled Invoke-RestMethod -Times 1 -Exactly -ParameterFilter { $Uri -like '*_apis/connectionData?api-version=7.1-preview' }
+        }
+    }
+
+    It 'rejects an invalid organization GUID returned by discovery' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Mock Invoke-RestMethod { [pscustomobject]@{ instanceId = 'not-a-guid' } } -ParameterFilter { $Uri -like '*_apis/connectionData?api-version=7.1-preview' }
+            { Connect-AzDevOps -Organization test-org -AccessToken 'header.payload.signature' } | Should -Throw 'Azure DevOps operation failed. Details were omitted to protect credentials.'
+            Assert-MockCalled Invoke-RestMethod -Times 1 -Exactly -ParameterFilter { $Uri -like '*_apis/connectionData?api-version=7.1-preview' }
+            $script:connection | Should -BeNullOrEmpty
+        }
+    }
+
+    It 'does not query connectionData when the GUID is explicitly supplied' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Connect-AzDevOps -Organization test-org -OrganizationId '5e433049-1396-4a9d-80b2-33dc2f1e98af' -AccessToken 'header.payload.signature'
+            Assert-MockCalled Invoke-RestMethod -Times 0 -Exactly -ParameterFilter { $Uri -like '*_apis/connectionData*' }
+        }
+    }
+
     It 'reports service-principal authentication failures at the token boundary' {
         InModuleScope DevOpsTools.AzureDevOps.PSRule {
             Mock Invoke-RestMethod { throw 'invalid client secret' } -ParameterFilter { $Method -eq 'Post' }
-            { Connect-AzDevOps -Organization test-org -TenantId tenant -ClientId client -ClientSecret wrong } | Should -Throw '*Failed to connect to Azure DevOps*'
+            { Connect-AzDevOps -Organization test-org -TenantId tenant -ClientId client -ClientSecret wrong } | Should -Throw 'Azure DevOps operation failed. Details were omitted to protect credentials.'
+            $script:connection | Should -BeNullOrEmpty
             Assert-MockCalled Invoke-RestMethod -ParameterFilter { $Method -eq 'Post' } -Times 1 -Exactly
         }
     }

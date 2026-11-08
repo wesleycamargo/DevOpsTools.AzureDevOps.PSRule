@@ -5,6 +5,9 @@ BeforeAll {
 Describe 'Empty collection contracts with deterministic API fixtures' -Tag Unit {
     BeforeEach {
         Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @(); count = 0 } }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod {
+            [pscustomobject]@{ instanceId = '11111111-1111-1111-1111-111111111111' }
+        } -ParameterFilter { $Uri -like '*/_apis/connectionData?*' }
         Connect-AzDevOps -Organization fixture-org -PAT fixture-token
     }
 

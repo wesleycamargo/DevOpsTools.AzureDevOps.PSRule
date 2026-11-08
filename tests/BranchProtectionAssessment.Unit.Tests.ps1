@@ -11,7 +11,7 @@ Describe 'Branch protection assessment acceptance' -Tag 'Unit' {
         @($raw | Where-Object Outcome -EQ 'Fail').Count | Should -Be 2
         (ConvertTo-AzDevOpsAssessment $raw @($target) 'fixture/project').RiskObjectives.Count | Should -Be 1
 
-        $policy = [pscustomobject]@{ isEnabled = $false; type = @{ id = 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' }; settings = @{ minimumApproverCount = 0 } }
+        $policy = [pscustomobject]@{ isEnabled = $false; isBlocking = $true; type = @{ id = 'fa4e907d-c16b-4a4c-9dfa-4906e5d171dd' }; settings = @{ minimumApproverCount = 0 } }
         $target | Add-Member -NotePropertyName $Field -NotePropertyValue @($policy)
         $raw = @($target | Invoke-PSRule -Module DevOpsTools.AzureDevOps.PSRule -Name @($Exists, $Enabled) -Outcome All -Culture en -ErrorAction Stop)
         ($raw | Where-Object RuleName -EQ $Exists).Outcome | Should -Be 'Pass'

@@ -51,6 +51,29 @@ function ConvertTo-AzDevOpsAssessment {
         } elseif ($outcome -eq 'None') {
             if ($null -eq $target) {
                 $outcome = 'Unknown'; $reason = 'OriginalTargetUnavailable'
+            } elseif ($rule.RuleId -match '\.(ProductionCheckProtection|ProductionHumanApproval|ProductionBranchLimit)$') {
+                $classification = Test-AzDevOpsProductionTarget -TargetObject $target -Configuration $Configuration
+                if ($classification.Outcome -eq 'NonProduction') {
+                    $outcome = 'NotApplicable'; $reason = 'NonProductionTarget'
+                } elseif ($classification.Outcome -eq 'Unknown') {
+                    $outcome = 'Unknown'; $reason = $classification.ReasonCode
+                } elseif ($rule.Applicability -in @('Policy', 'DefaultPolicy')) {
+                    $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.assessmentPolicies.($rule.RuleId)
+                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+                } elseif ($rule.RuleId -like '*.ProductionCheckProtection') {
+                    $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $target
+                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+                } elseif ($rule.RuleId -like '*.ProductionBranchLimit') {
+                    $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $target
+                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+                }
+            } elseif ($rule.RuleId -match '\.(ProductionApproval|SelfApproval)$' -and $rule.TargetType -eq 'Azure.DevOps.Pipelines.Releases.Definition') {
+                $classification = Get-AzDevOpsProductionReleaseClassification -TargetObject $target -Configuration $Configuration
+                if ($classification.Outcome -eq 'NonProduction') {
+                    $outcome = 'NotApplicable'; $reason = 'NonProductionTarget'
+                } elseif ($classification.Outcome -eq 'Unknown') {
+                    $outcome = 'Unknown'; $reason = $classification.ReasonCode
+                }
             } elseif ($rule.Applicability -in @('Policy', 'DefaultPolicy')) {
                 $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.assessmentPolicies.($rule.RuleId)
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
@@ -60,6 +83,19 @@ function ConvertTo-AzDevOpsAssessment {
             } elseif ($rule.RuleId -like '*.ProductionCheckProtection') {
                 $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+            } elseif ($rule.RuleId -like '*.ProductionBranchLimit') {
+                $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $target
+                $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+            } elseif ($rule.RuleId -like '*.ProjectValidUsers') {
+                $assessment = Get-AzDevOpsProjectValidUsersAssessment -TargetObject $target -RuleId $rule.RuleId -Policy $Configuration.projectValidUsersPolicies.($rule.RuleId)
+                $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+            } elseif ($rule.RuleId -eq 'Azure.DevOps.ServiceConnections.Scope') {
+                if ($target.type -eq 'azurerm') {
+                    $assessment = Get-AzDevOpsServiceConnectionScopeAssessment -TargetObject $target -Policy $Configuration.serviceConnectionScopePolicies.'Azure.DevOps.ServiceConnections.Scope'
+                    $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode
+                } else {
+                    $outcome = 'NotApplicable'
+                }
             } elseif ($rule.RiskGroup -eq 'VariableGroup.SecretExposure') {
                 $assessment = Get-AzDevOpsVariableGroupSecretAssessment -TargetObject $target
                 $outcome = $assessment.Outcome; $reason = $assessment.ReasonCode

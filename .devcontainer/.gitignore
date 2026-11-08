@@ -1,0 +1,2 @@
+# Local Compose environment overrides. Copy .env.example to .env.
+.env

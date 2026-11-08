@@ -17,6 +17,17 @@ function Set-AzDevOpsCollectionStatus {
     }
 }
 
+function Get-AzDevOpsSanitizedErrorMessage {
+    param ([string]$Operation = 'Azure DevOps operation')
+
+    $reasonCodes = @()
+    if ($null -ne $script:collectionStatus) {
+        $reasonCodes = @($script:collectionStatus.ReasonCodes | Where-Object { $_ })
+    }
+    $reasonSuffix = if ($reasonCodes.Count) { " Reason codes: ($($reasonCodes -join ', '))." } else { '' }
+    return "$Operation failed.$reasonSuffix Details were omitted to protect credentials."
+}
+
 function Set-AzDevOpsMissingCollectionData {
     param ($Data, [string[]]$RequiredProperties, [string[]]$AllowNullProperties, [switch]$Partial)
 
@@ -85,5 +96,47 @@ function Complete-AzDevOpsAssessmentExport {
         $message = "Assessment collection is incomplete: $($commands -join ', ')."
         if ($Strict) { throw $message }
         Write-Warning $message
+    }
+}
+
+
+function Resolve-AzDevOpsAssessmentExportPaths {
+    param (
+        [string]$OutputPath,
+        [string]$CompletenessReportPath,
+        [switch]$PassThru,
+        [switch]$KeepResults
+    )
+
+    $isDefault = [string]::IsNullOrEmpty($OutputPath)
+    if ($isDefault) {
+        $layout = Get-AzDevOpsAssessmentRunPaths -OutputRoot (Join-Path $PWD 'outputs') -KeepResults:$KeepResults
+        $runPath = $layout.RunDirectory
+        $OutputPath = $layout.OutputPath
+    }
+    else {
+        $OutputPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputPath)
+        $runPath = Split-Path -Path $OutputPath -Parent
+    }
+
+    if (-not $PassThru -and -not $CompletenessReportPath) {
+        $CompletenessReportPath = Join-Path $runPath 'collection-status.json'
+    }
+    Assert-AzDevOpsCompletenessReportPath -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath
+
+    $runLock = $null
+    if (-not $PassThru) {
+        if ($isDefault) {
+            $runLock = Initialize-AzDevOpsAssessmentRunDirectory -RunDirectory $runPath -KeepResults:$KeepResults
+        }
+        else {
+            New-Item -Path $OutputPath -ItemType Directory -Force -ErrorAction Stop | Out-Null
+        }
+    }
+
+    [pscustomobject]@{
+        OutputPath = $OutputPath
+        CompletenessReportPath = $CompletenessReportPath
+        RunLock = $runLock
     }
 }

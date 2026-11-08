@@ -121,15 +121,28 @@
 
         $candidate.OrganizationId = $OrganizationId
 
-        # Verify connection with a simple API call
+        # Verify credentials before attempting organization identity discovery.
         $uri = "https://dev.azure.com/$Organization/_apis/projects?api-version=7.0"
-        $verification = Invoke-RestMethod -Uri $uri -Method Get -Headers $candidate.GetHeader()
+        $verification = Invoke-RestMethod -Uri $uri -Method Get -Headers $candidate.GetHeader() -ErrorAction Stop
         if ($verification -is [string]) { throw 'Authentication failed.' }
+
+        # Billing requires the organization GUID. Resolve it automatically when
+        # callers connect with only the organization name (including OAuth).
+        if ([string]::IsNullOrWhiteSpace($candidate.OrganizationId)) {
+            $identityUri = "https://dev.azure.com/$Organization/_apis/connectionData?api-version=7.1-preview"
+            $identity = Invoke-RestMethod -Uri $identityUri -Method Get -Headers $candidate.GetHeader() -ErrorAction Stop
+            $parsedId = [guid]::Empty
+            if (-not [guid]::TryParse([string]$identity.instanceId, [ref]$parsedId) -or $parsedId -eq [guid]::Empty) {
+                throw 'Azure DevOps connectionData did not return a valid organization GUID.'
+            }
+            $candidate.OrganizationId = $parsedId.ToString()
+        }
+
         $script:connection = $candidate
         Write-Verbose "Successfully connected to Azure DevOps organization: $Organization"
     }
     catch {
-        throw "Failed to connect to Azure DevOps: $($_.Exception.Message)"
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 }
 
@@ -236,12 +249,12 @@ function Get-AzDevOpsProjectAcls {
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
     $aclInfo = @{
-        'Environments' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/83d4c2e6-e57d-4d6e-892b-b87222b7ad20?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/$ProjectId"
-        'Pipelines' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/33344d9c-fc72-4d6f-aba5-fa317101a7e9?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
-        'ReleaseDefinitions' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/c788c23e-1b46-4162-8f5e-d7585343b5de?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
-        'Repositories' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/$ProjectId"
-        'ServiceConnections' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/49b48001-ca20-4adc-8111-5b60c903a50c?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/$ProjectId"
-        'VariableGroups' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/b7e84409-6553-448a-bbb2-af228e07cbeb?includeExtendedInfo=true&api-version=7.2-preview.1&token=Library/$ProjectId"
+        'Environments' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsEnvironmentSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/$ProjectId"
+        'Pipelines' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsBuildSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
+        'ReleaseDefinitions' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsReleaseManagementSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
+        'Repositories' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsGitRepositoriesSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/$ProjectId"
+        'ServiceConnections' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsServiceEndpointsSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/$ProjectId"
+        'VariableGroups' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsLibrarySecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=Library/$ProjectId"
     }
     $acls = @{}
     try {
@@ -258,7 +271,7 @@ function Get-AzDevOpsProjectAcls {
         }
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     return $acls
 }
@@ -322,7 +335,7 @@ function Export-AzDevOpsProject {
         } | ConvertTo-Json -Depth 100
     }
     catch {
-        throw $_.Exception.Message
+        throw (Get-AzDevOpsSanitizedErrorMessage)
     }
     if($PassThru) {
         Write-Output $response

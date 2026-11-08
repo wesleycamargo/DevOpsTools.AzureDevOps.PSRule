@@ -32,3 +32,7 @@ Remove the Project Valid Users group from the service connection acl.
 ## ASSESSMENT
 
 Independent assessment risk: **High** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+This rule evaluates direct grants of sensitive namespace-specific permission bits to Project Valid Users. It requires a referenced projectValidUsersPolicies entry with SensitiveMask and optional ApprovedMask. Missing policy or incomplete ACL evidence results in Unknown, not a pass or fail. It is not a substitute for complete effective-permission analysis, including nested groups and administrative bypass.

@@ -30,3 +30,7 @@ Consider enabling the policy to require comments for pull requests to be resolve
 ## ASSESSMENT
 
 Independent assessment risk: **Medium** (severity policy `1.1.0`). The legacy help severity above and PSRule level Warning remain compatibility metadata; they are not the four-grade assessment scale.
+
+## EVIDENCE (rule-set 2026.11.06.1)
+
+A matching policy must be enabled and blocking. Its type and relevant settings must also satisfy the rule. A present but disabled or advisory-only policy does not protect a branch.
