@@ -85,6 +85,8 @@ Install-Module -Name DevOpsTools.AzureDevOps.PSRule -Scope CurrentUser
 ```
 
 For the version published from this repository, use the [GitHub release installation instructions](docs/releases.md).
+For a self-contained Azure DevOps YAML example that installs the pinned Gallery
+module and publishes assessment reports, see [Azure Pipelines](docs/azure-pipelines.md).
 
 ### Assessment output
 
