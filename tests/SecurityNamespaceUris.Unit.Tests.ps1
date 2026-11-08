@@ -42,4 +42,12 @@ Describe 'Security namespace URI construction' -Tag Unit {
             $global:capturedAclUris | Should -Contain $expectedUri
         }
     }
+
+    It 'delimits scoped namespace variables before ACL query strings' {
+        $functionsPath = Join-Path $PSScriptRoot '../src/DevOpsTools.AzureDevOps.PSRule/Functions'
+        $unscopedNamespaceUris = Get-ChildItem -LiteralPath $functionsPath -Filter '*.ps1' -File |
+            Select-String -Pattern '\$script:AzureDevOps\w+SecurityNamespaceId\?'
+
+        $unscopedNamespaceUris | Should -BeNullOrEmpty
+    }
 }
