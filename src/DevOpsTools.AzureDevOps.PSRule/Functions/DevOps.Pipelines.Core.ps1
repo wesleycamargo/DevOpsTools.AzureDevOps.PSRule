@@ -95,7 +95,7 @@ function Get-AzDevOpsPipelineAcls {
         return $null
     } else {
         $header = $script:connection.GetHeader()
-        $uri = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsBuildSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=$($ProjectId)/$($PipelineId)"
+        $uri = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsBuildSecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=$($ProjectId)/$($PipelineId)"
         Write-Verbose "Getting pipeline ACLs from $uri"
         Write-Verbose "PROJECTID: $ProjectId"
         try {

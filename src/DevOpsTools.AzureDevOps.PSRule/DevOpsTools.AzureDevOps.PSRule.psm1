@@ -274,7 +274,7 @@ Function Export-AzDevOpsOrganizationRuleData {
     param (
         [Parameter(Mandatory)]
         [string] $Organization,
-        [Parameter(Mandatory)]
+        [Parameter()]
         [string] $OrganizationId,
         [Parameter()]
         [ValidateNotNullOrEmpty()]
@@ -290,6 +290,9 @@ Function Export-AzDevOpsOrganizationRuleData {
     )
     if ($null -eq $script:connection) {
         throw 'Not connected to Azure DevOps. Run Connect-AzDevOps first.'
+    }
+    if (-not $OrganizationId) {
+        $OrganizationId = $script:connection.OrganizationId
     }
     $paths = Resolve-AzDevOpsAssessmentExportPaths -OutputPath $OutputPath -CompletenessReportPath $CompletenessReportPath -KeepResults:$KeepResults
     $OutputPath = $paths.OutputPath

@@ -249,12 +249,12 @@ function Get-AzDevOpsProjectAcls {
     $Organization = $script:connection.Organization
     $header = $script:connection.GetHeader()
     $aclInfo = @{
-        'Environments' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsEnvironmentSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/$ProjectId"
-        'Pipelines' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsBuildSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
-        'ReleaseDefinitions' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsReleaseManagementSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
-        'Repositories' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsGitRepositoriesSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/$ProjectId"
-        'ServiceConnections' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsServiceEndpointsSecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/$ProjectId"
-        'VariableGroups' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$script:AzureDevOpsLibrarySecurityNamespaceId?includeExtendedInfo=true&api-version=7.2-preview.1&token=Library/$ProjectId"
+        'Environments' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsEnvironmentSecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=Environments/$ProjectId"
+        'Pipelines' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsBuildSecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
+        'ReleaseDefinitions' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsReleaseManagementSecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=$ProjectId"
+        'Repositories' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsGitRepositoriesSecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=repoV2/$ProjectId"
+        'ServiceConnections' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsServiceEndpointsSecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=endpoints/$ProjectId"
+        'VariableGroups' = "https://dev.azure.com/$Organization/_apis/accesscontrollists/$($script:AzureDevOpsLibrarySecurityNamespaceId)?includeExtendedInfo=true&api-version=7.2-preview.1&token=Library/$ProjectId"
     }
     $acls = @{}
     try {

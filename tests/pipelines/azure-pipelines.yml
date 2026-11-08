@@ -1,0 +1,146 @@
+trigger:
+  branches:
+    include:
+      - feature/*
+pr: none
+
+parameters:
+  - name: azureResourceManagerServiceConnection
+    displayName: Azure Resource Manager service connection
+    type: string
+    default: psrule-azure
+  - name: moduleRef
+    displayName: DevOpsTools module branch
+    type: string
+    default: ''
+
+variables:
+  - name: PSRULE_VERSION
+    value: "2.9.0"
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  # Clone the requested module branch so unpublished feature changes can be assessed.
+  - checkout: none
+
+  - task: PowerShell@2
+    displayName: Install PSRule and fetch module source
+    inputs:
+      targetType: inline
+      pwsh: true
+      script: |
+        $ErrorActionPreference = 'Stop'
+
+        $installedModule = Get-Module -ListAvailable -Name PSRule |
+            Where-Object { $_.Version -eq [version]$env:PSRULE_VERSION } |
+            Select-Object -First 1
+        if ($null -eq $installedModule) {
+            Install-Module -Name PSRule `
+                -RequiredVersion $env:PSRULE_VERSION `
+                -Repository PSGallery `
+                -Scope CurrentUser `
+                -Force `
+                -SkipPublisherCheck
+        }
+
+        $moduleRef = if ($env:MODULE_REF) { $env:MODULE_REF } else { $env:BUILD_SOURCEBRANCH -replace '^refs/heads/' }
+        if (-not $moduleRef) {
+            throw 'No module branch was supplied and Build.SourceBranch was unavailable.'
+        }
+
+        $moduleRoot = Join-Path $env:AGENT_TEMPDIRECTORY 'DevOpsTools.AzureDevOps.PSRule'
+        git clone --depth 1 --branch $moduleRef `
+            https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.PSRule.git `
+            $moduleRoot
+
+        $moduleManifest = Join-Path $moduleRoot 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1'
+        if (-not (Test-Path -LiteralPath $moduleManifest -PathType Leaf)) {
+            throw "The module manifest was not found after cloning '$moduleRef'."
+        }
+    env:
+      PSRULE_VERSION: $(PSRULE_VERSION)
+      MODULE_REF: ${{ parameters.moduleRef }}
+      BUILD_SOURCEBRANCH: $(Build.SourceBranch)
+
+  - task: AzureCLI@3
+    displayName: Export and assess Azure DevOps organization
+    inputs:
+      connectionType: azureRM
+      azureSubscription: ${{ parameters.azureResourceManagerServiceConnection }}
+      addSpnToEnvironment: true
+      scriptType: pscore
+      scriptLocation: inlineScript
+      inlineScript: |
+        $ErrorActionPreference = 'Stop'
+        $exportPath = Join-Path $env:AGENT_TEMPDIRECTORY ('psrule-export-' + [guid]::NewGuid().ToString())
+        $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif'
+        $completenessPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json'
+
+        New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
+        New-Item -Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY -ItemType Directory -Force | Out-Null
+
+        $moduleManifest = Join-Path `
+            $env:AGENT_TEMPDIRECTORY `
+            'DevOpsTools.AzureDevOps.PSRule/src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1'
+        Import-Module -Name $moduleManifest -Force
+
+        $collectionUri = [uri]$env:SYSTEM_COLLECTIONURI
+        if ($collectionUri.Host -ne 'dev.azure.com' -or $collectionUri.Segments.Count -lt 2) {
+            throw "System.CollectionUri must be a dev.azure.com organization URI; received '$collectionUri'."
+        }
+        $organization = $collectionUri.Segments[1].Trim('/')
+        if (-not $organization) {
+            throw "System.CollectionUri did not contain an Azure DevOps organization name."
+        }
+        Write-Host "Assessing Azure DevOps organization '$organization' from System.CollectionUri."
+
+        if (-not $env:tenantId -or -not $env:servicePrincipalId -or -not $env:servicePrincipalKey) {
+            throw 'AzureCLI@3 did not expose service-connection credentials.'
+        }
+        Connect-AzDevOps `
+            -Organization $organization `
+            -TenantId $env:tenantId `
+            -ClientId $env:servicePrincipalId `
+            -ClientSecret $env:servicePrincipalKey
+
+        Export-AzDevOpsOrganizationRuleData `
+            -Organization $organization `
+            -OutputPath $exportPath `
+            -CompletenessReportPath $completenessPath `
+            -Strict
+
+        $inputFiles = @(Get-ChildItem -LiteralPath $exportPath -File -Recurse -Filter '*.json' |
+            Select-Object -ExpandProperty FullName)
+        if ($inputFiles.Count -eq 0) {
+            throw 'The organization export produced no JSON input files.'
+        }
+
+        try {
+            Assert-PSRule `
+                -InputPath $inputFiles `
+                -Module DevOpsTools.AzureDevOps.PSRule `
+                -Baseline Baseline.Default `
+                -Style Plain `
+                -OutputPath $reportPath `
+                -OutputFormat Sarif `
+                -Outcome All
+        }
+        catch {
+            if ($_.FullyQualifiedErrorId -eq 'PSRule.Fail,Assert-PSRule') {
+                Write-Warning 'Assessment completed with noncompliant findings. See the published SARIF report for details.'
+            }
+            else {
+                throw
+            }
+        }
+    env:
+      SYSTEM_COLLECTIONURI: $(System.CollectionUri)
+
+  - task: PublishPipelineArtifact@1
+    displayName: Publish assessment reports
+    condition: always()
+    inputs:
+      targetPath: $(Build.ArtifactStagingDirectory)
+      artifact: psrule-results
