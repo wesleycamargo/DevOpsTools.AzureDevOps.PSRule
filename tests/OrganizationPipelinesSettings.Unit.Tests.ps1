@@ -26,7 +26,7 @@ Describe 'Read-AdoOrganizationPipelinesSettings with an explicit token' -Tag 'Un
         InModuleScope DevOpsTools.AzureDevOps.PSRule {
             Mock Invoke-WebRequest { [pscustomobject]@{ Content = '<html>Sign In</html>'; RawContent = 'Sign In' } }
 
-            { Read-AdoOrganizationPipelinesSettings -Organization fixture-org -AccessToken 'Bearer expired-token' } | Should -Throw '*Failed to retrieve pipeline settings*'
+            { Read-AdoOrganizationPipelinesSettings -Organization fixture-org -AccessToken 'Bearer expired-token' } | Should -Throw 'Azure DevOps operation failed. Details were omitted to protect credentials.'
             Assert-MockCalled Invoke-WebRequest -Times 1 -Exactly
         }
     }

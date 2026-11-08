@@ -5,6 +5,9 @@ BeforeAll {
 Describe 'Versioned collection API contracts' -Tag Unit {
     BeforeEach {
         Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod { [pscustomobject]@{ value = @() } }
+        Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod {
+            [pscustomobject]@{ instanceId = '11111111-1111-1111-1111-111111111111' }
+        } -ParameterFilter { $Uri -like '*/_apis/connectionData?*' }
         Connect-AzDevOps -Organization fixture-org -PAT fixture-token
     }
 
