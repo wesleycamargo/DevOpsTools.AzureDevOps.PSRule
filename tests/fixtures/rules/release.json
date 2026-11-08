@@ -9,6 +9,7 @@
         "environments": [
           {
             "name": "production",
+            "isProduction": true,
             "preDeployApprovals": {
               "approvals": [
                 {
@@ -30,6 +31,7 @@
         "environments": [
           {
             "name": "production",
+            "isProduction": true,
             "preDeployApprovals": {
               "approvals": []
             }
@@ -45,6 +47,7 @@
         "environments": [
           {
             "name": "production",
+            "isProduction": true,
             "preDeployApprovals": {}
           }
         ]

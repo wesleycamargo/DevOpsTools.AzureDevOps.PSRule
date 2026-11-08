@@ -343,6 +343,12 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
                 [pscustomobject]@{ id = 1; name = 'fixture-pipeline'; folder = '\'; _links = @{ web = @{ href = 'https://dev.azure.com/org/project/_build' } }; configuration = @{ type = 'yaml'; repository = @{ type = 'azureReposGit' } } }
             }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsPipelineYaml { "trigger: none`nsteps: []" }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/securitynamespaces/*' } {
+                [pscustomobject]@{ value = @([pscustomobject]@{ namespaceId = ([uri]$Uri).AbsolutePath.Split('/')[-1] }) }
+            }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/accesscontrollists/*' } {
+                [pscustomobject]@{ count = 0; value = @() }
+            }
 
             $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -CompletenessReportPath $reportPath -Strict)
 
@@ -350,6 +356,9 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             $yaml.Count | Should -Be 1
             $yaml[0] | Should -Match 'ObjectType: Azure.DevOps.Pipelines.PipelineYaml'
             @($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Pipeline').Count | Should -Be 1
+            $pipeline = $targets | Where-Object ObjectType -EQ 'Azure.DevOps.Pipeline'
+            $pipeline.PermissionEvidence.Status | Should -Be 'Complete'
+            $pipeline.PermissionEvidence.ScopeComplete | Should -BeTrue
         }
 
         It 'treats a repository without a default branch as collected data' {
@@ -359,10 +368,19 @@ Describe 'Assessment collection completeness' -Tag 'Unit' {
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepositoryGhas { @{ isEnabled = $false } }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepositoryPipelinePermissions { @{} }
             Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsRepositoryAcls { @{} }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/securitynamespaces/*' } {
+                [pscustomobject]@{ value = @([pscustomobject]@{ namespaceId = ([uri]$Uri).AbsolutePath.Split('/')[-1] }) }
+            }
+            Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Invoke-RestMethod -ParameterFilter { $Uri -like '*/_apis/accesscontrollists/*' } {
+                [pscustomobject]@{ count = 0; value = @() }
+            }
 
             $targets = @(Export-AzDevOpsRuleData -Project fixture-project -OutputPath $outputPath -PassThru -Strict -CompletenessReportPath $reportPath)
 
             @($targets | Where-Object ObjectType -EQ 'Azure.DevOps.Repo').Count | Should -Be 1
+            $repo = $targets | Where-Object ObjectType -EQ 'Azure.DevOps.Repo'
+            $repo.PermissionEvidence.Status | Should -Be 'Complete'
+            $repo.PermissionEvidence.ScopeComplete | Should -BeTrue
             (Get-Content -Raw $reportPath | ConvertFrom-Json).Status | Should -Be 'Complete'
         }
 
