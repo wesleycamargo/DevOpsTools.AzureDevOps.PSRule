@@ -12,7 +12,7 @@ parameters:
   - name: moduleRef
     displayName: DevOpsTools module branch
     type: string
-    default: main
+    default: ''
 
 variables:
   - name: PSRULE_VERSION
@@ -45,18 +45,24 @@ steps:
                 -SkipPublisherCheck
         }
 
+        $moduleRef = if ($env:MODULE_REF) { $env:MODULE_REF } else { $env:BUILD_SOURCEBRANCH -replace '^refs/heads/' }
+        if (-not $moduleRef) {
+            throw 'No module branch was supplied and Build.SourceBranch was unavailable.'
+        }
+
         $moduleRoot = Join-Path $env:AGENT_TEMPDIRECTORY 'DevOpsTools.AzureDevOps.PSRule'
-        git clone --depth 1 --branch $env:MODULE_REF `
+        git clone --depth 1 --branch $moduleRef `
             https://github.com/wesleycamargo/DevOpsTools.AzureDevOps.PSRule.git `
             $moduleRoot
 
         $moduleManifest = Join-Path $moduleRoot 'src/DevOpsTools.AzureDevOps.PSRule/DevOpsTools.AzureDevOps.PSRule.psd1'
         if (-not (Test-Path -LiteralPath $moduleManifest -PathType Leaf)) {
-            throw "The module manifest was not found after cloning '$env:MODULE_REF'."
+            throw "The module manifest was not found after cloning '$moduleRef'."
         }
     env:
       PSRULE_VERSION: $(PSRULE_VERSION)
       MODULE_REF: ${{ parameters.moduleRef }}
+      BUILD_SOURCEBRANCH: $(Build.SourceBranch)
 
   - task: AzureCLI@3
     displayName: Export and assess Azure DevOps organization
