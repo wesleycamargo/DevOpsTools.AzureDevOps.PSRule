@@ -1,11 +1,9 @@
 # Production classification is shared between environment, service-connection and release rules.
-# Explicit configuration is authoritative for a target type or release definition.
+# Explicit configuration is authoritative. Names are not production evidence.
 function Test-AzDevOpsProductionName {
     [CmdletBinding()]
     param([AllowNull()][string]$Name)
-    if ([string]::IsNullOrWhiteSpace($Name)) { return $false }
-    # Never assume 'main' or 'master' is a production environment.
-    return $Name -match '(?i)(^|[._\s-])(production|prod|prd|live)($|[._\s-])'
+    return $false
 }
 
 function Test-AzDevOpsProductionTarget {
@@ -21,30 +19,57 @@ function Test-AzDevOpsProductionTarget {
             $null -ne $configured.PSObject.Properties[$type]
         }
         if ($isConfigured) {
-            return $name -cin @($configured.($type))
+            $expected = @($configured.($type))
+            return [pscustomobject]@{ Outcome = if ($name -cin $expected) { 'Production' } else { 'NonProduction' }; ReasonCode = 'ConfiguredProductionScope' }
         }
     }
-    return Test-AzDevOpsProductionName -Name $TargetObject.name
+    foreach ($propertyName in 'isProduction', 'production') {
+        $property = $TargetObject.PSObject.Properties[$propertyName]
+        if ($null -ne $property -and $property.Value -is [bool]) {
+            return [pscustomobject]@{ Outcome = if ($property.Value) { 'Production' } else { 'NonProduction' }; ReasonCode = 'ApiProductionClassification' }
+        }
+    }
+    return [pscustomobject]@{ Outcome = 'Unknown'; ReasonCode = 'ProductionClassificationUnavailable' }
+}
+
+function Get-AzDevOpsProductionReleaseClassification {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][object]$TargetObject, [object]$Configuration)
+    $release = [string]$TargetObject.ObjectName
+    $configured = $Configuration.productionReleaseEnvironments
+    $isConfigured = if ($null -eq $configured) { $false } elseif ($configured -is [System.Collections.IDictionary]) {
+        $configured.Contains($release)
+    } else {
+        $null -ne $configured.PSObject.Properties[$release]
+    }
+    if ($isConfigured) {
+        $expected = @($configured.($release))
+        $matches = @($TargetObject.environments | Where-Object { $_.name -cin $expected })
+        return [pscustomobject]@{ Outcome = if ($matches.Count -gt 0) { 'Production' } else { 'NonProduction' }; ReasonCode = 'ConfiguredProductionScope' }
+    }
+    $environments = @($TargetObject.environments)
+    if ($environments.Count -eq 0) { return [pscustomobject]@{ Outcome = 'Unknown'; ReasonCode = 'ProductionClassificationUnavailable' } }
+    $values = @($environments | ForEach-Object {
+        $property = $_.PSObject.Properties['isProduction']
+        if ($null -ne $property -and $property.Value -is [bool]) { $property.Value } else { $null }
+    })
+    if ($values -contains $true) { return [pscustomobject]@{ Outcome = 'Production'; ReasonCode = 'ApiProductionClassification' } }
+    if (@($values | Where-Object { $null -eq $_ }).Count -eq 0) { return [pscustomobject]@{ Outcome = 'NonProduction'; ReasonCode = 'ApiProductionClassification' } }
+    return [pscustomobject]@{ Outcome = 'Unknown'; ReasonCode = 'ProductionClassificationUnavailable' }
 }
 
 function Get-AzDevOpsProductionReleaseEnvironments {
     [CmdletBinding()]
     param([Parameter(Mandatory)][object]$TargetObject, [object]$Configuration)
+    $classification = Get-AzDevOpsProductionReleaseClassification -TargetObject $TargetObject -Configuration $Configuration
+    if ($classification.Outcome -ne 'Production') { return @() }
     $release = [string]$TargetObject.ObjectName
     $configured = $Configuration.productionReleaseEnvironments
-    $isConfigured = $false
-    if ($null -ne $configured) {
-        $isConfigured = if ($configured -is [System.Collections.IDictionary]) {
-            $configured.Contains($release)
-        } else {
-            $null -ne $configured.PSObject.Properties[$release]
-        }
+    if ($null -ne $configured -and (($configured -is [System.Collections.IDictionary] -and $configured.Contains($release)) -or
+        ($configured -isnot [System.Collections.IDictionary] -and $null -ne $configured.PSObject.Properties[$release]))) {
+        return @($TargetObject.environments | Where-Object { $_.name -cin @($configured.($release)) })
     }
-    if ($isConfigured) {
-        $expected = @($configured.($release))
-        return @($TargetObject.environments | Where-Object { $_.name -cin $expected })
-    }
-    return @($TargetObject.environments | Where-Object { Test-AzDevOpsProductionName -Name $_.name })
+    return @($TargetObject.environments | Where-Object { $_.PSObject.Properties['isProduction'].Value -eq $true })
 }
 
 function Get-AzDevOpsProductionBranchAssessment {

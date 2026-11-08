@@ -24,7 +24,7 @@ Describe 'Explicit production target classification' -Tag 'Unit' {
     It 'uses an exact configured mapping in preference to name matching' {
         $targets = @(
             [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'org.project.staging'; name = 'staging'; Checks = @() }
-            [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'org.project.production'; name = 'production'; Checks = @() }
+            [pscustomobject]@{ ObjectType = 'Azure.DevOps.Pipelines.Environment'; ObjectName = 'org.project.production'; name = 'production'; isProduction = $true; Checks = @() }
             [pscustomobject]@{ ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = 'org.project.service'; name = 'service'; Checks = @() }
         )
         $option = New-PSRuleOption -Configuration @{
@@ -48,7 +48,7 @@ Describe 'Explicit production target classification' -Tag 'Unit' {
             ObjectType = 'Azure.DevOps.Pipelines.Releases.Definition'
             ObjectName = 'org.project.release'
             environments = @(
-                @{ name = 'production'; preDeployApprovals = @{ approvals = @(@{ approver = @{ displayName = 'synthetic' } }); approvalOptions = @{ releaseCreatorCanBeApprover = $false } } }
+                @{ name = 'production'; isProduction = $true; preDeployApprovals = @{ approvals = @(@{ approver = @{ displayName = 'synthetic' } }); approvalOptions = @{ releaseCreatorCanBeApprover = $false } } }
                 @{ name = 'acceptance'; preDeployApprovals = @{ approvals = @(); approvalOptions = @{ releaseCreatorCanBeApprover = $true } } }
             )
         }
@@ -79,7 +79,7 @@ Describe 'Production branch restriction evidence' -Tag 'Unit' {
             $target = [pscustomobject]@{
                 ObjectType = $Type
                 ObjectName = 'fixture.production'
-                name = 'production'
+                name = 'production'; isProduction = $true
                 Checks = @(@{
                     isDisabled = $false
                     type = @{ name = 'Branch control' }
@@ -103,7 +103,7 @@ Describe 'Production branch restriction evidence' -Tag 'Unit' {
         $target = [pscustomobject]@{
             ObjectType = 'Azure.DevOps.Pipelines.Environment'
             ObjectName = 'fixture.production'
-            name = 'production'
+            name = 'production'; isProduction = $true
             Checks = @($check)
         }
         $rule = 'Azure.DevOps.Pipelines.Environments.ProductionBranchLimit'
@@ -141,7 +141,7 @@ Describe 'Production branch restriction evidence' -Tag 'Unit' {
         @{ Type = 'Azure.DevOps.ServiceConnection'; Rule = 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' }
     ) {
         $target = [pscustomobject]@{
-            ObjectType = $Type; ObjectName = 'fixture.production'; name = 'production'
+            ObjectType = $Type; ObjectName = 'fixture.production'; name = 'production'; isProduction = $true
             Checks = @(
                 @{ isDisabled = $false; type = @{ name = 'Branch control' }; settings = @{ inputs = @{ allowedBranches = 'refs/heads/main' } } }
             )
@@ -169,7 +169,7 @@ Describe 'Production branch restriction evidence' -Tag 'Unit' {
 
     It 'rejects a branch policy that is not a branch-control check' {
         $target = [pscustomobject]@{
-            ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = 'fixture.production'; name = 'production'
+            ObjectType = 'Azure.DevOps.ServiceConnection'; ObjectName = 'fixture.production'; name = 'production'; isProduction = $true
             Checks = @(@{ type = @{ name = 'Approval' }; settings = @{ approvers = @(@{ id = 'synthetic' }); inputs = @{ allowedBranches = 'refs/heads/main' } } })
         }
         $rule = 'Azure.DevOps.ServiceConnections.ProductionBranchLimit'

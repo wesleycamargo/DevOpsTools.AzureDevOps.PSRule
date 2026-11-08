@@ -4,7 +4,7 @@
 Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
     -Ref 'ADO-SC-001' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -If { (Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration) -and (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
+    -If { ((Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration).Outcome -eq 'Production') -and (Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA' } `
     -Level Warning {
         $assessment = Get-AzDevOpsProductionGateAssessment -TargetObject $TargetObject
@@ -17,7 +17,7 @@ Rule 'Azure.DevOps.ServiceConnections.ProductionCheckProtection' `
 Rule 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' `
     -Ref 'ADO-SC-002' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -If { (Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration) -and (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
+    -If { ((Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration).Outcome -eq 'Production') -and (Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval').Outcome -in @('Pass', 'Fail') } `
     -Tag @{ release = 'GA'; assessment = 'Policy' } `
     -Level Warning {
         $assessment = Get-AzDevOpsPolicyAssessment -TargetObject $TargetObject -RuleId 'Azure.DevOps.ServiceConnections.ProductionHumanApproval' -Policy $Configuration.assessmentPolicies.'Azure.DevOps.ServiceConnections.ProductionHumanApproval'
@@ -73,7 +73,7 @@ Rule 'Azure.DevOps.ServiceConnections.WorkloadIdentityFederation' `
 Rule 'Azure.DevOps.ServiceConnections.ProductionBranchLimit' `
     -Ref 'ADO-SC-006' `
     -Type 'Azure.DevOps.ServiceConnection' `
-    -If { (Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration) -and (Get-AzDevOpsProductionBranchAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
+    -If { ((Test-AzDevOpsProductionTarget -TargetObject $TargetObject -Configuration $Configuration).Outcome -eq 'Production') -and (Get-AzDevOpsProductionBranchAssessment -TargetObject $TargetObject).Outcome -ne 'Unknown' } `
     -Tag @{ release = 'GA'} `
     -Level Warning {
         $assessment = Get-AzDevOpsProductionBranchAssessment -TargetObject $TargetObject

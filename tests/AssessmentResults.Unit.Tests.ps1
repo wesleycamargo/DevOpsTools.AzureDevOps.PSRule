@@ -8,7 +8,7 @@ BeforeAll {
 Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
     It 'versions the corrected review evidence semantics separately from severity policy' {
         $catalog = Get-AzDevOpsAssessmentCatalog
-        $catalog.RuleSetVersion | Should -Be '2026.11.07.1'
+        $catalog.RuleSetVersion | Should -Be '2026.11.08.1'
         $catalog.SeverityPolicyVersion | Should -Be '1.1.0'
         $raw = @(New-FixtureResult 'Azure.DevOps.Repos.Branch.HasBranchPolicy' 'Azure.DevOps.Repo.Branch')
         $current = ConvertTo-AzDevOpsAssessment $raw @() 'fixture/project'
@@ -40,9 +40,7 @@ Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
                     "$Prefix.ProductionHumanApproval" = @{ Reference = 'required-human-review-v1' }
                 }
             }
-            if ($scenario.Explicit) {
-                $configuration.productionTargets = @{ $Type = @() }
-            }
+            $configuration.productionTargets = @{ $Type = @() }
             $rules = @(
                 "$Prefix.ProductionCheckProtection"
                 "$Prefix.ProductionHumanApproval"
@@ -115,7 +113,7 @@ Describe 'Assessment catalog and risk projection' -Tag 'Unit' {
         $report.Findings[0].Outcome | Should -Be 'Unknown'
         $report.Findings[0].ReasonCode | Should -Be 'OriginalTargetUnavailable'
 
-        $target.name = 'production'
+        $target.name = 'production'; $target | Add-Member -MemberType NoteProperty -Name isProduction -Value $true
         $report = ConvertTo-AzDevOpsAssessment @($raw) @($target) 'fixture/project'
         $report.Findings[0].Outcome | Should -Be 'Unknown'
         $report.Findings[0].ReasonCode | Should -Be 'RawDiagnosticNotEvaluated'

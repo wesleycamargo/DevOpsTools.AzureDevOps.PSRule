@@ -1,6 +1,6 @@
 {
   "SchemaVersion": 1,
-  "RuleSetVersion": "2026.11.07.1",
+  "RuleSetVersion": "2026.11.08.1",
   "SeverityPolicyVersion": "1.1.0",
   "ClassificationProvenance": "User-supplied 117-rule proposal, matched against source inventory and legacy help; docs/assessment/proposed-rule-risk-policy.json SHA256 4baa1eeaf4f133b0a936d3322f2ae54d09405eb0c263cce0ddf19e7ffdec4123. Runtime applicability and migrated permission controls retain their implemented semantics.",
   "RiskWeights": {
