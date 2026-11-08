@@ -27,6 +27,7 @@ Describe 'Azure DevOps assessment pipeline authentication' -Tag 'Unit' {
 
         $pipeline | Should -Not -Match '(?m)^\s*continueOnError:\s*true\s*$'
         $pipeline | Should -Not -Match '-As\s+Detail'
+        $pipeline | Should -Match '-Style\s+Plain'
         $pipeline | Should -Match 'if \(\$_.FullyQualifiedErrorId -eq ''PSRule\.Fail,Assert-PSRule''\)'
         $pipeline | Should -Match '(?m)^\s*throw\s*$'
     }

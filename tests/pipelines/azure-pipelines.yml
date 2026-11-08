@@ -122,6 +122,7 @@ steps:
                 -InputPath $inputFiles `
                 -Module DevOpsTools.AzureDevOps.PSRule `
                 -Baseline Baseline.Default `
+                -Style Plain `
                 -OutputPath $reportPath `
                 -OutputFormat Sarif `
                 -Outcome All
