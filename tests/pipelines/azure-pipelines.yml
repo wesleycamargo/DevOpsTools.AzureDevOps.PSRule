@@ -64,6 +64,7 @@ steps:
     inputs:
       connectionType: azureRM
       azureSubscription: ${{ parameters.azureResourceManagerServiceConnection }}
+      addSpnToEnvironment: true
       scriptType: pscore
       scriptLocation: inlineScript
       inlineScript: |
@@ -90,30 +91,17 @@ steps:
         }
         Write-Host "Assessing Azure DevOps organization '$organization' from System.CollectionUri."
 
-        $accessToken = az account get-access-token `
-            --resource 499b84ac-1321-427f-aa17-267ca6975798 `
-            --query accessToken `
-            --output tsv
-        if (-not $accessToken) {
-            throw 'AzureCLI@3 did not return an Azure DevOps access token from the service connection.'
+        if (-not $env:tenantId -or -not $env:servicePrincipalId -or -not $env:servicePrincipalKey) {
+            throw 'AzureCLI@3 did not expose service-connection credentials.'
         }
-
-        $connectionData = Invoke-RestMethod `
-            -Uri "$($collectionUri.AbsoluteUri)_apis/connectionData" `
-            -Headers @{ Authorization = "Bearer $accessToken" }
-        if (-not $connectionData.instanceId) {
-            throw 'Azure DevOps did not return an organization identity.'
-        }
-
-        $organizationId = [guid]$connectionData.instanceId
         Connect-AzDevOps `
             -Organization $organization `
-            -OrganizationId $organizationId `
-            -AccessToken $accessToken
+            -TenantId $env:tenantId `
+            -ClientId $env:servicePrincipalId `
+            -ClientSecret $env:servicePrincipalKey
 
         Export-AzDevOpsOrganizationRuleData `
             -Organization $organization `
-            -OrganizationId $organizationId `
             -OutputPath $exportPath `
             -CompletenessReportPath $completenessPath `
             -Strict

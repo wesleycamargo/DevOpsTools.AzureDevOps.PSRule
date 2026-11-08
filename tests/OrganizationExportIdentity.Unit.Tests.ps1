@@ -36,6 +36,20 @@ Describe 'Organization export identity and diagnostics' -Tag 'Unit' {
         }
     }
 
+    It 'uses the connected organization ID when organization export omits it' {
+        InModuleScope DevOpsTools.AzureDevOps.PSRule {
+            Mock Get-AzDevOpsProject { @() }
+            Mock Invoke-AzDevOpsOrganizationExport {
+                param ($OrganizationId)
+                $OrganizationId | Should -Be '5e433049-1396-4a9d-80b2-33dc2f1e98af'
+            }
+
+            Export-AzDevOpsOrganizationRuleData -Organization 'test-org' -OutputPath $TestDrive
+
+            Assert-MockCalled Invoke-AzDevOpsOrganizationExport -Times 1 -Exactly
+        }
+    }
+
     It 'fails clearly if the connection does not have a valid organization GUID' {
         InModuleScope DevOpsTools.AzureDevOps.PSRule {
             $script:connection.OrganizationId = ''
