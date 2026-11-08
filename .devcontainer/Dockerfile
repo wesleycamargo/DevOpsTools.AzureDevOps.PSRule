@@ -29,8 +29,10 @@ RUN curl -fsSL https://packages.microsoft.com/config/debian/13/packages-microsof
     && dpkg -i /tmp/packages-microsoft-prod.deb \
     && rm /tmp/packages-microsoft-prod.deb \
     && apt-get update \
-    && apt-get install -y --no-install-recommends powershell less unzip \
+    && apt-get install -y --no-install-recommends powershell sudo less unzip \
     && rm -rf /var/lib/apt/lists/* \
+    && printf 'hermes ALL=(ALL) NOPASSWD:ALL\n' > /etc/sudoers.d/hermes \
+    && chmod 440 /etc/sudoers.d/hermes \
     && rm -f /usr/share/doc/libxmlsec1-dev/examples/rsakey.pem
 
 ARG OH_MY_POSH_VERSION=31.9.1
@@ -48,6 +50,8 @@ curl -fsSL 'https://gist.githubusercontent.com/wesleycamargo/06b58b472fe0cded2e6
 BASH
 
 ARG TERMINAL_ICONS_VERSION=0.11.0
+ARG AZ_ACCOUNTS_VERSION=4.0.2
+ARG PESTER_VERSION=5.2.2
 # PowerShell writes both ~/.local/share and $XDG_RUNTIME_DIR/.dotnet even
 # without a profile. Isolate root's setup so Claude and PSReadLine can run as hermes.
 RUN install -d -m 700 /root/.cache/powershell-runtime \
@@ -55,6 +59,8 @@ RUN install -d -m 700 /root/.cache/powershell-runtime \
        pwsh -NoLogo -NoProfile -NonInteractive -File /dev/stdin <<'PWSH'
 $ErrorActionPreference = 'Stop'
 Install-Module -Name Terminal-Icons -RequiredVersion $env:TERMINAL_ICONS_VERSION -Force -Scope AllUsers
+Install-Module -Name Az.Accounts -RequiredVersion $env:AZ_ACCOUNTS_VERSION -Force -Scope AllUsers
+Install-Module -Name Pester -RequiredVersion $env:PESTER_VERSION -Force -Scope AllUsers
 @'
 if (-not [Console]::IsInputRedirected) {
     Import-Module Terminal-Icons
@@ -83,21 +89,24 @@ RUN --mount=type=cache,target=/root/.npm \
     npm install --prefix /usr/local -g --no-audit --no-fund "@openai/codex@${CODEX_VERSION}"
 
 ARG CLAUDE_VERSION=2.1.314
-ARG CLAUDE_SHA512=883e7c3d766f342ca4466dd946257fcc93ac7a35c7fc5b4b645b6c16a507c45c41b2d84ec9bfb430835e27c12c35b486f04093b1f8733c867097cc7a3484644a
-RUN --mount=type=cache,target=/root/.npm \
-    curl -fsSL "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${CLAUDE_VERSION}.tgz" -o /tmp/claude-code.tgz \
-    && echo "${CLAUDE_SHA512}  /tmp/claude-code.tgz" | sha512sum --check --strict \
-    && npm install --prefix /usr/local -g --no-audit --no-fund /tmp/claude-code.tgz \
-    && rm /tmp/claude-code.tgz \
-    && install -d -o hermes -g hermes /home/hermes/.local \
+RUN install -d -o hermes -g hermes /home/hermes/.local \
        /home/hermes/.local/bin /home/hermes/.local/share \
+    && curl -fsSL https://claude.ai/install.sh -o /tmp/claude-install.sh \
+    && runuser -u hermes -- bash /tmp/claude-install.sh "$CLAUDE_VERSION" \
+    && rm /tmp/claude-install.sh \
+    && ln -s /home/hermes/.local/bin/claude /usr/local/bin/claude \
     && printf 'model_reasoning_effort = "medium"\n' > /home/hermes/.codex/config.toml \
     && ln -s /home/hermes/.claude/CLAUDE.md /home/hermes/.codex/AGENTS.md \
     && chown -h hermes:hermes /home/hermes/.codex/AGENTS.md /home/hermes/.codex/config.toml
 
 # The wrapper supplies the same runtime environment to Docker exec and shells,
 # including env -i; root invocations drop to hermes before touching user data.
-COPY --chmod=755 hermes.sh /usr/local/bin/hermes
+COPY --chmod=755 hermes_devbox.py /usr/local/lib/hermes_devbox.py
+RUN ln -sf /usr/local/lib/hermes_devbox.py /usr/local/bin/hermes \
+    && ln -sf /usr/local/lib/hermes_devbox.py /usr/local/bin/hermes-entrypoint \
+    && ln -sf /usr/local/lib/hermes_devbox.py /usr/local/bin/hermes-start-services \
+    && ln -sf /usr/local/lib/hermes_devbox.py /usr/local/bin/hermes-webapp-open \
+    && /opt/hermes/.venv/bin/python -m py_compile /usr/local/lib/hermes_devbox.py
 RUN ln -s /opt/hermes/.venv/bin/hermes-acp /usr/local/bin/hermes-acp \
     && ln -s /opt/hermes/.venv/bin/hermes-agent /usr/local/bin/hermes-agent
 
@@ -107,16 +116,9 @@ RUN --network=none timeout 60 runuser -u hermes -- hermes --version </dev/null \
     && timeout 30 runuser -u hermes -- claude --version </dev/null \
     && timeout 30 runuser -u hermes -- codex --version </dev/null \
     && runuser -u hermes -- gh --version \
-    && runuser -u hermes -- pwsh -NoLogo -NoProfile -NonInteractive -Command '$ErrorActionPreference = "Stop"; Import-Module Terminal-Icons; $mutex = [System.Threading.Mutex]::new($false, "HermesPSReadLineSmoke"); $mutex.Dispose()' \
+    && runuser -u hermes -- pwsh -NoLogo -NoProfile -NonInteractive -Command '$ErrorActionPreference = "Stop"; Import-Module Terminal-Icons; Import-Module Az.Accounts; Import-Module Pester; $mutex = [System.Threading.Mutex]::new($false, "HermesPSReadLineSmoke"); $mutex.Dispose()' \
     && node --version
 
 # Keep data/bootstrap preparation and Compose init, not the upstream s6 entrypoint.
-COPY --chmod=755 entrypoint.sh /usr/local/bin/hermes-entrypoint
-COPY --chmod=755 start-services.sh /usr/local/bin/hermes-start-services
-COPY --chmod=755 webapp-open.py /usr/local/bin/hermes-webapp-open
-RUN bash -n /usr/local/bin/hermes-entrypoint \
-    && bash -n /usr/local/bin/hermes-start-services \
-    && sh -n /usr/local/bin/hermes
-
 ENTRYPOINT ["/usr/local/bin/hermes-entrypoint"]
 CMD ["sleep", "infinity"]

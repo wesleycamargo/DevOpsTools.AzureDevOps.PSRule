@@ -4,7 +4,7 @@ services:
     # and publishes it as ai-hermes-devbox-image). No local build step --
     # for an extra local layer, swap this for a `build:` block pointing at a
     # Dockerfile that does `FROM` this public image. Registry login is not required.
-    image: ghcr.io/wesleycamargo/devcontainer-template/ai-hermes-devbox-image@sha256:520757f0754865308bd4af62ff8c66581ff566008184bacae2a7451d7445dd42
+    image: ghcr.io/wesleycamargo/devcontainer-template/ai-hermes-devbox-image:latest
     init: true
     # No `command:` override. The image prepares user data and defaults to
     # `sleep infinity` as hermes, keeping the development shell available.
@@ -16,6 +16,16 @@ services:
       # Set HERMES_AUTOSTART_SERVICES=0 for the development shell only.
       HERMES_AUTOSTART_SERVICES: "${HERMES_AUTOSTART_SERVICES:-1}"
       HERMES_AUTOSTART_DASHBOARD: "${HERMES_AUTOSTART_DASHBOARD:-0}"
+      # Optional bootstrap defaults; blank means no requested value.
+      HERMES_MODEL_PROVIDER: "${HERMES_MODEL_PROVIDER:-}"
+      HERMES_DEFAULT_MODEL: "${HERMES_DEFAULT_MODEL:-}"
+      HERMES_MODEL_BASE_URL: "${HERMES_MODEL_BASE_URL:-}"
+      HERMES_TERMINAL_CWD: "${HERMES_TERMINAL_CWD:-}"
+      HERMES_TERMINAL_BACKEND: "${HERMES_TERMINAL_BACKEND:-}"
+      HERMES_TERMINAL_TIMEOUT: "${HERMES_TERMINAL_TIMEOUT:-}"
+      HERMES_WEBAPP_ENABLED: "${HERMES_WEBAPP_ENABLED:-}"
+      HERMES_WEBAPP_HOST: "${HERMES_WEBAPP_HOST:-}"
+      HERMES_WEBAPP_PORT: "${HERMES_WEBAPP_PORT:-}"
     # Optional dashboard (9119) and Webapp (9120) default to container loopback and
     # are not published. VS Code forwards both locally; image users can opt
     # into remote Webapp access separately (see ../README.md).
