@@ -1,10 +1,13 @@
 # Repository architecture
 
-This document describes the module source and assessment contracts on 25 October 2026.
+This document describes the module source and assessment contracts, including the
+module-owned static project report. Older dashboard and ingestion details below
+are retained as legacy context, not as the current report implementation.
 Pipeline definitions describe intended execution. They do not prove that a pipeline, service connection, or Azure resource currently exists.
-The [Project Health integration guide](project-health.md) retains historical live
-validation. The dashboard reporter is now integrated in its repository; source
-integration alone does not establish that a live pipeline definition was updated.
+The [Project assessment HTML guide](project-health.md) describes the reduced
+per-run report and live acceptance gate. The companion workflow is legacy pending
+an accepted cutover; source integration does not establish a live update or
+authorize repository archival.
 
 ## Scope and requirements
 
@@ -18,19 +21,22 @@ The main requirements visible in the implementation are:
 - Record collection gaps separately from rule failures.
 - Provide configurable baselines and localized rule help.
 - Publish assessment evidence in pipeline artifacts.
-- Present a run snapshot in Azure DevOps and historical results in Azure Monitor.
+- Provide a portable project HTML snapshot alongside JSON and SARIF. Historical
+  dashboards and Azure Monitor Workbooks remain legacy companion features.
 
 The source does not define an assessment latency target, throughput target, or service availability objective.
-Assessment duration depends on project count, API calls, agent capacity, and ingestion delay.
+Assessment duration depends on project count, API calls, and agent capacity.
+The static report does not require ingestion.
 
 ## Workspace boundaries
 
-The container workspace is not a Git repository. It contains two independent repositories.
+Report ownership spans this module repository and a separate legacy companion
+repository. The companion is not a dependency of the static HTML implementation.
 
 | Directory | Responsibility |
 | --- | --- |
-| `PSRule.Rules.AzureDevOps/` | PowerShell module, collectors, rules, tests, and module delivery pipelines. |
-| `PSRule.Dashboards.AzureDevOps_/` | Assessment scripts, pipeline reports, Bicep resources, and Azure Monitor Workbooks. |
+| `DevOpsTools.AzureDevOps.PSRule/` | PowerShell module, collectors, rules, tests, delivery pipelines, and the static project HTML report. |
+| `PSRule.Dashboards.AzureDevOps_/` | Legacy three-tab dashboard, assessment scripts, Bicep resources, and Azure Monitor Workbooks; pending accepted live cutover. |
 | Each repository's `.worktrees/` | Isolated development checkouts; these are not production components. |
 | `.agents/` | Shared development workflows. It is not part of the assessment runtime. |
 
@@ -72,11 +78,11 @@ flowchart TB
 
     sarif[("Raw SARIF")]
     assessment[("assessment-results.json")]
-    report["Dashboard repository<br/>Project Health · Readiness · Evolution"]
+    report["Private module renderer<br/>psrule-report.html · project-only"]
     results --> sarif
     projection --> assessment
-    results --> report
-    coverage -. "Coverage limits and confidence" .-> report
+    assessment --> report
+    coverage -. "Complete collection required" .-> report
 
     classDef service fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
     classDef step fill:#eff6ff,stroke:#2563eb,color:#172554
@@ -89,8 +95,13 @@ flowchart TB
 ```
 
 Collection requires Azure DevOps access. Saved targets can be evaluated offline.
-Coverage metadata stays outside rule inputs and informs report confidence; it is
-not a rule target. Report presentation belongs to the dashboard repository.
+Coverage metadata stays outside rule inputs; it is not a rule target. The public
+`Export-AzDevOpsAssessmentRun` accepts optional `HtmlOutputPath` and
+`CollectionStatusPath` parameters. It keeps its existing JSON and return value,
+and invokes the private `Functions/AssessmentHtml.ps1` renderer only when HTML is
+requested with complete collection. Organization-root findings remain in SARIF,
+outside the existing project projection and HTML. No new public renderer or
+assessment schema is introduced.
 
 ### Module loading and authentication
 
@@ -159,15 +170,15 @@ flowchart TB
     subgraph hosted["Assessment jobs · Azure Pipelines · ubuntu-latest"]
         weekly["Module assessment<br/>Manual / Sunday 02:00 UTC<br/>Import checked-out source"]
         strict["Strict collection<br/>Evaluate only with complete evidence"]
-        daily["Dashboard assessment<br/>Manual / daily 06:00 UTC<br/>Install pinned Gallery package"]
+        daily["Legacy dashboard assessment<br/>Pending accepted live cutover<br/>Install pinned Gallery package"]
         partial["Collect and evaluate available inputs<br/>Expose partial coverage explicitly"]
         weekly --> strict
         daily --> partial
     end
     source --> weekly
     gallery -->|"Pinned package version"| daily
-    strict --> moduleEvidence[("psrule-results<br/>Completeness · SARIF · assessment JSON")]
-    partial --> dashboardEvidence[("Reports and raw-export artifacts<br/>Three-tab HTML · Markdown · snapshots")]
+    strict --> moduleEvidence[("psrule-results<br/>Completeness · SARIF · assessment JSON<br/>Static project HTML · collected targets")]
+    partial --> dashboardEvidence[("Legacy reports and raw-export artifacts<br/>Three-tab HTML · Markdown · snapshots")]
 
     classDef source fill:#eef2ff,stroke:#6366f1,color:#1e1b4b
     classDef step fill:#eff6ff,stroke:#2563eb,color:#172554
@@ -179,22 +190,32 @@ flowchart TB
 
 | Entry point | Execution and outputs |
 | --- | --- |
-| Module `pipelines/psrule-assessment.yml` | Microsoft-hosted `Azure Pipelines`, `ubuntu-latest`; manual or Sunday 02:00 UTC. Imports checked-out source, authenticates with the service principal, exports with strict completeness and evaluates `Baseline.Default`. Separate reports are retained with `always()`; incomplete collection stops evaluation. |
-| Dashboard `azure-pipelines/run-assessment.yml` | Microsoft-hosted `Azure Pipelines`, `ubuntu-latest`; manual or daily 06:00 UTC. Installs the pinned Gallery package, evaluates available exports and publishes Project Health, Readiness and Evolution, including collection diagnostics and retained history. |
+| Module `pipelines/psrule-assessment.yml` | Static-report implementation. Microsoft-hosted `Azure Pipelines`, `ubuntu-latest`; manual or Sunday 02:00 UTC. Imports checked-out source, authenticates with the service principal, exports with strict completeness and evaluates `Baseline.Default`. Publishes `outputs/psrule-report.html` beside JSON, collection status, and SARIF in `psrule-results` (or a retained timestamp subdirectory). Publication uses `always()`; incomplete collection stops evaluation and HTML generation. |
+| Legacy dashboard `azure-pipelines/run-assessment.yml` | Companion workflow pending accepted live cutover, not required for static HTML. Its source describes a hosted manual/daily assessment using a pinned Gallery package, available exports, three-tab HTML, and retained history. This is not verification of its live definition or schedule. |
 
-The two assessments are independent entry points. Publication does not trigger
-an assessment automatically. The dashboard's Bicep and workbook publishing
-utilities remain legacy operator paths; the current daily pipeline does not
-provision Azure resources or ingest results into Log Analytics. See the dashboard
-repository's `docs/architecture.md` for its report and artifact contracts.
+The assessments remain independent entry points until a separately authorized
+cutover. Publication does not trigger an assessment automatically. The dashboard's
+Bicep, workbook publishing, and history utilities remain legacy operator paths;
+none is migrated into the static report. Preserve their historical evidence and
+resources until a separate retention and retirement decision.
 
-### Project Health reporting integration
+### Static project reporting and legacy handover
 
-The dashboard repository owns the reporter, templates, effort configuration and
-historical artifact acquisition. This repository supplies collectors, rule
-evaluation and localized remediation help. The three-tab report is integrated into dashboard `main` and is used by
-`run-assessment.yml`. Historical classic-run evidence below remains separate
-from validation of the current source-backed pipeline.
+This repository owns collectors, rule evaluation, localized remediation help,
+assessment JSON, and the minimal HTML renderer. The HTML embeds CSS only: no
+JavaScript, external assets, network dependency, or HTML Reports extension. It
+shows run metadata, four diagnostic outcomes, the existing nullable SecurityScore,
+and Fail/Unknown findings. Evaluated pass rate is Pass / (Pass + Fail), not overall
+compliance or a security score; Unknown and NotApplicable remain explicit.
+
+The legacy companion retains its three-tab reporter, effort configuration,
+templates, and historical artifact acquisition. Those features are intentionally
+not migrated. Accept an authorized real run and the reduced functionality before
+disabling the old workflow or archiving its repository. Neither offline tests nor
+definition numbers prove a live cutover. Resource teardown is separately approved.
+
+The following classic-run account is retained historical evidence, not validation
+of the module-owned HTML or the current live pipeline configuration.
 
 Existing classic definition **17**, revision **15**, generated and published
 **Project Health & Compliance** in report-only run **121**. The job executed this
@@ -203,12 +224,13 @@ module's `fix/assessment-trust` source at
 It retained collection status, SARIF, Markdown, HTML, normalized snapshot and
 history artifacts. Report-only success does not establish Monitor ingestion.
 
-The display uses schema 2.0; stored snapshots/history remain 1.0. Missing coverage,
+The legacy display uses schema 2.0; stored snapshots/history remain 1.0. Missing coverage,
 legacy failures-only evidence and incompatible identities/configurations cannot
 establish improvement. Effort is external reviewed configuration, separate from
 rule severity. Without usable estimates in scope, the UI hides effort-dependent
-content and ranks using measured findings. See the [integration guide](project-health.md)
-for the current report link, definitions, validation and ownership boundaries.
+content and ranks using measured findings. These are legacy dashboard semantics,
+not features of the static project report. See the [HTML guide](project-health.md)
+for the module-owned report contract and acceptance gate.
 
 ## GitHub workflow structure
 
@@ -233,22 +255,23 @@ These records describe observed implementation choices. They do not claim histor
 
 PowerShell matches the existing module, operator scripts, and Pester tests.
 PSRule supplies rule discovery, binding, baselines, and result formats.
-Bicep describes Azure resources and workbook content.
-The standalone HTML report supplies a portable snapshot without a separate report web server.
-Log Analytics stores historical results and supports the workbook queries.
-This document does not propose replacement technologies.
+Bicep describes legacy Azure resources and workbook content; Log Analytics
+supports that legacy history path. The module-owned static HTML supplies a
+portable project snapshot without either system or a separate report web server.
+The ADRs above remain historical records, not promises of feature parity.
 
 ## Security, operation, and failure modes
 
 | Boundary or failure | Effect | Existing control or remaining gap |
 | --- | --- | --- |
-| Insufficient API access | Missing assessment inputs. | The module pipeline rejects incomplete strict collection; the dashboard reports available evidence and explicit gaps. |
-| No usable input or results | A report could imply successful coverage without evidence. | The dashboard publishes collection diagnostics and a partial status for missing evidence; rule execution and report generation errors remain failures. |
+| Insufficient API access | Missing assessment inputs. | The module pipeline rejects incomplete strict collection before projection/HTML. The legacy dashboard has separate partial-coverage behavior. |
+| No usable input or results | A report could imply successful coverage without evidence. | The module pipeline rejects zero rule results; HTML shows explicit empty project/finding states and unavailable rates/scores. Missing evidence is not a pass; engine, projection, and rendering errors remain errors. |
+| Stale current report | An incomplete recollection could appear successful. | Owned-file cleanup includes `psrule-report.html`; incomplete strict collection retains status instead of generating HTML. Retained runs and unrelated files survive. |
 | Legacy Azure ingestion failure | Workbook history can remain absent or partial. | Legacy publisher utilities retry transient failures and verify record counts. The daily dashboard uses retained pipeline artifacts. |
 | Legacy duplicate ingestion | Workbook history can contain duplicate records. | Legacy count checks reject excess records without removing duplicates. The daily dashboard selects compatible run snapshots. |
 | Agent capacity unavailable | Manual and scheduled jobs wait for hosted capacity. | Assessment jobs use `Azure Pipelines` with `ubuntu-latest`; no container listener is required. |
 | Artifact expiration | Run snapshots become unavailable. | Azure DevOps run retention controls artifacts. Operators must retain or download required evidence. |
-| Sensitive assessment data | Target identities and exported configuration can expose organizational information. | Restrict pipeline, artifact, variable-group, and workspace access. The daily dashboard publishes raw exports in a separate artifact. |
+| Sensitive assessment data | Target identities and exported configuration can expose organizational information. | Restrict pipeline, artifact, variable-group, and workspace access. HTML encodes display values and excludes raw payloads/reasons, but the module artifact staging directory includes collected targets. Encoding does not replace access control. |
 | Package or branch drift | Different pipelines can evaluate different module versions. | The module assessment imports checked-out source; the dashboard installs a pinned Gallery package. Record both the source revision and package version. |
 | Legacy workflow drift | Older paths can fail against the current module API. | The GitHub Monitor export call requires review before operational use. Documentation does not fix this code. |
 
