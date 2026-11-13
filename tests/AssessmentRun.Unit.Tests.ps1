@@ -23,7 +23,15 @@ Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
         $null = Assert-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Outcome All -Culture en -OutputPath $sarifPath -OutputFormat Sarif -ResultVariable raw -ErrorAction SilentlyContinue
         $before = Get-Content $sarifPath -Raw
         $details = @(Invoke-PSRule -InputPath ($export.FullName + [IO.Path]::DirectorySeparatorChar) -Module DevOpsTools.AzureDevOps.PSRule -Name $rules -Outcome All -Culture en)
-        $report = Export-AzDevOpsAssessmentRun -Result $details -ExportPath $export.FullName -OutputPath "$TestDrive/assessment.json" -Organization fixture -SourceRevision synthetic-commit
+        $statusPath = Join-Path $TestDrive 'collection-status.json'
+        '{"Status":"Complete"}' | Set-Content -LiteralPath $statusPath
+        $htmlPath = Join-Path $TestDrive 'psrule-report.html'
+        $report = Export-AzDevOpsAssessmentRun -Result $details -ExportPath $export.FullName -OutputPath "$TestDrive/assessment.json" -Organization fixture -SourceRevision synthetic-commit -HtmlOutputPath $htmlPath -CollectionStatusPath $statusPath
+        $html = Get-Content -LiteralPath $htmlPath -Raw
+        $html | Should -Match 'fixture/alpha'
+        $html | Should -Match 'fixture/beta'
+        $html | Should -Match 'Unknown'
+        $html | Should -Not -Match 'private-fixture-payload|syntheticPayloadMustNotBePublished'
         $report.Projects.Count | Should -Be 2
         $report.Projects[0].ScopeId | Should -Not -Be $report.Projects[1].ScopeId
         foreach ($project in $report.Projects) {
@@ -42,6 +50,22 @@ Describe 'Versioned assessment run artifacts' -Tag 'Unit' {
         $report.RuleSetVersion | Should -Be (Get-AzDevOpsAssessmentCatalog).RuleSetVersion
         $report.SeverityPolicyVersion | Should -Be '1.1.0'
         $report.SourceRevision | Should -Be 'synthetic-commit'
+    }
+    It 'keeps HTML opt-in for existing callers' {
+        $export = New-Item -Path "$TestDrive/empty-export" -ItemType Directory
+        $reports = New-Item -Path "$TestDrive/json-only" -ItemType Directory
+        $output = Join-Path $reports.FullName 'assessment-results.json'
+        $report = Export-AzDevOpsAssessmentRun -Result @() -ExportPath $export.FullName -OutputPath $output -Organization fixture -SourceRevision fixture
+        Test-Path -LiteralPath $output | Should -BeTrue
+        @(Get-ChildItem -LiteralPath $reports.FullName -Filter '*.html').Count | Should -Be 0
+        $report.SchemaVersion | Should -Be 1
+    }
+
+    It 'requires collection status before writing optional reports' {
+        $export = New-Item -Path "$TestDrive/prerequisite-export" -ItemType Directory
+        $output = Join-Path $TestDrive 'missing-status.json'
+        { Export-AzDevOpsAssessmentRun -Result @() -ExportPath $export.FullName -OutputPath $output -Organization fixture -SourceRevision fixture -HtmlOutputPath "$TestDrive/missing-status.html" } | Should -Throw '*CollectionStatusPath is required*'
+        Test-Path -LiteralPath $output | Should -BeFalse
     }
 }
 AfterAll { Remove-Module DevOpsTools.AzureDevOps.PSRule -Force }

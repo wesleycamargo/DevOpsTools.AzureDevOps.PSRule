@@ -5,6 +5,12 @@ function Export-AzDevOpsAssessmentRun {
     .DESCRIPTION
     Reuses detailed results with file provenance from the original -Outcome All evaluation.
     Exported target payloads are read locally and never included in the output report.
+    .PARAMETER HtmlOutputPath
+    Optionally write a self-contained project assessment HTML report alongside JSON.
+    Does not change PSRule output formats or include organization-wide SARIF findings.
+    .PARAMETER CollectionStatusPath
+    Collection completeness JSON. Required when HtmlOutputPath is specified.
+    HTML is generated only for complete collection.
     #>
     [CmdletBinding()]
     param(
@@ -14,8 +20,13 @@ function Export-AzDevOpsAssessmentRun {
         [Parameter(Mandatory)][string]$Organization,
         [Parameter(Mandatory)][string]$SourceRevision,
         [string]$Baseline = 'Baseline.Default',
-        [System.Collections.IDictionary]$Configuration = @{}
+        [System.Collections.IDictionary]$Configuration = @{},
+        [string]$HtmlOutputPath,
+        [string]$CollectionStatusPath
     )
+    if ($HtmlOutputPath -and -not $CollectionStatusPath) {
+        throw 'CollectionStatusPath is required when HtmlOutputPath is specified.'
+    }
     $projects = @()
     foreach ($directory in Get-ChildItem -LiteralPath $ExportPath -Directory) {
         $prefix = $directory.FullName + [IO.Path]::DirectorySeparatorChar
@@ -32,6 +43,9 @@ function Export-AzDevOpsAssessmentRun {
         SourceRevision = $SourceRevision; Organization = $Organization; Baseline = $Baseline; Projects = $projects
     }
     $report | ConvertTo-Json -Depth 50 | Set-Content -LiteralPath $OutputPath -Encoding utf8
+    if ($HtmlOutputPath) {
+        Export-AzDevOpsAssessmentHtmlReport -Assessment $report -CollectionStatusPath $CollectionStatusPath -OutputPath $HtmlOutputPath
+    }
     return $report
 }
 Export-ModuleMember -Function Export-AzDevOpsAssessmentRun

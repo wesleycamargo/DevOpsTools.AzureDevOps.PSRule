@@ -48,6 +48,7 @@ Describe 'Assessment module distribution' -Tag Unit {
         $manifest.Guid | Should -Not -Be ([guid]'bb42e16e-b0af-46be-9ac1-51e2f6bb6e8d')
         $archive.Name | Should -Be "$moduleName.$expectedVersion.zip"
         Test-Path (Join-Path (Split-Path $manifestPath) 'LICENSE') | Should -BeTrue
+        Test-Path (Join-Path (Split-Path $manifestPath) 'Functions/AssessmentHtml.ps1') | Should -BeTrue
         Test-Path (Join-Path $installationPath 'PSRule.Rules.AzureDevOps') | Should -BeFalse
         Test-Path (Join-Path $installationPath 'DevOpsTools.AzureDevOps.Assessment') | Should -BeFalse
 
