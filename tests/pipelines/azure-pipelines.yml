@@ -12,7 +12,7 @@ parameters:
   - name: moduleRef
     displayName: DevOpsTools module branch
     type: string
-    default: $(Build.SourceBranchName)
+    default: ''
 
 variables:
   - name: PSRULE_VERSION
@@ -45,7 +45,10 @@ steps:
                 -SkipPublisherCheck
         }
 
-        $moduleRef = if ($env:MODULE_REF) { $env:MODULE_REF } else { $env:BUILD_SOURCEBRANCH -replace '^refs/heads/' }
+        $moduleRef = '${{ parameters.moduleRef }}'
+        if (-not $moduleRef) {
+            $moduleRef = $env:BUILD_SOURCEBRANCH -replace '^refs/heads/'
+        }
         if (-not $moduleRef) {
             throw 'No module branch was supplied and Build.SourceBranch was unavailable.'
         }
@@ -61,7 +64,6 @@ steps:
         }
     env:
       PSRULE_VERSION: $(PSRULE_VERSION)
-      MODULE_REF: ${{ parameters.moduleRef }}
       BUILD_SOURCEBRANCH: $(Build.SourceBranch)
 
   - task: AzureCLI@3
