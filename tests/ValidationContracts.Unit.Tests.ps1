@@ -43,4 +43,20 @@ Describe 'Validation and publishing contracts' -Tag Unit {
         ($steps | Where-Object { $_['name'] -eq 'Build module package' })['run'] | Should -Match 'Build-Module.ps1'
         (Get-Content "$PSScriptRoot/../.github/workflows/publish-on-release.yml" -Raw) | Should -Not -Match 'github.event.release'
     }
+
+    It 'automatically bumps push packages before testing and building without writing to Git' {
+        $publishing['permissions']['contents'] | Should -Be 'read'
+        $publishing['permissions']['pull-requests'] | Should -Be 'read'
+        $steps = @($publishing['jobs']['publish']['steps'])
+        $labels = $steps | Where-Object { $_['name'] -eq 'Resolve pull request version labels' }
+        $labels['if'] | Should -Be "github.event_name == 'push'"
+        $labels['uses'] | Should -Be 'actions/github-script@v7'
+        $bump = $steps | Where-Object { $_['name'] -eq 'Bump module version' }
+        $bump['if'] | Should -Be "github.event_name == 'push'"
+        $bump['env']['PR_LABELS'] | Should -Be '${{ steps.labels.outputs.labels }}'
+        $bump['run'] | Should -Match 'Set-ModuleReleaseVersion.ps1 -PullRequestLabels'
+        $steps.IndexOf($bump) | Should -BeLessThan ($steps.IndexOf(($steps | Where-Object { $_['name'] -eq 'Validate manifest version' })))
+        $steps.IndexOf($bump) | Should -BeLessThan ($steps.IndexOf(($steps | Where-Object { $_['name'] -eq 'Run offline tests' })))
+        $steps.IndexOf($bump) | Should -BeLessThan ($steps.IndexOf(($steps | Where-Object { $_['name'] -eq 'Build module package' })))
+    }
 }

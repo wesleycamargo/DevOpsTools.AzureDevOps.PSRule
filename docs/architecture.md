@@ -136,16 +136,20 @@ Changes to object metadata can affect rule selection, target identity, tests, an
 ## Delivery and assessment pipelines
 
 The module publication workflow runs on pushes to `main` and can also validate
-an explicit version tag manually. It validates the manifest, runs pinned offline
-tests, builds the package and checks the Gallery before publishing a new version.
-An already published manifest version is skipped. Manual publication remains
-controlled by the workflow's `publish` input. Azure Artifacts publication is retired.
+an explicit version tag manually. Push runs bump the runner's manifest from the
+higher of the source and latest stable Gallery versions: minor by default, with
+merged-PR labels `major` and `patch` as overrides; conflicting labels fail.
+It then validates the manifest, runs pinned offline tests, builds the package
+and checks the Gallery before publishing. No source commit or Git tag is created.
+Manual runs retain the tag's declared version and the opt-in `publish` input.
+See [module releases](releases.md) for retry behavior and label rules.
+Azure Artifacts publication is retired.
 
 ```mermaid
 flowchart TB
     source["Module repository<br/>main source and manifest version"]
     subgraph delivery["Package delivery · GitHub Actions"]
-        validate["Validate manifest<br/>Pinned offline tests"]
+        validate["Push: bump version from PR labels<br/>Validate manifest · pinned offline tests"]
         package["Build ZIP and checksum"]
         gallery[("PowerShell Gallery<br/>Publish a new version once")]
         validate --> package --> gallery
@@ -211,7 +215,7 @@ for the current report link, definitions, validation and ownership boundaries.
 | Definition | Trigger | Responsibility |
 | --- | --- | --- |
 | `.github/workflows/module-ci.yml` | Selected source and test paths on PRs to `main` and pushes to `main`. Push filters are narrower than PR filters. | Hosted Ubuntu job using the shared pinned Unit runner, NUnit results, coverage and retained diagnostics. ScriptAnalyzer is disabled. |
-| `.github/workflows/publish-on-release.yml` | Push to `main` or manual version tag. | Validate source and package; automatically publish a new manifest version on main. Manual publishing is opt-in; existing Gallery versions are skipped. |
+| `.github/workflows/publish-on-release.yml` | Push to `main` or manual version tag. | Push: bump the package version (minor default, PR labels override), validate and publish. No Git writeback. Manual tags are not bumped; publication is opt-in and existing Gallery versions are skipped. |
 | `.github/workflows/wiki.yml` | Published release or manual dispatch. | Copy README, English rule help, and top-level Markdown docs. Generate command help with PlatyPS. Commit and push the wiki. |
 | `.github/workflows/psrule-monitor.yml` | Daily at 06:00 UTC or manual dispatch. | Legacy organization export and PSRule.Monitor publication with a shared workspace key. Its export call omits the currently mandatory organization arguments. |
 
