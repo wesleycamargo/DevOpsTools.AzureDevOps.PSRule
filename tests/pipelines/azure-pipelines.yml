@@ -77,7 +77,7 @@ steps:
       inlineScript: |
         $ErrorActionPreference = 'Stop'
         $exportPath = Join-Path $env:AGENT_TEMPDIRECTORY ('psrule-export-' + [guid]::NewGuid().ToString())
-        $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.sarif'
+        $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.md'
         $completenessPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json'
 
         New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
@@ -126,12 +126,12 @@ steps:
                 -Baseline Baseline.Default `
                 -Style Plain `
                 -OutputPath $reportPath `
-                -OutputFormat Sarif `
+                -OutputFormat Markdown `
                 -Outcome All
         }
         catch {
             if ($_.FullyQualifiedErrorId -eq 'PSRule.Fail,Assert-PSRule') {
-                Write-Warning 'Assessment completed with noncompliant findings. See the published SARIF report for details.'
+                Write-Warning 'Assessment completed with noncompliant findings. See the published Markdown report for details.'
             }
             else {
                 throw
