@@ -76,6 +76,7 @@ steps:
         $completenessPath = $paths.CompletenessReportPath
         $reportPath = Join-Path $runDirectory 'psrule-results.sarif'
         $assessmentPath = Join-Path $runDirectory 'assessment-results.json'
+        $htmlPath = Join-Path $runDirectory 'psrule-report.html'
 
         $tokenBody = @{
             grant_type = 'client_credentials'
@@ -141,7 +142,8 @@ steps:
                 -ErrorAction Stop)
             $assessment = Export-AzDevOpsAssessmentRun -Result $assessmentResults -ExportPath $exportPath `
                 -OutputPath $assessmentPath -Organization $env:ADO_ORGANIZATION `
-                -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default
+                -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default `
+                -HtmlOutputPath $htmlPath -CollectionStatusPath $completenessPath
             $failedCount = @($results | Where-Object { $_.Outcome -eq 'Fail' }).Count
 
             Write-Host "PSRule assessment completed with $failedCount failed rule result(s)."

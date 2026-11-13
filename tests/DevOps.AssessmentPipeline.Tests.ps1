@@ -54,8 +54,20 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         }
         Mock Invoke-PSRule { [pscustomobject]@{ RuleName = 'fixture'; Outcome = 'None'; OutcomeReason = 'PreconditionFail' } }
         Mock Export-AzDevOpsAssessmentRun {
-            param ($OutputPath)
-            @{ RuleSetVersion = '2026.10.21.2'; SeverityPolicyVersion = '1.1.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
+            param ($OutputPath, $HtmlOutputPath, $CollectionStatusPath)
+            $report = [pscustomobject]@{
+                SchemaVersion = 1; Organization = 'fixture-org'; SourceRevision = 'synthetic-commit'
+                RuleSetVersion = 'fixture-rules'; SeverityPolicyVersion = 'fixture-severity'
+                Baseline = 'Baseline.Default'; Projects = @()
+            }
+            $report | ConvertTo-Json | Set-Content -LiteralPath $OutputPath
+            if ($HtmlOutputPath) {
+                & (Get-Module DevOpsTools.AzureDevOps.PSRule) {
+                    param($Report, $Status, $Output)
+                    Export-AzDevOpsAssessmentHtmlReport -Assessment $Report -CollectionStatusPath $Status -OutputPath $Output
+                } $report $CollectionStatusPath $HtmlOutputPath
+            }
+            return $report
         }
         Mock Assert-PSRule {
             param ($InputPath, $OutputPath, $ResultVariable)
@@ -94,7 +106,11 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         Test-Path (Join-Path $outputDirectory[0].FullName 'psrule-results.sarif') | Should -BeTrue
         $script:exportPaths[0] | Should -Be (Join-Path $outputDirectory[0].FullName 'targets')
         $publish['inputs']['PathtoPublish'] | Should -Be '$(Build.ArtifactStagingDirectory)'
-        @((Get-ChildItem $outputDirectory[0].FullName).Name | Sort-Object) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif', 'targets')
+        @((Get-ChildItem $outputDirectory[0].FullName).Name | Sort-Object) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-report.html', 'psrule-results.sarif', 'targets')
+        Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter {
+            $HtmlOutputPath -eq (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/psrule-report.html') -and
+            $CollectionStatusPath -eq (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/collection-status.json')
+        }
     }
 
     It 'projects detailed precondition outcomes rather than the assertion result subset' {
@@ -155,6 +171,31 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         { & $assessmentScript } | Should -Throw '*zero rule results*'
     }
 
+    It 'retains HTML before surfacing noncompliant rule results' {
+        Mock Assert-PSRule {
+            param ($OutputPath, $ResultVariable)
+            '{}' | Set-Content -LiteralPath $OutputPath
+            for ($scopeIndex = 1; $scopeIndex -le 8; $scopeIndex++) {
+                $scopedResultVariable = Get-Variable -Scope $scopeIndex | Where-Object Name -EQ $ResultVariable
+                if ($null -ne $scopedResultVariable) {
+                    $scopedResultVariable.Value = @([pscustomobject]@{ Outcome = 'Fail' })
+                    break
+                }
+            }
+            Write-Error 'Fixture noncompliant rule result.' -ErrorId 'PSRule.Fail' -ErrorAction Continue
+        }
+
+        { & $assessmentScript } | Should -Throw '*PSRule reported failures or errors*'
+
+        $output = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs'
+        Test-Path -LiteralPath (Join-Path $output 'psrule-report.html') | Should -BeTrue
+        Test-Path -LiteralPath (Join-Path $output 'assessment-results.json') | Should -BeTrue
+        Test-Path -LiteralPath (Join-Path $output 'psrule-results.sarif') | Should -BeTrue
+        Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly
+        $assessment['continueOnError'] | Should -BeTrue
+        $publish['condition'] | Should -Be 'always()'
+    }
+
     It 'rejects a same-minute repeated retained run without deleting assessment evidence' {
         $env:KEEP_RESULTS = 'true'
         & $assessmentScript
@@ -187,6 +228,17 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
 
     It 'scopes the assessment output lock in a finally block' {
         $assessment['inputs']['script'] | Should -Match '(?s)\$runLock\s*=\s*Initialize-AzDevOpsAssessmentRunDirectory.*finally\s*\{.*Release-AzDevOpsAssessmentRunLock\s+-RunLock\s+\$runLock'
+    }
+
+    It 'does not publish stale HTML after incomplete recollection' {
+        & $assessmentScript
+        $html = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/psrule-report.html'
+        Test-Path -LiteralPath $html | Should -BeTrue
+        $script:collectionStatus = 'Partial'
+        { & $assessmentScript } | Should -Throw '*collection is incomplete*'
+        Test-Path -LiteralPath $html | Should -BeFalse
+        Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly
+        $publish['condition'] | Should -Be 'always()'
     }
 
 }

@@ -47,7 +47,7 @@ function Initialize-AzDevOpsAssessmentRunDirectory {
 
         # Delete only current-run artifacts, never retained history or unrelated files.
         $existing = @(
-            foreach ($name in 'targets', 'collection-status.json', 'rule-results.json', 'psrule-results.sarif', 'assessment-results.json') {
+            foreach ($name in 'targets', 'collection-status.json', 'rule-results.json', 'psrule-results.sarif', 'assessment-results.json', 'psrule-report.html') {
                 $path = Join-Path $RunDirectory $name
                 if (Test-Path -LiteralPath $path) {
                     $item = Get-Item -LiteralPath $path -Force -ErrorAction Stop

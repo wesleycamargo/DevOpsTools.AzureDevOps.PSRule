@@ -206,12 +206,12 @@ Describe 'Project export default output directory' -Tag 'Unit' {
 
     It 'cleans all known current reports but preserves unrelated files' {
         Export-AzDevOpsRuleData -Project fixture-project
-        foreach ($name in 'rule-results.json', 'assessment-results.json', 'psrule-results.sarif', 'notes.txt') {
+        foreach ($name in 'rule-results.json', 'assessment-results.json', 'psrule-results.sarif', 'psrule-report.html', 'notes.txt') {
             'old' | Set-Content (Join-Path './outputs' $name)
         }
         Mock -ModuleName DevOpsTools.AzureDevOps.PSRule Get-AzDevOpsProject {}
         Export-AzDevOpsOrganizationRuleData -Organization fixture-org -OrganizationId '11111111-1111-1111-1111-111111111111'
-        foreach ($name in 'rule-results.json', 'assessment-results.json', 'psrule-results.sarif') {
+        foreach ($name in 'rule-results.json', 'assessment-results.json', 'psrule-results.sarif', 'psrule-report.html') {
             Test-Path (Join-Path './outputs' $name) | Should -BeFalse
         }
         Test-Path './outputs/targets/fixture.json' | Should -BeFalse
