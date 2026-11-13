@@ -12,7 +12,7 @@ parameters:
   - name: moduleRef
     displayName: DevOpsTools module branch
     type: string
-    default: ''
+    default: $(Build.SourceBranchName)
 
 variables:
   - name: PSRULE_VERSION
