@@ -17,7 +17,9 @@ pipeline. It runs manually or every Sunday at 02:00 UTC on `main`.
 JSON and SARIF in the existing `psrule-results` artifact. Download it and open
 `outputs/psrule-report.html` locally, or the corresponding retained timestamp
 subdirectory when `KeepResults` is enabled. The HTML is project-only, with
-embedded CSS and no JavaScript, network dependency, or HTML Reports extension.
+embedded CSS and no JavaScript or network dependency when opened locally.
+`PublishHtmlReport@1` also displays it under **Reports → Project assessment**;
+the run UI requires the BlakYaks **Html Reports** extension in the organization.
 Organization-wide findings remain in SARIF.
 
 See [Project assessment HTML](../docs/project-health.md) for fields, evaluated

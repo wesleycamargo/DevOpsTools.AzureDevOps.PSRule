@@ -5,7 +5,9 @@ The module's [assessment pipeline](../pipelines/psrule-assessment.yml) writes
 The report is one UTF-8 HTML document titled **Azure DevOps project assessment**,
 with embedded CSS and no JavaScript, external assets, network requests, or runtime
 dependencies. No companion dashboard repository, Azure Monitor ingestion, web
-hosting, or HTML Reports extension is required.
+hosting, or HTML Reports extension is required to open the downloaded file.
+The pipelines use `PublishHtmlReport@1` to display it under **Reports → Project
+assessment** in the run UI; install the BlakYaks **Html Reports** extension in the organization.
 
 ## Generate a report
 
@@ -86,9 +88,14 @@ Download the **`psrule-results`** artifact from the assessment run. Open
 The JSON, collection status, and SARIF are beside it in the same run directory,
 not under `targets/`.
 
+The branch-test pipeline in `tests/pipelines/azure-pipelines.yml` publishes
+`psrule-report.html`, `assessment-results.json`, `collection-status.json`, and
+`psrule-results.md` at the artifact root. It retains Markdown instead of SARIF.
+
 Check that collection status is `Complete`, report metadata agrees with
-`assessment-results.json`, and project counts agree with its findings. Use SARIF
-for organization-wide findings. Open the downloaded HTML offline to verify it
+`assessment-results.json`, and project counts agree with its findings. Use the
+companion SARIF (weekly pipeline) or Markdown (branch-test pipeline) for
+organization-wide findings. Open the downloaded HTML offline to verify it
 remains readable without a network connection. Project/resource identifiers are
 still sensitive: artifact permissions and retention apply even though raw
 payloads are excluded from HTML. Preserve required evidence before expiry.

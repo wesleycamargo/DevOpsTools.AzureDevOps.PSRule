@@ -203,7 +203,9 @@ resources until a separate retention and retirement decision.
 
 This repository owns collectors, rule evaluation, localized remediation help,
 assessment JSON, and the minimal HTML renderer. The HTML embeds CSS only: no
-JavaScript, external assets, network dependency, or HTML Reports extension. It
+JavaScript, external assets, or network dependency when downloaded. The pipelines
+use `PublishHtmlReport@1` from the BlakYaks Html Reports extension to attach the
+generated file to the run UI. The report
 shows run metadata, four diagnostic outcomes, the existing nullable SecurityScore,
 and Fail/Unknown findings. Evaluated pass rate is Pass / (Pass + Fail), not overall
 compliance or a security score; Unknown and NotApplicable remain explicit.
