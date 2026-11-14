@@ -78,6 +78,8 @@ steps:
         $ErrorActionPreference = 'Stop'
         $exportPath = Join-Path $env:AGENT_TEMPDIRECTORY ('psrule-export-' + [guid]::NewGuid().ToString())
         $reportPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-results.md'
+        $assessmentPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'assessment-results.json'
+        $htmlPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'psrule-report.html'
         $completenessPath = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'collection-status.json'
 
         New-Item -Path $exportPath -ItemType Directory -Force | Out-Null
@@ -137,8 +139,32 @@ steps:
                 throw
             }
         }
+
+        $assessmentResults = @(Invoke-PSRule `
+            -InputPath $inputFiles `
+            -Module DevOpsTools.AzureDevOps.PSRule `
+            -Baseline Baseline.Default `
+            -Outcome All `
+            -ErrorAction Stop)
+        if ($assessmentResults.Count -eq 0) {
+            throw 'The assessment evaluated zero rule results.'
+        }
+        $null = Export-AzDevOpsAssessmentRun -Result $assessmentResults -ExportPath $exportPath `
+            -OutputPath $assessmentPath -Organization $organization `
+            -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default `
+            -HtmlOutputPath $htmlPath -CollectionStatusPath $completenessPath
+        Write-Host "##vso[task.setvariable variable=PSRuleHtmlReportPath]$htmlPath"
+        Write-Host '##vso[task.setvariable variable=PSRuleHtmlReportReady]true'
     env:
       SYSTEM_COLLECTIONURI: $(System.CollectionUri)
+
+  - task: PublishHtmlReport@1
+    displayName: Publish project assessment HTML
+    condition: and(succeededOrFailed(), eq(variables['PSRuleHtmlReportReady'], 'true'))
+    inputs:
+      reportDir: $(PSRuleHtmlReportPath)
+      tabName: Project assessment
+      useFilenameTabs: false
 
   - task: PublishPipelineArtifact@1
     displayName: Publish assessment reports

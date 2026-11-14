@@ -35,4 +35,29 @@ Describe 'Azure DevOps assessment pipeline authentication' -Tag 'Unit' {
         $pipeline | Should -Match 'if \(\$_.FullyQualifiedErrorId -eq ''PSRule\.Fail,Assert-PSRule''\)'
         $pipeline | Should -Match '(?m)^\s*throw\s*$'
     }
+
+    It 'generates HTML alongside Markdown in the published artifact directory' {
+        $pipeline = Get-Content -LiteralPath $script:pipelinePath -Raw
+
+        $pipeline | Should -Match '\$htmlPath = Join-Path \$env:BUILD_ARTIFACTSTAGINGDIRECTORY ''psrule-report\.html'''
+        $pipeline | Should -Match '\$assessmentPath = Join-Path \$env:BUILD_ARTIFACTSTAGINGDIRECTORY ''assessment-results\.json'''
+        $pipeline | Should -Match '\$assessmentResults = @\(Invoke-PSRule'
+        $pipeline | Should -Match 'Export-AzDevOpsAssessmentRun -Result \$assessmentResults -ExportPath \$exportPath'
+        $pipeline | Should -Match '-HtmlOutputPath \$htmlPath -CollectionStatusPath \$completenessPath'
+        $pipeline | Should -Match '-SourceRevision \$env:BUILD_SOURCEVERSION'
+        $pipeline | Should -Match 'PublishPipelineArtifact@1'
+        $pipeline | Should -Match 'condition: always\(\)'
+        $pipeline | Should -Match 'targetPath: \$\(Build.ArtifactStagingDirectory\)'
+    }
+
+    It 'publishes the generated HTML as a report tab' {
+        $pipeline = Get-Content -LiteralPath $script:pipelinePath -Raw
+
+        $pipeline | Should -Match 'task: PublishHtmlReport@1'
+        $pipeline | Should -Match 'task.setvariable variable=PSRuleHtmlReportReady\]true'
+        $pipeline | Should -Match 'task.setvariable variable=PSRuleHtmlReportPath\]\$htmlPath'
+        $pipeline | Should -Match 'condition: and\(succeededOrFailed\(\), eq\(variables\[''PSRuleHtmlReportReady''\], ''true''\)\)'
+        $pipeline | Should -Match 'reportDir: \$\(PSRuleHtmlReportPath\)'
+        $pipeline | Should -Match 'tabName: Project assessment'
+    }
 }

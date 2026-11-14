@@ -30,7 +30,7 @@ function Export-AzDevOpsAssessmentHtmlReport {
         [void]$body.AppendLine("<p>${name}: $(& $encode $Assessment.$name)</p>")
     }
     [void]$body.AppendLine("<p>Collection status: $(& $encode $status.Status)</p>")
-    [void]$body.AppendLine('<p>This report covers project projections only. Organization-wide findings remain in psrule-results.sarif. Missing evidence is not a pass. Evaluated pass rate excludes Unknown and NotApplicable and is not a security score.</p>')
+    [void]$body.AppendLine('<p>This report covers project projections only. Organization-wide findings are excluded here; review the companion PSRule output. Missing evidence is not a pass. Evaluated pass rate excludes Unknown and NotApplicable and is not a security score.</p>')
     $projects = @($Assessment.Projects | Where-Object { $null -ne $_ })
     $findings = @($projects | ForEach-Object { $_.Findings } | Where-Object { $null -ne $_ })
     [void]$body.AppendLine('<h2>Project diagnostic totals</h2>')

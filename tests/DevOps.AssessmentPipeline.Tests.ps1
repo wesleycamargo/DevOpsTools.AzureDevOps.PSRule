@@ -241,4 +241,14 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $publish['condition'] | Should -Be 'always()'
     }
 
+    It 'publishes the generated HTML as a report tab' {
+        $htmlPublish = @($pipeline['steps'] | Where-Object { $_['task'] -eq 'PublishHtmlReport@1' })
+        $htmlPublish.Count | Should -Be 1
+        $htmlPublish[0]['inputs']['reportDir'] | Should -Be '$(PSRuleHtmlReportPath)'
+        $htmlPublish[0]['inputs']['tabName'] | Should -Be 'Project assessment'
+        $htmlPublish[0]['condition'] | Should -Be 'and(succeededOrFailed(), eq(variables[''PSRuleHtmlReportReady''], ''true''))'
+        $assessment['inputs']['script'] | Should -Match 'task.setvariable variable=PSRuleHtmlReportReady\]true'
+        $assessment['inputs']['script'] | Should -Match 'task.setvariable variable=PSRuleHtmlReportPath\]\$htmlPath'
+    }
+
 }

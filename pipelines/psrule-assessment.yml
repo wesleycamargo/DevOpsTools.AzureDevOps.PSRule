@@ -144,6 +144,8 @@ steps:
                 -OutputPath $assessmentPath -Organization $env:ADO_ORGANIZATION `
                 -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default `
                 -HtmlOutputPath $htmlPath -CollectionStatusPath $completenessPath
+            Write-Host "##vso[task.setvariable variable=PSRuleHtmlReportPath]$htmlPath"
+            Write-Host '##vso[task.setvariable variable=PSRuleHtmlReportReady]true'
             $failedCount = @($results | Where-Object { $_.Outcome -eq 'Fail' }).Count
 
             Write-Host "PSRule assessment completed with $failedCount failed rule result(s)."
@@ -161,6 +163,14 @@ steps:
       ADO_TENANT_ID: $(ADO_TENANT_ID)
       ADO_CLIENT_ID: $(ADO_CLIENT_ID)
       ADO_CLIENT_SECRET: $(ADO_CLIENT_SECRET)
+
+  - task: PublishHtmlReport@1
+    displayName: Publish project assessment HTML
+    condition: and(succeededOrFailed(), eq(variables['PSRuleHtmlReportReady'], 'true'))
+    inputs:
+      reportDir: $(PSRuleHtmlReportPath)
+      tabName: Project assessment
+      useFilenameTabs: false
 
   - task: PublishBuildArtifacts@1
     displayName: Publish PSRule assessment reports

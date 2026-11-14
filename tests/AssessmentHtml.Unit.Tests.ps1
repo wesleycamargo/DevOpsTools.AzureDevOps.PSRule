@@ -32,6 +32,7 @@ Describe 'Static assessment HTML' -Tag 'Unit' {
             $html | Should -Match 'fixture-org/project-a'
             $html | Should -Match 'fixture-revision'
             $html | Should -Match 'Collection status: Complete'
+            $html | Should -Match 'Organization-wide findings are excluded here; review the companion PSRule output'
             $html | Should -Match 'Pass: 1; Fail: 1; Unknown: 1; NotApplicable: 1'
             $html | Should -Match 'Evaluated pass rate: 50.00%'
             $html | Should -Match 'SecurityScore: Unavailable'
