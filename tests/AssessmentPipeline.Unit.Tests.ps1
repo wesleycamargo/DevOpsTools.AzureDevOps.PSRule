@@ -19,8 +19,8 @@ Describe 'Azure DevOps assessment pipeline authentication' -Tag 'Unit' {
 
         $pipeline | Should -Match 'default: '''''
         $pipeline | Should -Match 'BUILD_SOURCEBRANCH: \$\(Build.SourceBranch\)'
-        $pipeline | Should -Match "\$moduleRef = '\$\{\{ parameters\.moduleRef \}\}'"
-        $pipeline | Should -Match '\$moduleRef = \$env:BUILD_SOURCEBRANCH -replace ''\^refs/heads/'''
+        $pipeline | Should -Match 'MODULE_REF: \$\{\{ parameters\.moduleRef \}\}'
+        $pipeline | Should -Match '\$moduleRef = if \(\$env:MODULE_REF\)'
         $pipeline | Should -Match 'git clone --depth 1 --branch \$moduleRef'
     }
 
