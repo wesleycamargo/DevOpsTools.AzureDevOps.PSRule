@@ -1,7 +1,7 @@
 Azure DevOps pipelines
 ======================
 
-Module publication uses the manual GitHub Actions workflow
+Module publication uses the GitHub Actions workflow
 `.github/workflows/publish-on-release.yml` and PowerShell Gallery. The former
 `azure-pipelines.yml` Azure Artifacts publisher has been retired. Existing feed
 packages are unchanged; any live definition pointing to the retired YAML must
