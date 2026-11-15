@@ -17,7 +17,9 @@ Describe 'Azure DevOps assessment pipeline authentication' -Tag 'Unit' {
     It 'clones the triggering branch when moduleRef is not specified' {
         $pipeline = Get-Content -LiteralPath $script:pipelinePath -Raw
 
+        $pipeline | Should -Match 'default: '''''
         $pipeline | Should -Match 'BUILD_SOURCEBRANCH: \$\(Build.SourceBranch\)'
+        $pipeline | Should -Match 'MODULE_REF: \$\{\{ parameters\.moduleRef \}\}'
         $pipeline | Should -Match '\$moduleRef = if \(\$env:MODULE_REF\)'
         $pipeline | Should -Match 'git clone --depth 1 --branch \$moduleRef'
     }
@@ -28,7 +30,21 @@ Describe 'Azure DevOps assessment pipeline authentication' -Tag 'Unit' {
         $pipeline | Should -Not -Match '(?m)^\s*continueOnError:\s*true\s*$'
         $pipeline | Should -Not -Match '-As\s+Detail'
         $pipeline | Should -Match '-Style\s+Plain'
+        $pipeline | Should -Match '\$reportPath = Join-Path \$env:BUILD_ARTIFACTSTAGINGDIRECTORY ''psrule-results\.sarif'''
+        $pipeline | Should -Match '-OutputPath \$reportPath\s+`\s*\n\s*-OutputFormat Sarif'
         $pipeline | Should -Match 'if \(\$_.FullyQualifiedErrorId -eq ''PSRule\.Fail,Assert-PSRule''\)'
         $pipeline | Should -Match '(?m)^\s*throw\s*$'
+    }
+
+    It 'generates JSON alongside SARIF in the published artifact directory' {
+        $pipeline = Get-Content -LiteralPath $script:pipelinePath -Raw
+
+        $pipeline | Should -Match '\$assessmentPath = Join-Path \$env:BUILD_ARTIFACTSTAGINGDIRECTORY ''assessment-results\.json'''
+        $pipeline | Should -Match '\$assessmentResults = @\(Invoke-PSRule'
+        $pipeline | Should -Match 'Export-AzDevOpsAssessmentRun -Result \$assessmentResults -ExportPath \$exportPath'
+        $pipeline | Should -Match '-SourceRevision \$env:BUILD_SOURCEVERSION'
+        $pipeline | Should -Match 'PublishPipelineArtifact@1'
+        $pipeline | Should -Match 'condition: always\(\)'
+        $pipeline | Should -Match 'targetPath: \$\(Build.ArtifactStagingDirectory\)'
     }
 }
