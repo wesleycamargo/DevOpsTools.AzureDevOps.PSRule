@@ -19,6 +19,7 @@ class DevOpsToolsAzureDevOpsConnection {
     [System.DateTime]$TokenExpires
     [string]$AuthType
     [string]$TokenType
+    hidden [string]$InteractiveAuthProvider
 
     # Constructor for Service Principal
     DevOpsToolsAzureDevOpsConnection(
@@ -109,6 +110,27 @@ class DevOpsToolsAzureDevOpsConnection {
         }
     }
 
+    DevOpsToolsAzureDevOpsConnection(
+        [string]$Organization,
+        [string]$TokenType,
+        [string]$AuthProvider,
+        [pscustomobject]$SessionToken
+    )
+    {
+        $this.Organization = $Organization
+        $this.TokenType = $TokenType
+        $this.AuthType = 'Interactive'
+        $this.InteractiveAuthProvider = $AuthProvider
+        $this.TenantId = $SessionToken.TenantId
+        $this.SetInteractiveToken($SessionToken)
+    }
+
+    hidden [void]SetInteractiveToken([pscustomobject]$SessionToken)
+    {
+        $this.Token = "Bearer $($SessionToken.AccessToken)"
+        $this.TokenExpires = $SessionToken.ExpiresUtc
+    }
+
     # Get a token for the Azure DevOps REST API using a service principal
     [void]GetServicePrincipalToken()
     {
@@ -162,6 +184,10 @@ class DevOpsToolsAzureDevOpsConnection {
                 }
                 'ManagedIdentity' {
                     $this.GetManagedIdentityToken()
+                }
+                'Interactive' {
+                    $sessionToken = Get-AzDevOpsInteractiveToken -AuthProvider $this.InteractiveAuthProvider -TenantId $this.TenantId
+                    $this.SetInteractiveToken($sessionToken)
                 }
                 'PAT' {
                     # PAT tokens don't expire in this context
