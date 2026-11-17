@@ -192,6 +192,24 @@ $assertParams = @{
 Assert-PSRule @assertParams
 ```
 
+### Interactive Microsoft Entra sign-in
+
+Use `-Interactive` to connect directly from the module. The selected provider
+tries the existing Azure session first and opens Microsoft sign-in if needed.
+The connection uses the signed-in account's Azure DevOps permissions.
+
+```powershell
+# Use Azure CLI (default)
+Connect-AzDevOps -Organization MyOrg -Interactive
+
+# Use Azure PowerShell (requires Az.Accounts)
+Connect-AzDevOps -Organization MyOrg -Interactive -AuthProvider AzurePowerShell
+```
+
+Specify `-TenantId` when targeting a particular Microsoft Entra tenant. The
+module renews the token through the same provider as needed. If the session
+requires sign-in again, rerun `Connect-AzDevOps -Interactive` with the same options.
+
 ### Bearer Token
 
 You can connect to your Azure DevOps organization using a Bearer token and 

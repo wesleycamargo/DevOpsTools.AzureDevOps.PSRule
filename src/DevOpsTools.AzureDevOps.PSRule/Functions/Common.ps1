@@ -3,7 +3,7 @@
         Connects to an Azure DevOps organization for use with DevOpsTools.AzureDevOps.PSRule cmdlets.
 
     .DESCRIPTION
-        The Connect-AzDevOps function establishes a connection to an Azure DevOps organization using one of several authentication methods: Personal Access Token (PAT), Service Principal, Managed Identity, or Bearer token. The connection details are stored in a script-level variable for use by other cmdlets in the DevOpsTools.AzureDevOps.PSRule module.
+        Connect using a Personal Access Token (PAT), Service Principal, Managed Identity, a supplied bearer token, or an interactive Microsoft Entra session. The module stores the connection for use by its other cmdlets.
 
     .PARAMETER Organization
         The name of the Azure DevOps organization to connect to.
@@ -18,7 +18,7 @@
         A Personal Access Token (PAT) used to authenticate to Azure DevOps. Used with the 'Pat' parameter set.
 
     .PARAMETER TenantId
-        The Microsoft Entra ID tenant ID for Service Principal authentication. Used with the 'ServicePrincipal' parameter set.
+        The Microsoft Entra tenant ID. Required for Service Principal authentication and optional with Interactive authentication.
 
     .PARAMETER ClientId
         The client ID of the Service Principal. Used with the 'ServicePrincipal' parameter set.
@@ -31,6 +31,12 @@
 
     .PARAMETER AccessToken
         A Bearer token (e.g., OAuth 2.0 access token from Microsoft Entra ID) used to authenticate to Azure DevOps. Used with the 'Bearer' parameter set.
+
+    .PARAMETER Interactive
+        Obtain a Microsoft Entra access token from an existing Azure session or prompt for sign-in if required.
+
+    .PARAMETER AuthProvider
+        The provider used with Interactive authentication: AzureCli (default) or AzurePowerShell (Az.Accounts).
 
     .EXAMPLE
         Connect-AzDevOps -Organization "MyOrg" -PAT "abc123"
@@ -47,6 +53,14 @@
     .EXAMPLE
         Connect-AzDevOps -Organization "MyOrg" -ManagedIdentity
         Connects to the "MyOrg" organization using a Managed Identity.
+
+    .EXAMPLE
+        Connect-AzDevOps -Organization "MyOrg" -Interactive
+        Uses the Azure CLI session, signing in if required.
+
+    .EXAMPLE
+        Connect-AzDevOps -Organization "MyOrg" -Interactive -AuthProvider AzurePowerShell
+        Uses the Azure PowerShell session, signing in if required.
 
     .NOTES
         - The Bearer token must have appropriate permissions for Azure DevOps APIs (e.g., read access to projects and settings).
@@ -67,6 +81,7 @@
         [Parameter(ParameterSetName = 'Pat')]
         [Parameter(ParameterSetName = 'ServicePrincipal')]
         [Parameter(ParameterSetName = 'ManagedIdentity')]
+        [Parameter(ParameterSetName = 'Interactive')]
         [string]
         $OrganizationId,
 
@@ -74,6 +89,7 @@
         [Parameter(ParameterSetName = 'ServicePrincipal')]
         [Parameter(ParameterSetName = 'ManagedIdentity')]
         [Parameter(ParameterSetName = 'Bearer')]
+        [Parameter(ParameterSetName = 'Interactive')]
         [ValidateSet('FullAccess', 'ReadOnly', 'FineGrained')]
         [string]
         $TokenType = 'FullAccess',
@@ -83,6 +99,7 @@
         $PAT,
 
         [Parameter(Mandatory = $true, ParameterSetName = 'ServicePrincipal')]
+        [Parameter(ParameterSetName = 'Interactive')]
         [string]
         $TenantId,
 
@@ -100,8 +117,25 @@
 
         [Parameter(Mandatory = $true, ParameterSetName = 'Bearer')]
         [string]
-        $AccessToken
+        $AccessToken,
+
+        [Parameter(Mandatory = $true, ParameterSetName = 'Interactive')]
+        [switch]
+        $Interactive,
+
+        [Parameter(ParameterSetName = 'Interactive')]
+        [ValidateSet('AzureCli', 'AzurePowerShell')]
+        [string]
+        $AuthProvider = 'AzureCli'
     )
+
+    if ($PSCmdlet.ParameterSetName -eq 'Interactive') {
+        if (-not $Interactive) { throw 'Use -Interactive to enable interactive authentication.' }
+        if ($TenantId -and $TenantId -notmatch '^[a-zA-Z0-9][a-zA-Z0-9.-]*$') {
+            throw 'Specify the Microsoft Entra tenant as a tenant ID or domain name.'
+        }
+        $sessionToken = Get-AzDevOpsInteractiveToken -AuthProvider $AuthProvider -TenantId $TenantId -AllowLogin
+    }
 
     try {
         switch ($PSCmdlet.ParameterSetName) {
@@ -116,6 +150,9 @@
             }
             'Bearer' {
                 $candidate = [DevOpsToolsAzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, $TokenType, $true)
+            }
+            'Interactive' {
+                $candidate = [DevOpsToolsAzureDevOpsConnection]::new($Organization, $TokenType, $AuthProvider, $sessionToken)
             }
         }
 
@@ -142,6 +179,9 @@
         Write-Verbose "Successfully connected to Azure DevOps organization: $Organization"
     }
     catch {
+        if ($Interactive -and [int]$_.Exception.Response.StatusCode -in 401, 403) {
+            throw 'Azure DevOps denied access for the signed-in account. Verify the organization, tenant and Azure DevOps permissions.'
+        }
         throw (Get-AzDevOpsSanitizedErrorMessage)
     }
 }

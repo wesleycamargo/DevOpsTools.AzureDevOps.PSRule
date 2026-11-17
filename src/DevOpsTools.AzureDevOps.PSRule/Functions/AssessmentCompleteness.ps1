@@ -94,6 +94,9 @@ function Complete-AzDevOpsAssessmentExport {
     if ($Report.Status -ne 'Complete') {
         $commands = @($records | Where-Object { $_.Status -notin 'Completed', 'Empty' } | ForEach-Object { $_.Command } | Select-Object -Unique)
         $message = "Assessment collection is incomplete: $($commands -join ', ')."
+        if ($records | Where-Object { 'AuthenticationRequired' -in $_.ReasonCodes }) {
+            $message += ' Run Connect-AzDevOps -Interactive again.'
+        }
         if ($Strict) { throw $message }
         Write-Warning $message
     }
