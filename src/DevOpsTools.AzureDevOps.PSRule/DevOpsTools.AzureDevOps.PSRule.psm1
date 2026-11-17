@@ -372,39 +372,30 @@ Export-ModuleMember -Function Export-AzDevOpsProject
 Export-ModuleMember -Function Connect-AzDevOps
 Export-ModuleMember -Function Disconnect-AzDevOps
 
-# Define the types to export with type accelerators.
-$ExportableTypes = @(
-    [AzureDevOpsConnection]
-)
-# Get the internal TypeAccelerators class to use its static methods.
+# Retain the historical shortcut when available. Internal code always uses the
+# module-specific class name and never depends on this process-wide shortcut.
+$ExportableTypes = @{
+    AzureDevOpsConnection = [DevOpsToolsAzureDevOpsConnection]
+}
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
 )
-# Ensure none of the types would clobber an existing type accelerator.
-# If a type accelerator with the same name exists, throw an exception.
-$ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
-foreach ($Type in $ExportableTypes) {
-    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        $Message = @(
-            "Unable to register type accelerator '$($Type.FullName)'"
-            'Accelerator already exists.'
-        ) -join ' - '
-
-        throw [System.Management.Automation.ErrorRecord]::new(
-            [System.InvalidOperationException]::new($Message),
-            'TypeAcceleratorAlreadyExists',
-            [System.Management.Automation.ErrorCategory]::InvalidOperation,
-            $Type.FullName
-        )
+$RegisteredTypeAccelerators = @{}
+foreach ($Name in $ExportableTypes.Keys) {
+    if ($TypeAcceleratorsClass::Get.ContainsKey($Name)) {
+        # Another module owns this shortcut. Leave it alone; it is not used
+        # to construct this module's connections.
+        continue
     }
+    $Type = $ExportableTypes[$Name]
+    $TypeAcceleratorsClass::Add($Name, $Type) | Out-Null
+    $RegisteredTypeAccelerators[$Name] = $Type
 }
-# Add type accelerators for every exportable type.
-foreach ($Type in $ExportableTypes) {
-    $TypeAcceleratorsClass::Add($Type.FullName, $Type) | Out-Null
-}
-# Remove type accelerators when the module is removed.
+# Remove only registrations created here, provided they have not been replaced.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    foreach ($Type in $ExportableTypes) {
-        $TypeAcceleratorsClass::Remove($Type.FullName) | Out-Null
+    foreach ($Name in $RegisteredTypeAccelerators.Keys) {
+        if ($TypeAcceleratorsClass::Get[$Name] -eq $RegisteredTypeAccelerators[$Name]) {
+            $TypeAcceleratorsClass::Remove($Name) | Out-Null
+        }
     }
 }.GetNewClosure()

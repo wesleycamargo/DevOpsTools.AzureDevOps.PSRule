@@ -106,16 +106,16 @@
     try {
         switch ($PSCmdlet.ParameterSetName) {
             'Pat' {
-                $candidate = [AzureDevOpsConnection]::new($Organization, $PAT, $TokenType)
+                $candidate = [DevOpsToolsAzureDevOpsConnection]::new($Organization, $PAT, $TokenType)
             }
             'ServicePrincipal' {
-                $candidate = [AzureDevOpsConnection]::new($Organization, $ClientId, $ClientSecret, $TenantId, $TokenType)
+                $candidate = [DevOpsToolsAzureDevOpsConnection]::new($Organization, $ClientId, $ClientSecret, $TenantId, $TokenType)
             }
             'ManagedIdentity' {
-                $candidate = [AzureDevOpsConnection]::new($Organization, $TokenType)
+                $candidate = [DevOpsToolsAzureDevOpsConnection]::new($Organization, $TokenType)
             }
             'Bearer' {
-                $candidate = [AzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, $TokenType, $true)
+                $candidate = [DevOpsToolsAzureDevOpsConnection]::new($Organization, $OrganizationId, $AccessToken, $TokenType, $true)
             }
         }
 

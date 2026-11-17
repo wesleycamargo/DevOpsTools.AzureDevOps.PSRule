@@ -1,6 +1,8 @@
 BeforeAll {
     $repositoryPath = Split-Path $PSScriptRoot -Parent
     $moduleName = 'DevOpsTools.AzureDevOps.PSRule'
+    $sourceManifest = Import-PowerShellDataFile "$repositoryPath/src/$moduleName/$moduleName.psd1"
+    $expectedVersion = $sourceManifest.ModuleVersion
     $expectedGuid = [guid]'f77fbd3d-03be-4e42-98f3-4c185cc93bba'
 }
 
