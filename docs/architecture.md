@@ -98,7 +98,12 @@ The manifest and loader reside in `src/DevOpsTools.AzureDevOps.PSRule/`.
 The loader initializes module connection state and imports scripts from `Classes/` and `Functions/`.
 PSRule discovers the rule definitions under `rules/`.
 
-`Connect-AzDevOps` creates an `AzureDevOpsConnection` instance and stores it in module state.
+`Connect-AzDevOps` creates a `DevOpsToolsAzureDevOpsConnection` instance and stores it in module state.
+All authentication paths refer to that module-specific class directly. The historical
+`AzureDevOpsConnection` type accelerator is registered only when its name is free;
+an existing registration belongs to its original owner and is never used to select
+this module's connection implementation. Removal cleans up only shortcuts created
+by this module that still point to its class.
 Collectors use this connection for authentication. The class supports PAT, bearer, service-principal, and managed-identity authentication.
 Token refresh and header construction belong to the connection class.
 

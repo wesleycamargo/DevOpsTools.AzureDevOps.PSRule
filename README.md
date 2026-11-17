@@ -57,6 +57,18 @@ baselines, and assessment data formats remain unchanged. There is no compatibili
 package under the old name. Use a fresh PowerShell session for the migration
 because both packages export the same commands.
 
+If version 0.2.2 reports `Unable to register type accelerator 'AzureDevOpsConnection' - Accelerator already exists`,
+a connection type is already registered in that PowerShell process. Open a fresh
+PowerShell session and import `DevOpsTools.AzureDevOps.PSRule` there, without first
+loading either predecessor package. Reinstalling the package does not clear a
+registration in an existing process.
+
+The source fix uses `DevOpsToolsAzureDevOpsConnection` internally and retains
+`AzureDevOpsConnection` as an optional compatibility shortcut when that name is free.
+If another package owns the shortcut, its meaning stays with that package; this
+module's commands still construct their own connection class. Scripts that inspect
+the concrete class name should account for the new name.
+
 See [repository architecture](docs/architecture.md) for module boundaries, data contracts,
 pipeline structure, and architecture decision records.
 
