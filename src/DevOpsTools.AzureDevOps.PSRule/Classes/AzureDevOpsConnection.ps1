@@ -7,7 +7,7 @@
 # header which is refreshed automatically when it expires for supported auth types.
 # --------------------------------------------------
 
-class AzureDevOpsConnection {
+class DevOpsToolsAzureDevOpsConnection {
     [string]$Organization
     [string]$OrganizationId
     [string]$PAT
@@ -21,7 +21,7 @@ class AzureDevOpsConnection {
     [string]$TokenType
 
     # Constructor for Service Principal
-    AzureDevOpsConnection(
+    DevOpsToolsAzureDevOpsConnection(
         [string]$Organization,
         [string]$ClientId,
         [string]$ClientSecret,
@@ -44,7 +44,7 @@ class AzureDevOpsConnection {
     }
 
     # Constructor for Managed Identity
-    AzureDevOpsConnection(
+    DevOpsToolsAzureDevOpsConnection(
         [string]$Organization,
         [string]$TokenType = 'FullAccess'
     )
@@ -70,7 +70,7 @@ class AzureDevOpsConnection {
     }
 
     # Constructor for Personal Access Token (PAT)
-    AzureDevOpsConnection(
+    DevOpsToolsAzureDevOpsConnection(
         [string]$Organization,
         [string]$PAT,
         [string]$TokenType = 'FullAccess'
@@ -88,7 +88,7 @@ class AzureDevOpsConnection {
     }
 
     # Constructor for Bearer Token
-    AzureDevOpsConnection(
+    DevOpsToolsAzureDevOpsConnection(
         [string]$Organization,
         [string]$OrganizationId,
         [string]$AccessToken,

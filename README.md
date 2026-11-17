@@ -63,6 +63,12 @@ PowerShell session and import `DevOpsTools.AzureDevOps.PSRule` there, without fi
 loading either predecessor package. Reinstalling the package does not clear a
 registration in an existing process.
 
+The source fix uses `DevOpsToolsAzureDevOpsConnection` internally and retains
+`AzureDevOpsConnection` as an optional compatibility shortcut when that name is free.
+If another package owns the shortcut, its meaning stays with that package; this
+module's commands still construct their own connection class. Scripts that inspect
+the concrete class name should account for the new name.
+
 See [repository architecture](docs/architecture.md) for module boundaries, data contracts,
 pipeline structure, and architecture decision records.
 

@@ -372,29 +372,20 @@ Export-ModuleMember -Function Export-AzDevOpsProject
 Export-ModuleMember -Function Connect-AzDevOps
 Export-ModuleMember -Function Disconnect-AzDevOps
 
-# Keep the public name explicit: an existing accelerator can affect type resolution.
+# Retain the historical shortcut when available. Internal code always uses the
+# module-specific class name and never depends on this process-wide shortcut.
 $ExportableTypes = @{
-    AzureDevOpsConnection = [AzureDevOpsConnection]
+    AzureDevOpsConnection = [DevOpsToolsAzureDevOpsConnection]
 }
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
 )
 $RegisteredTypeAccelerators = @{}
 foreach ($Name in $ExportableTypes.Keys) {
-    $ExistingType = $TypeAcceleratorsClass::Get[$Name]
-    if ($null -ne $ExistingType) {
-        # Predecessor modules export the same connection class. Reuse their
-        # accelerator without taking ownership of its registration.
-        if ($ExistingType.FullName -eq $Name) {
-            continue
-        }
-        $Message = "Unable to register type accelerator '$Name' - Accelerator already exists."
-        throw [System.Management.Automation.ErrorRecord]::new(
-            [System.InvalidOperationException]::new($Message),
-            'TypeAcceleratorAlreadyExists',
-            [System.Management.Automation.ErrorCategory]::InvalidOperation,
-            $Name
-        )
+    if ($TypeAcceleratorsClass::Get.ContainsKey($Name)) {
+        # Another module owns this shortcut. Leave it alone; it is not used
+        # to construct this module's connections.
+        continue
     }
     $Type = $ExportableTypes[$Name]
     $TypeAcceleratorsClass::Add($Name, $Type) | Out-Null
