@@ -1,6 +1,8 @@
 BeforeAll {
     $repositoryPath = Split-Path $PSScriptRoot -Parent
     $moduleName = 'DevOpsTools.AzureDevOps.PSRule'
+    $sourceManifest = Import-PowerShellDataFile "$repositoryPath/src/$moduleName/$moduleName.psd1"
+    $expectedVersion = $sourceManifest.ModuleVersion
     $expectedGuid = [guid]'f77fbd3d-03be-4e42-98f3-4c185cc93bba'
 }
 
@@ -21,28 +23,28 @@ Describe 'Assessment module distribution' -Tag Unit {
 
         $installationPath = Join-Path $TestDrive 'modules'
         Expand-Archive $archive.FullName -DestinationPath $installationPath
-        $manifestPath = Join-Path $installationPath "$moduleName/0.2.3/$moduleName.psd1"
+        $manifestPath = Join-Path $installationPath "$moduleName/$expectedVersion/$moduleName.psd1"
         $manifest = Test-ModuleManifest $manifestPath
         $manifest.Name | Should -Be $moduleName
-        $manifest.Version | Should -Be ([version]'0.2.3')
+        $manifest.Version | Should -Be ([version]$expectedVersion)
         $manifest.Guid | Should -Be $expectedGuid
         $manifest.Guid | Should -Not -Be ([guid]'60742743-bfdd-46c1-bd7a-8dfab61de69e')
         $manifest.Guid | Should -Not -Be ([guid]'bb42e16e-b0af-46be-9ac1-51e2f6bb6e8d')
-        $archive.Name | Should -Be "$moduleName.0.2.3.zip"
+        $archive.Name | Should -Be "$moduleName.$expectedVersion.zip"
         Test-Path (Join-Path (Split-Path $manifestPath) 'LICENSE') | Should -BeTrue
         Test-Path (Join-Path $installationPath 'PSRule.Rules.AzureDevOps') | Should -BeFalse
         Test-Path (Join-Path $installationPath 'DevOpsTools.AzureDevOps.Assessment') | Should -BeFalse
 
         $probePath = Join-Path $TestDrive 'Import-PackagedModule.ps1'
         @'
-param($InstallationPath, $ManifestPath)
+param($InstallationPath, $ManifestPath, $ExpectedVersion)
 $ErrorActionPreference = 'Stop'
 $env:PSModulePath = $InstallationPath + [IO.Path]::PathSeparator + $env:PSModulePath
 $module = Import-Module $ManifestPath -Force -PassThru
 Remove-Module $module.Name -Force
 $module = Import-Module -FullyQualifiedName @{
     ModuleName = 'DevOpsTools.AzureDevOps.PSRule'
-    RequiredVersion = '0.2.3'
+    RequiredVersion = $ExpectedVersion
     GUID = 'f77fbd3d-03be-4e42-98f3-4c185cc93bba'
 } -PassThru
 foreach ($name in 'Connect-AzDevOps', 'Export-AzDevOpsRuleData', 'Export-AzDevOpsOrganizationRuleData', 'Export-AzDevOpsAssessmentRun') {
@@ -55,7 +57,7 @@ foreach ($rule in $rules) {
     if (-not (Test-Path (Join-Path $module.ModuleBase "en/$($rule.Name).md"))) { throw "Missing packaged help: $($rule.Name)" }
 }
 '@ | Set-Content $probePath
-        & (Get-Process -Id $PID).Path -NoProfile -File $probePath $installationPath $manifestPath
+        & (Get-Process -Id $PID).Path -NoProfile -File $probePath $installationPath $manifestPath $expectedVersion
         $LASTEXITCODE | Should -Be 0
     }
 }
