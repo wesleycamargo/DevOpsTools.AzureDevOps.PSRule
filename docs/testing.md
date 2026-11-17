@@ -2,6 +2,11 @@
 
 Install the versions listed in `tests/requirements.psd1`, then run from the repository root:
 
+Node.js 20 or newer must also be available as `node` for the offline publishing
+label tests. They execute the workflow's JavaScript with synthetic GitHub
+responses; they do not contact GitHub or publish packages. Hosted Ubuntu CI
+already provides Node.js.
+
 ```powershell
 ./tests/Run-Tests.ps1 -TestType Unit
 ```

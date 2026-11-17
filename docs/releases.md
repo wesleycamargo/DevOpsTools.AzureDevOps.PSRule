@@ -28,19 +28,44 @@ a release whose tag matches the manifest version.
 ## Validate and publish
 
 The `.github/workflows/publish-on-release.yml` GitHub Actions workflow runs on
-every push to `main`. It validates the manifest, runs pinned offline tests,
-builds the ZIP and checksum, and publishes the declared module version to
-PowerShell Gallery. If that exact version is already published, validation and
-packaging still run, but publication is skipped. Gallery lookup failures stop
-publication. Runs are serialized to avoid concurrent publication attempts.
+every push to `main`. Before validation, it automatically bumps the module
+version in the runner's checkout. It uses the higher of the checked-in manifest
+version and the latest stable PowerShell Gallery version as its starting point.
+You do not need to edit the manifest before merging a pull request.
 
-To publish a new version, update the module manifest version before merging to
-`main`. Automatic publication does not require or create a Git tag. The existing
-`0.2.0` package is not republished when this workflow is enabled.
+The default bump is **minor**. To override it, apply a GitHub **pull request
+label** before merging (these are labels, not Git tags):
+
+| PR labels | Bump | Example starting at `0.2.2` |
+| --- | --- | --- |
+| No version label, or unrelated labels | Minor | `0.3.0` |
+| `major` | Major | `1.0.0` |
+| `patch` | Patch | `0.2.3` |
+| Both `major` and `patch` | Reject the run | No package published |
+
+Label comparisons are case-insensitive. The workflow reads the merged PR
+associated with the triggering commit, targeting this repository's `main`.
+A direct push without such a PR defaults to minor. GitHub label lookup and
+Gallery lookup failures stop publication rather than guessing a bump or base
+version. Automatic bumps reject prerelease manifests; use manual tagged
+validation/publication for those.
+
+After bumping, the workflow validates the manifest, runs pinned offline tests,
+builds the ZIP and checksum, and publishes that same version to PowerShell
+Gallery. Existing package versions are never overwritten. Runs are serialized
+to avoid concurrent publication attempts.
+
+The bump applies only to the package and runner checkout: it does **not** commit
+to `main`, create a Git tag, or create a GitHub release. The checked-in manifest
+can therefore be older than the published package. Re-running a completed push
+run calculates another bump from the then-current Gallery version and can
+publish another version of the same source; it is not an idempotent retry.
 
 Manual execution remains available: supply an existing tag matching the manifest
 version, such as `v0.2.1`. The manual `publish` input defaults to `false` for
 validation only; enable it to publish a version that is not already in Gallery.
+Manual runs do not auto-bump: the selected tag's manifest remains authoritative,
+and an already published version is skipped.
 Both publication modes use the repository secret `PS_GALLERY_KEY`. Publishing
 requires credentials authorized for the package name. GitHub releases do not
 trigger this workflow.
