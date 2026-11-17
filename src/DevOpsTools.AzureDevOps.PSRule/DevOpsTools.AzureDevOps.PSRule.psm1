@@ -372,39 +372,39 @@ Export-ModuleMember -Function Export-AzDevOpsProject
 Export-ModuleMember -Function Connect-AzDevOps
 Export-ModuleMember -Function Disconnect-AzDevOps
 
-# Define the types to export with type accelerators.
-$ExportableTypes = @(
-    [AzureDevOpsConnection]
-)
-# Get the internal TypeAccelerators class to use its static methods.
+# Keep the public name explicit: an existing accelerator can affect type resolution.
+$ExportableTypes = @{
+    AzureDevOpsConnection = [AzureDevOpsConnection]
+}
 $TypeAcceleratorsClass = [psobject].Assembly.GetType(
     'System.Management.Automation.TypeAccelerators'
 )
-# Ensure none of the types would clobber an existing type accelerator.
-# If a type accelerator with the same name exists, throw an exception.
-$ExistingTypeAccelerators = $TypeAcceleratorsClass::Get
-foreach ($Type in $ExportableTypes) {
-    if ($Type.FullName -in $ExistingTypeAccelerators.Keys) {
-        $Message = @(
-            "Unable to register type accelerator '$($Type.FullName)'"
-            'Accelerator already exists.'
-        ) -join ' - '
-
+$RegisteredTypeAccelerators = @{}
+foreach ($Name in $ExportableTypes.Keys) {
+    $ExistingType = $TypeAcceleratorsClass::Get[$Name]
+    if ($null -ne $ExistingType) {
+        # Predecessor modules export the same connection class. Reuse their
+        # accelerator without taking ownership of its registration.
+        if ($ExistingType.FullName -eq $Name) {
+            continue
+        }
+        $Message = "Unable to register type accelerator '$Name' - Accelerator already exists."
         throw [System.Management.Automation.ErrorRecord]::new(
             [System.InvalidOperationException]::new($Message),
             'TypeAcceleratorAlreadyExists',
             [System.Management.Automation.ErrorCategory]::InvalidOperation,
-            $Type.FullName
+            $Name
         )
     }
+    $Type = $ExportableTypes[$Name]
+    $TypeAcceleratorsClass::Add($Name, $Type) | Out-Null
+    $RegisteredTypeAccelerators[$Name] = $Type
 }
-# Add type accelerators for every exportable type.
-foreach ($Type in $ExportableTypes) {
-    $TypeAcceleratorsClass::Add($Type.FullName, $Type) | Out-Null
-}
-# Remove type accelerators when the module is removed.
+# Remove only registrations created here, provided they have not been replaced.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
-    foreach ($Type in $ExportableTypes) {
-        $TypeAcceleratorsClass::Remove($Type.FullName) | Out-Null
+    foreach ($Name in $RegisteredTypeAccelerators.Keys) {
+        if ($TypeAcceleratorsClass::Get[$Name] -eq $RegisteredTypeAccelerators[$Name]) {
+            $TypeAcceleratorsClass::Remove($Name) | Out-Null
+        }
     }
 }.GetNewClosure()
