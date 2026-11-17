@@ -1,0 +1,11 @@
+{
+  "SchemaVersion": 1,
+  "Profile": "NEN 7510",
+  "Control": {
+    "Name": "Default branch protection",
+    "RuleIds": [
+      "Azure.DevOps.Repos.DefaultBranchPolicyMinimumReviewers",
+      "Azure.DevOps.Repos.DefaultBranchPolicyAllowSelfApproval"
+    ]
+  }
+}

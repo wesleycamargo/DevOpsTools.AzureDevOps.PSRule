@@ -73,3 +73,31 @@ DevOps. See [hosted agents](https://learn.microsoft.com/en-us/azure/devops/pipel
 ![Sarif Viewer](../assets/media/sarif-0.0.11.png)
 
 See [assessment reporting](../docs/assessment/reporting.md) before comparing revised scores. Unknown evidence and pending severity classification keep SecurityScore unavailable; a changed policy or denominator is not compliance improvement.
+
+## Run the NEN 7510 branch protection pilot
+
+Prepare a JSON policy in the assessment checkout using the
+[example policy](../example/nen7510/policy.json). Set the exact Azure DevOps
+`Project` name and the approved `ControlReference` from your Statement of
+Applicability. In `AllowedBypass`, use Azure DevOps security identity
+descriptors as keys and list the actions authorized for each identity or group.
+Use `PolicyExempt` for bypass on push and `PullRequestBypassPolicy` for bypass
+when completing a pull request. Use an empty object if your policy authorizes
+neither action for any identity. This file configures the assessment criteria.
+
+Run `psrule-assessment.yml` with `EnableNen7510` set to true and
+`Nen7510PolicyPath` set to the policy path in the checkout. The pilot reuses
+the two default-branch PSRule findings for required reviewers and creator
+self-approval, with the existing `Baseline.Default` rule settings. It also reads
+Git ACLs on the branch and its ancestors and resolves Azure DevOps group
+memberships. The service principal needs to be able to read these ACLs and
+identities.
+
+The run adds `nen7510-results.json` and `nen7510-summary.md` to the existing
+artifact and displays the English summary in the run's **Extensions** tab.
+The JSON includes the granted actions and security identity descriptors for
+administrator follow-up. The status applies to the configuration checks in
+the pilot. An incomplete ACL or identity response is **Not assessed** unless a
+mapped rule already establishes a failure. This pilot assesses the two Git
+bypass permissions recorded by the security namespace. PR history and
+administrative ability to change policies or permissions are out of scope.

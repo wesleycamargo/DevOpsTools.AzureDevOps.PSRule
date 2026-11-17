@@ -16,6 +16,8 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $runPath = Join-Path $TestDrive ([guid]::NewGuid().ToString())
         $environment = @{
             KEEP_RESULTS = 'false'
+            ENABLE_NEN7510 = 'false'
+            NEN7510_POLICY_PATH = 'config/nen7510-policy.json'
             TZ = 'Etc/GMT-2'
             AGENT_TEMPDIRECTORY = Join-Path $runPath 'agent-temp'
             BUILD_ARTIFACTSTAGINGDIRECTORY = Join-Path $runPath 'artifacts'
@@ -57,6 +59,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
             param ($OutputPath)
             @{ RuleSetVersion = '2026.10.21.2'; SeverityPolicyVersion = '1.1.0'; Projects = @() } | ConvertTo-Json | Set-Content $OutputPath
         }
+        Mock Export-AzDevOpsNen7510Pilot { Join-Path $OutputDirectory 'nen7510-summary.md' }
         Mock Assert-PSRule {
             param ($InputPath, $OutputPath, $ResultVariable)
             @((Get-ChildItem $InputPath -File).Name | Sort-Object) | Should -Be @('fixture.prj.ado.json', 'organization.ado.json')
@@ -79,6 +82,9 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
     }
 
     It 'assesses complete exports and publishes only separate reports' {
+        $nenParameter = @($pipeline['parameters'] | Where-Object { $_['name'] -eq 'EnableNen7510' })[0]
+        $nenParameter['default'] | Should -Be 'false'
+        $nenParameter['type'] | Should -Be 'boolean'
         $retentionParameter = @($pipeline['parameters'] | Where-Object { $_['name'] -eq 'KeepResults' })[0]
         $retentionParameter['type'] | Should -Be 'boolean'
         $retentionParameter['default'] | Should -Be 'false'
@@ -87,6 +93,7 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
 
         Should -Invoke Assert-PSRule -Times 1 -Exactly -ParameterFilter { @($InputPath).Count -eq 2 -and @($InputPath | Where-Object { $_ -like '*fixture-project*fixture.prj.ado.json' }).Count -eq 1 -and $Outcome -eq 'All' }
         Should -Invoke Export-AzDevOpsAssessmentRun -Times 1 -Exactly -ParameterFilter { $SourceRevision -eq 'synthetic-commit' -and $Organization -eq 'fixture-org' }
+        Should -Invoke Export-AzDevOpsNen7510Pilot -Times 0 -Exactly
         $outputDirectory = @(Get-Item -LiteralPath (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs'))
         $outputDirectory.Count | Should -Be 1
         $outputDirectory[0].FullName | Should -Be (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs')
@@ -95,6 +102,25 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         $script:exportPaths[0] | Should -Be (Join-Path $outputDirectory[0].FullName 'targets')
         $publish['inputs']['PathtoPublish'] | Should -Be '$(Build.ArtifactStagingDirectory)'
         @((Get-ChildItem $outputDirectory[0].FullName).Name | Sort-Object) | Should -Be @('assessment-results.json', 'collection-status.json', 'psrule-results.sarif', 'targets')
+    }
+
+    It 'runs the NEN projection once when enabled and reuses the same assessment' {
+        $env:ENABLE_NEN7510 = 'true'
+        Mock Export-AzDevOpsAssessmentRun {
+            param ($OutputPath)
+            $assessment = [pscustomobject]@{ SourceRevision = 'synthetic-commit'; Projects = @() }
+            $assessment | ConvertTo-Json | Set-Content $OutputPath
+            $assessment
+        }
+
+        & $assessmentScript
+
+        Should -Invoke Export-AzDevOpsNen7510Pilot -Times 1 -Exactly -ParameterFilter {
+            $Assessment.SourceRevision -eq 'synthetic-commit' -and
+            $ExportPath -eq $script:exportPaths[0] -and
+            $PolicyPath -eq (Join-Path $env:BUILD_SOURCESDIRECTORY 'config/nen7510-policy.json')
+        }
+        Should -Invoke Invoke-PSRule -Times 1 -Exactly
     }
 
     It 'projects detailed precondition outcomes rather than the assertion result subset' {
@@ -178,8 +204,14 @@ Describe 'Azure DevOps assessment pipeline' -Tag 'Unit' {
         & $assessmentScript
         $stale = Join-Path $script:exportPaths[0] 'stale.ado.json'
         '{}' | Set-Content $stale
+        $staleNenResult = Join-Path (Split-Path $script:exportPaths[0] -Parent) 'nen7510-results.json'
+        $staleNenSummary = Join-Path (Split-Path $script:exportPaths[0] -Parent) 'nen7510-summary.md'
+        '{}' | Set-Content $staleNenResult
+        '# Stale summary' | Set-Content $staleNenSummary
         & $assessmentScript
         Test-Path $stale | Should -BeFalse
+        Test-Path $staleNenResult | Should -BeFalse
+        Test-Path $staleNenSummary | Should -BeFalse
         $script:exportPaths | Should -Be @((Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/targets'), (Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY 'outputs/targets'))
         Should -Invoke Assert-PSRule -Times 2 -Exactly
     }
