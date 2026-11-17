@@ -5,6 +5,14 @@ parameters:
     displayName: Retain timestamped assessment results
     type: boolean
     default: false
+  - name: EnableNen7510
+    displayName: Run the NEN 7510 branch protection pilot
+    type: boolean
+    default: false
+  - name: Nen7510PolicyPath
+    displayName: NEN 7510 pilot policy path (relative to the checkout)
+    type: string
+    default: config/nen7510-policy.json
 
 trigger: none
 pr: none
@@ -142,6 +150,12 @@ steps:
             $assessment = Export-AzDevOpsAssessmentRun -Result $assessmentResults -ExportPath $exportPath `
                 -OutputPath $assessmentPath -Organization $env:ADO_ORGANIZATION `
                 -SourceRevision $env:BUILD_SOURCEVERSION -Baseline Baseline.Default
+            if ($env:ENABLE_NEN7510 -eq 'true') {
+                $policyPath = Join-Path $env:BUILD_SOURCESDIRECTORY $env:NEN7510_POLICY_PATH
+                $summaryPath = Export-AzDevOpsNen7510Pilot -Assessment $assessment -ExportPath $exportPath `
+                    -PolicyPath $policyPath -OutputDirectory $runDirectory
+                Write-Host "##vso[task.uploadsummary]$summaryPath"
+            }
             $failedCount = @($results | Where-Object { $_.Outcome -eq 'Fail' }).Count
 
             Write-Host "PSRule assessment completed with $failedCount failed rule result(s)."
@@ -155,6 +169,8 @@ steps:
         }
     env:
       KEEP_RESULTS: ${{ parameters.KeepResults }}
+      ENABLE_NEN7510: ${{ parameters.EnableNen7510 }}
+      NEN7510_POLICY_PATH: ${{ parameters.Nen7510PolicyPath }}
       ADO_ORGANIZATION: $(ADO_ORGANIZATION)
       ADO_TENANT_ID: $(ADO_TENANT_ID)
       ADO_CLIENT_ID: $(ADO_CLIENT_ID)

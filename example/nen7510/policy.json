@@ -1,0 +1,9 @@
+{
+  "Project": "Example Team Project",
+  "ControlReference": "Example Statement of Applicability control reference",
+  "AllowedBypass": {
+    "ExampleIdentityType;example-group-identifier": [
+      "PullRequestBypassPolicy"
+    ]
+  }
+}
